@@ -44,6 +44,7 @@ Partial Public Class Addin
         nC = Val(Left(strV, InStr(1, strV, "x", 1) - 1)) : nR = Val(Right(strV, Len(strV) - InStr(1, strV, "x", 1)))
         w = Application.FormatResult(20, 70, 64, "#.0000")
         h = Application.FormatResult(8, 70, 64, "#.0000")
+        MessageBox.Show("Таблица: " & nC & " x " & nR)
         'Call CreatTable("", 1, nC, nR, w, h, 200, 150, False, False)
     End Sub
 

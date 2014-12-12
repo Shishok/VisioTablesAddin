@@ -6,27 +6,7 @@ VisioTablesAddin
 </name>
 </assembly>
 <members>
-<member name="M:VisioTablesAddin.ThisAddIn.#ctor(Microsoft.Office.Tools.Factory,System.IServiceProvider)">
-</member><member name="M:VisioTablesAddin.ThisAddIn.Initialize">
-</member><member name="M:VisioTablesAddin.ThisAddIn.FinishInitialization">
-</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeDataBindings">
-</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeCachedData">
-</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeData">
-</member><member name="M:VisioTablesAddin.ThisAddIn.BindToData">
-</member><member name="M:VisioTablesAddin.ThisAddIn.StartCaching(System.String)">
-</member><member name="M:VisioTablesAddin.ThisAddIn.StopCaching(System.String)">
-</member><member name="M:VisioTablesAddin.ThisAddIn.IsCached(System.String)">
-</member><member name="M:VisioTablesAddin.ThisAddIn.BeginInitialization">
-</member><member name="M:VisioTablesAddin.ThisAddIn.EndInitialization">
-</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeControls">
-</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeComponents">
-</member><member name="M:VisioTablesAddin.ThisAddIn.NeedsFill(System.String)">
-</member><member name="T:VisioTablesAddin.ThisAddIn">
-</member><member name="M:VisioTablesAddin.Globals.#ctor">
-</member><member name="T:VisioTablesAddin.Globals">
-</member><member name="M:VisioTablesAddin.ThisRibbonCollection.#ctor(Microsoft.Office.Tools.Ribbon.RibbonFactory)">
-</member><member name="T:VisioTablesAddin.ThisRibbonCollection">
-</member><member name="P:VisioTablesAddin.My.Resources.Resources.ResourceManager">
+<member name="P:VisioTablesAddin.My.Resources.Resources.ResourceManager">
 	<summary>
   Возвращает кэшированный экземпляр ResourceManager, использованный этим классом.
 </summary>
@@ -67,6 +47,26 @@ VisioTablesAddin
 	<summary>
   Класс ресурса со строгой типизацией для поиска локализованных строк и т.д.
 </summary>
+</member><member name="M:VisioTablesAddin.ThisAddIn.#ctor(Microsoft.Office.Tools.Factory,System.IServiceProvider)">
+</member><member name="M:VisioTablesAddin.ThisAddIn.Initialize">
+</member><member name="M:VisioTablesAddin.ThisAddIn.FinishInitialization">
+</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeDataBindings">
+</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeCachedData">
+</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeData">
+</member><member name="M:VisioTablesAddin.ThisAddIn.BindToData">
+</member><member name="M:VisioTablesAddin.ThisAddIn.StartCaching(System.String)">
+</member><member name="M:VisioTablesAddin.ThisAddIn.StopCaching(System.String)">
+</member><member name="M:VisioTablesAddin.ThisAddIn.IsCached(System.String)">
+</member><member name="M:VisioTablesAddin.ThisAddIn.BeginInitialization">
+</member><member name="M:VisioTablesAddin.ThisAddIn.EndInitialization">
+</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeControls">
+</member><member name="M:VisioTablesAddin.ThisAddIn.InitializeComponents">
+</member><member name="M:VisioTablesAddin.ThisAddIn.NeedsFill(System.String)">
+</member><member name="T:VisioTablesAddin.ThisAddIn">
+</member><member name="M:VisioTablesAddin.Globals.#ctor">
+</member><member name="T:VisioTablesAddin.Globals">
+</member><member name="M:VisioTablesAddin.ThisRibbonCollection.#ctor(Microsoft.Office.Tools.Ribbon.RibbonFactory)">
+</member><member name="T:VisioTablesAddin.ThisRibbonCollection">
 </member>
 </members>
 </doc>
