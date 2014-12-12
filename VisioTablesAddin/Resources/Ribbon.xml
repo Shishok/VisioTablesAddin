@@ -2,11 +2,11 @@
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad">
   <ribbon startFromScratch="false">
     <tabs>
-      <!--<tab idMso="TabInsert">
-        <group idMso="GroupIllustrations">
-          <button id="btn_www" insertBeforeMso="PictureInsertFromFile" size="large" label="Табличка" imageMso="TableInsert" onAction="OnRibbonButtonClick"/>
+      <tab idMso="TabInsert">
+        <group id="group_table"  label="Таблицы" insertBeforeMso="GroupPages">
+          <button id="btn_www" size="large" label="Табличка" imageMso="TableInsert" onAction="OnRibbonButtonClick"/>
         </group>
-      </tab>-->          
+      </tab>
       <tab id="table1" label="Таблицы">
         <group id="group_add" label="Добавить" imageMso="TableInsert">
           <gallery id="gal1" label="Таблица" imageMso="TableInsert" size="large" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
