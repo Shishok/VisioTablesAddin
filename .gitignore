@@ -37,9 +37,9 @@ Icon
 .Trashes
 
 # Directories potentially created on remote AFP share
-/publish/*
-/bin/*
-/obj/*
+/publish/
+/bin/
+/obj/
 .AppleDB
 .AppleDesktop
 Network Trash Folder
