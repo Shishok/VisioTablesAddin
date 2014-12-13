@@ -49,24 +49,26 @@ Partial Public Class Addin
 
 #Region "RibbonFunctions"
 
-    Public Function IsSplitEnabled(commandId As String) As Boolean
+    Public Function IsCommandAltEnabled(commandId As String) As Boolean
         Return Application IsNot Nothing AndAlso Application.ActiveWindow IsNot Nothing
     End Function
 
     Public Function IsCommandEnabled(commandId As String) As Boolean
-
-        If Application.ActiveWindow.Selection.Count > 0 Then
-            If Application.ActiveWindow.Selection(1).CellExistsU("User.TableName", 0) Then
-                Return True
-            End If
-        End If
-
+        If Application.ActiveWindow.Selection.Count > 0 AndAlso _
+            Application.ActiveWindow.Selection(1).CellExistsU("User.TableName", 0) Then Return True
         Return False
     End Function
 
     Sub Startup(app As Object)
         Application = DirectCast(app, Microsoft.Office.Interop.Visio.Application)
         AddHandler Application.SelectionChanged, AddressOf Application_SelectionChanged
+        AddHandler Application.DocumentCreated, AddressOf Application_DocumentListChanged
+        AddHandler Application.DocumentOpened, AddressOf Application_DocumentListChanged
+        AddHandler Application.BeforeDocumentClose, AddressOf Application_DocumentListChanged
+    End Sub
+
+    Private Sub Application_DocumentListChanged(ByVal doc As Microsoft.Office.Interop.Visio.Document)
+        UpdateUI()
     End Sub
 
     Private Sub Application_SelectionChanged(ByVal window As Visio.Window)

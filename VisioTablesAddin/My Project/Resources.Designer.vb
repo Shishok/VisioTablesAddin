@@ -61,53 +61,17 @@ Namespace My.Resources
         End Property
         
         '''<summary>
-        '''  Поиск локализованного ресурса типа System.Drawing.Icon, аналогичного (Значок).
-        '''</summary>
-        Friend ReadOnly Property Command1() As System.Drawing.Icon
-            Get
-                Dim obj As Object = ResourceManager.GetObject("Command1", resourceCulture)
-                Return CType(obj,System.Drawing.Icon)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Ищет локализованную строку, похожую на command 1.
-        '''</summary>
-        Friend ReadOnly Property Command1_Label() As String
-            Get
-                Return ResourceManager.GetString("Command1_Label", resourceCulture)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Поиск локализованного ресурса типа System.Drawing.Icon, аналогичного (Значок).
-        '''</summary>
-        Friend ReadOnly Property Command2() As System.Drawing.Icon
-            Get
-                Dim obj As Object = ResourceManager.GetObject("Command2", resourceCulture)
-                Return CType(obj,System.Drawing.Icon)
-            End Get
-        End Property
-        
-        '''<summary>
-        '''  Ищет локализованную строку, похожую на command 2.
-        '''</summary>
-        Friend ReadOnly Property Command2_Label() As String
-            Get
-                Return ResourceManager.GetString("Command2_Label", resourceCulture)
-            End Get
-        End Property
-        
-        '''<summary>
         '''  Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
         '''&lt;customUI xmlns=&quot;http://schemas.microsoft.com/office/2009/07/customui&quot; onLoad=&quot;OnRibbonLoad&quot;&gt;
-        '''  &lt;ribbon&gt;
+        '''  &lt;ribbon startFromScratch=&quot;false&quot;&gt;
         '''    &lt;tabs&gt;
-        '''      &lt;tab idMso=&quot;TabHome&quot;&gt;
-        '''        &lt;group id=&quot;Group1&quot; label=&quot;VisioTablesAddin&quot;&gt;
-        '''
-        '''          &lt;button id=&quot;Command1&quot; size=&quot;large&quot; getLabel=&quot;OnGetRibbonLabel&quot; onAction=&quot;OnRibbonButtonClick&quot; getEnabled=&quot;IsRibbonCommandEnabled&quot; getImage=&quot;GetRibbonImage&quot; /&gt;
-        '''          &lt;button id=&quot;Command2&quot; size=&quot;large&quot; getLabel=&quot;OnGetRibbonLabel&quot; onAction=&quot;OnRibbonButtonC [остаток строки не уместился]&quot;;.
+        '''      &lt;tab idMso=&quot;TabInsert&quot;&gt;
+        '''        &lt;group id=&quot;group_table&quot;  label=&quot;Таблицы&quot; insertBeforeMso=&quot;GroupPages&quot;&gt;
+        '''          &lt;button id=&quot;btn_www&quot; size=&quot;large&quot; label=&quot;Табличка&quot; imageMso=&quot;TableInsert&quot; onAction=&quot;OnRibbonButtonClick&quot;/&gt;
+        '''        &lt;/group&gt;
+        '''      &lt;/tab&gt;
+        '''      &lt;tab id=&quot;table1&quot; label=&quot;Таблицы&quot;&gt;
+        '''        &lt;group id=&quot;group_a [остаток строки не уместился]&quot;;.
         '''</summary>
         Friend ReadOnly Property Ribbon() As String
             Get

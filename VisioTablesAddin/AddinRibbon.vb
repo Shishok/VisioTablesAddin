@@ -17,8 +17,8 @@ Partial Public Class Addin
 
 #Region "Ribbon Callbacks"
 
-    Public Function IsRibbonSplitEnabled(ctrl As Microsoft.Office.Core.IRibbonControl) As Boolean
-        Return IsSplitEnabled(ctrl.Id)
+    Public Function IsRibbonCommandAltEnabled(ctrl As Microsoft.Office.Core.IRibbonControl) As Boolean
+        Return IsCommandAltEnabled(ctrl.Id)
     End Function
 
     Public Function IsRibbonCommandEnabled(ctrl As Microsoft.Office.Core.IRibbonControl) As Boolean
