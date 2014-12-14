@@ -50,6 +50,7 @@ Partial Class dlgNewTable
         Me.ToolTip1 = New System.Windows.Forms.ToolTip(Me.components)
         Me.Label7 = New System.Windows.Forms.Label()
         Me.txtNameTable = New System.Windows.Forms.TextBox()
+        Me.ckbNoContextMenu = New System.Windows.Forms.CheckBox()
         Me.TableLayoutPanel1.SuspendLayout()
         CType(Me.nudColumns, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.nudRows, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -64,7 +65,7 @@ Partial Class dlgNewTable
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
         Me.TableLayoutPanel1.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(221, 293)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(221, 341)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -334,7 +335,7 @@ Partial Class dlgNewTable
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(182, 14)
         Me.Label7.TabIndex = 22
-        Me.Label7.Tag = "0"
+        Me.Label7.Tag = ""
         Me.Label7.Text = "Имя таблицы (необязательно)"
         '
         'txtNameTable
@@ -344,8 +345,19 @@ Partial Class dlgNewTable
         Me.txtNameTable.Name = "txtNameTable"
         Me.txtNameTable.Size = New System.Drawing.Size(349, 22)
         Me.txtNameTable.TabIndex = 23
-        Me.txtNameTable.Tag = "1"
+        Me.txtNameTable.Tag = ""
         Me.txtNameTable.Text = "TbL"
+        '
+        'ckbNoContextMenu
+        '
+        Me.ckbNoContextMenu.AutoSize = True
+        Me.ckbNoContextMenu.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
+        Me.ckbNoContextMenu.Location = New System.Drawing.Point(15, 302)
+        Me.ckbNoContextMenu.Name = "ckbNoContextMenu"
+        Me.ckbNoContextMenu.Size = New System.Drawing.Size(253, 18)
+        Me.ckbNoContextMenu.TabIndex = 24
+        Me.ckbNoContextMenu.Text = "Ячейки таблицы без контекстных меню"
+        Me.ckbNoContextMenu.UseVisualStyleBackColor = True
         '
         'dlgNewTable
         '
@@ -353,7 +365,8 @@ Partial Class dlgNewTable
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.CancelButton = Me.Cancel_Button
-        Me.ClientSize = New System.Drawing.Size(379, 334)
+        Me.ClientSize = New System.Drawing.Size(379, 382)
+        Me.Controls.Add(Me.ckbNoContextMenu)
         Me.Controls.Add(Me.txtNameTable)
         Me.Controls.Add(Me.Label7)
         Me.Controls.Add(Me.nudRows)
@@ -420,5 +433,6 @@ Partial Class dlgNewTable
     Friend WithEvents ToolTip1 As System.Windows.Forms.ToolTip
     Friend WithEvents Label7 As System.Windows.Forms.Label
     Friend WithEvents txtNameTable As System.Windows.Forms.TextBox
+    Friend WithEvents ckbNoContextMenu As System.Windows.Forms.CheckBox
 
 End Class

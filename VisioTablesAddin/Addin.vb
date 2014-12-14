@@ -38,16 +38,7 @@ Partial Public Class Addin
         End Select
     End Sub
 
-    Public Sub QuickTable(strV)
-        Dim nC As Integer = 0, nR As Integer = 0, w As Single = 0, h As Single = 0
-        strV = Right(strV, Len(strV) - 1)
-        nC = Val(Left(strV, InStr(1, strV, "x", 1) - 1)) : nR = Val(Right(strV, Len(strV) - InStr(1, strV, "x", 1)))
-        w = Application.FormatResult(20, 70, 64, "#.0000")
-        h = Application.FormatResult(8, 70, 64, "#.0000")
-        MessageBox.Show("Таблица: " & nC & " x " & nR)
-    End Sub
-
-#Region "RibbonFunctions"
+#Region "RIBBONFUNCTIONS"
 
     Public Function IsCommandAltEnabled(commandId As String) As Boolean
         Return Application IsNot Nothing AndAlso Application.ActiveWindow IsNot Nothing

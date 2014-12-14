@@ -7,7 +7,7 @@ Partial Public Class Addin
     Implements IRibbonExtensibility
     Private _ribbon As Microsoft.Office.Core.IRibbonUI
 
-#Region "IRibbonExtensibility Members"
+#Region "IRIBBONEXTENSIBILITY MEMBERS"
 
     Public Function GetCustomUI(ribbonId As String) As String Implements IRibbonExtensibility.GetCustomUI
         Return My.Resources.Ribbon
@@ -15,7 +15,7 @@ Partial Public Class Addin
 
 #End Region
 
-#Region "Ribbon Callbacks"
+#Region "RIBBON CALLBACKS"
 
     Public Function IsRibbonCommandAltEnabled(ctrl As Microsoft.Office.Core.IRibbonControl) As Boolean
         Return IsCommandAltEnabled(ctrl.Id)
