@@ -4,6 +4,7 @@
     <PublishUrlHistory />
     <InstallUrlHistory />
     <SupportUrlHistory />
+    <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Project</StartAction>

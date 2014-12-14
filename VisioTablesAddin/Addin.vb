@@ -12,7 +12,7 @@ Partial Public Class Addin
             Case "btn_onwidth" : MessageBox.Show(commandId) ': OnWidth
             Case "btn_onheight" : MessageBox.Show(commandId) ': OnHeight
             Case "btn_onwidthheight" : MessageBox.Show(commandId) ': AllOnText
-            Case "btn_newtable" : MessageBox.Show(commandId) ': LoadfrmAddTable
+            Case "btn_newtable" : CreatingTable.Load_dlgNewTable()
             Case "btn_seltable", "btn_selrange", "btn_selcolumn", "btn_selrow" : MessageBox.Show(commandTag) ': SelCell (Button.Tag)
             Case "btn_seltxt", "btn_selnum", "btn_selnotnum", "btn_seldate", "btn_selempty", "btn_selnotempty", "btn_selinvert" : MessageBox.Show(commandTag) ': SelInContent (Button.Tag)
             Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : MessageBox.Show(commandTag) ': InsertText (Button.Tag)
@@ -61,6 +61,7 @@ Partial Public Class Addin
 
     Sub Startup(app As Object)
         Application = DirectCast(app, Microsoft.Office.Interop.Visio.Application)
+        System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(False)
         AddHandler Application.SelectionChanged, AddressOf Application_SelectionChanged
         AddHandler Application.DocumentCreated, AddressOf Application_DocumentListChanged
         AddHandler Application.DocumentOpened, AddressOf Application_DocumentListChanged
@@ -68,14 +69,10 @@ Partial Public Class Addin
     End Sub
 
     Private Sub Application_DocumentListChanged(ByVal doc As Microsoft.Office.Interop.Visio.Document)
-        UpdateUI()
+        UpdateRibbon()
     End Sub
 
-    Private Sub Application_SelectionChanged(ByVal window As Visio.Window)
-        UpdateUI()
-    End Sub
-
-    Sub UpdateUI()
+    Private Sub Application_SelectionChanged(ByVal window As Microsoft.Office.Interop.Visio.Window)
         UpdateRibbon()
     End Sub
 
