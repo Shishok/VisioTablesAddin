@@ -23,7 +23,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ru</TargetCulture>
-    <ApplicationVersion>1.0.6.7</ApplicationVersion>
+    <ApplicationVersion>1.0.9.7</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -54,6 +54,11 @@
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
       <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
@@ -141,6 +146,12 @@
     <Compile Include="dlgNewTable.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="dlgWait.Designer.vb">
+      <DependentUpon>dlgWait.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgWait.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="My Project\Resources.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -172,6 +183,9 @@
   <ItemGroup>
     <EmbeddedResource Include="dlgNewTable.resx">
       <DependentUpon>dlgNewTable.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dlgWait.resx">
+      <DependentUpon>dlgWait.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>

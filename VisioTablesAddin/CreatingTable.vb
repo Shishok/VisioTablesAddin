@@ -23,7 +23,7 @@ Module CreatingTable
     Const UTN = "User.TableName", UTR = "User.TableRow", UTC = "User.TableCol", PX = "PinX", PY = "PinY"
     Const WI = "Width", HE = "Height", CA = "Angle", LD = "LockDelete", GU = "=GUARD("
     Dim NT As String = "", UndoScopeID As Long = 0
-    Dim arrShapeID() As Integer
+    Dim arrNewID() As Integer
     Public FlagPage As Byte
     Dim LayerVisible As String, LayerLock As String
     Const strATC = "!Actions.Titles.Checked=1,"
@@ -123,9 +123,14 @@ Module CreatingTable
         ThemeE = pagObj.ThemeEffects
         If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
 
+        ' Добавление и изменение свойств слоев
         vsoLayerTitles = pagObj.Layers.Add("Titles_Tables")
         vsoLayerCells = pagObj.Layers.Add("Cells_Tables")
-        vsoLayerTitles.CellsC(5).FormulaU = "0"
+        If vsoLayerTitles.CellsC(4).Result("") = 0 Then vsoLayerTitles.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
+        If vsoLayerTitles.CellsC(7).Result("") = 1 Then vsoLayerTitles.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
+        If vsoLayerCells.CellsC(4).Result("") = 0 Then vsoLayerCells.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
+        If vsoLayerCells.CellsC(7).Result("") = 1 Then vsoLayerCells.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
+        vsoLayerTitles.CellsC(5).FormulaU = "GUARD(0)" ' Слой всегда не печатаемый
 
         If bytInsertType = 2 Then
             Dim sngPW As Single, sngPH As Single, sngPLM As Single, sngPRM As Single, sngPTM As Single, sngPBM As Single
@@ -157,11 +162,14 @@ Module CreatingTable
             End If
         End If
 
-        ReDim arrShapeID((intRowCount * intColumnsCount) + (intRowCount + intColumnsCount))
+        ReDim arrNewID((intRowCount * intColumnsCount) + (intRowCount + intColumnsCount))
         CountID = -1
 
         'If booVisibleProgressBar Then
-        '    Load frmWait : frmWait.Caption = "Создание таблицы..." : frmWait.Show() : frmWait.Repaint()
+        Dim frm As New dlgWait
+        frm.Label1.Text = " " & vbCrLf & "Создание  новой таблицы"
+        'frm.lblProgressBar.Maximum = intRowCount
+        frm.Show() : frm.Refresh()
         'End If
 
         'Call RecUndo("Создание таблицы...")
@@ -204,6 +212,7 @@ Module CreatingTable
         TypeCell = "ClW" : VarCell = 0 'Вставка рабочих ячеек
         For jGT = 1 To intRowCount
             'If booVisibleProgressBar Then
+            frm.lblProgressBar.Width = (300 / intRowCount) * jGT : frm.lblProgressBar.Refresh() : Application.DoEvents()
             '    frmWait.lblProgress.Width = (300 / intRowCount) * jGT : frmWait.Repaint() : DoEvents()
             'End If
             For iGT = 1 To intColumnsCount
@@ -219,32 +228,33 @@ Module CreatingTable
             Next
         Next
 
-        shpObj = pagObj.Shapes.ItemFromID(arrShapeID(0))
+        shpObj = pagObj.Shapes.ItemFromID(arrNewID(0))
         shpObj.Cells(UTC).FormulaU = "GUARD(" & intColumnsCount & ")"
         shpObj.Cells(UTR).FormulaU = "GUARD(" & intRowCount & ")"
 
         For iGT = 0 To intColumnsCount + intRowCount - 1
-            winObj.Page.Shapes.ItemFromID(arrShapeID(iGT)).Cells("LockTextEdit").FormulaU = "Guard(1)"
+            winObj.Page.Shapes.ItemFromID(arrNewID(iGT)).Cells("LockTextEdit").FormulaU = "Guard(1)"
         Next
 
-        '        Call RecUndo(0)
-
-        '        If booVisibleProgressBar Then Unload frmWait
+        'Call RecUndo(0)
+        'frm.Close()
+        'If booVisibleProgressBar Then Unload frmWait
 
         If booDeleteTargetShape Then
             If pagObj.Shapes.ItemFromID(MemSHID).Cells(LD).Result("") = 0 Then pagObj.Shapes.ItemFromID(MemSHID).DeleteEx(0)
         End If
 
         vsoApp.ShowChanges = True
-        'winObj.DeselectAll()
         winObj.Select(shpObj, 258)
+
         'winObj = Nothing : pagObj = Nothing : shpObj = Nothing
-        'shape_TbL = Nothing : shape_ThC = Nothing : shape_TvR = Nothing : shape_ClW = Nothing
-        'vsoLayerTitles = Nothing : vsoLayerCells = Nothing
-        Erase arrShapeID
+        shape_TbL = Nothing : shape_ThC = Nothing : shape_TvR = Nothing : shape_ClW = Nothing
+        vsoLayerTitles = Nothing : vsoLayerCells = Nothing
+        Erase arrNewID
 
         If ThemeC <> pagObj.ThemeColors Then pagObj.ThemeColors = ThemeC
         If ThemeE <> pagObj.ThemeEffects Then pagObj.ThemeEffects = ThemeE
+        frm.Close()
         Exit Sub
 errD:
         MessageBox.Show("CreatTable" & vbNewLine & Err.Description)
@@ -255,24 +265,24 @@ errD:
         On Error GoTo errD
         With pagObj
             CountID = CountID + 1
-            arrShapeID(CountID) = shpObj.ID
+            arrNewID(CountID) = shpObj.ID
             With shpObj
                 Select Case VarCell
 
                     Case 0 'Вставка рабочих ячеек
-                        .Cells(PX).FormulaForceU = GS & arrShapeID(iGT) & "!PinX)"
-                        .Cells(PY).FormulaForceU = GS & arrShapeID(intColumnsCount + jGT) & "!PinY)"
-                        .Cells(WI).FormulaForceU = GS & arrShapeID(iGT) & "!Width)"
-                        .Cells(HE).FormulaForceU = GS & arrShapeID(intColumnsCount + jGT) & "!Height)"
-                        .Cells(UTN).FormulaForceU = GS & arrShapeID(0) & "!Name(0))"
-                        .Cells(UTC).FormulaForceU = GS & arrShapeID(iGT) & "!User.TableCol)"
-                        .Cells(UTR).FormulaForceU = GS & arrShapeID(intColumnsCount + jGT) & "!User.TableRow)"
-                        .Cells("Comment").FormulaForceU = GI & sh & arrShapeID(0) & strACC & "User.TableCol.Prompt&"" ""&User.TableCol&CHAR(10)&User.TableRow.Prompt&"" ""&User.TableRow" & "," & """""" & "))"
+                        .Cells(PX).FormulaForceU = GS & arrNewID(iGT) & "!PinX)"
+                        .Cells(PY).FormulaForceU = GS & arrNewID(intColumnsCount + jGT) & "!PinY)"
+                        .Cells(WI).FormulaForceU = GS & arrNewID(iGT) & "!Width)"
+                        .Cells(HE).FormulaForceU = GS & arrNewID(intColumnsCount + jGT) & "!Height)"
+                        .Cells(UTN).FormulaForceU = GS & arrNewID(0) & "!Name(0))"
+                        .Cells(UTC).FormulaForceU = GS & arrNewID(iGT) & "!User.TableCol)"
+                        .Cells(UTR).FormulaForceU = GS & arrNewID(intColumnsCount + jGT) & "!User.TableRow)"
+                        .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & "User.TableCol.Prompt&"" ""&User.TableCol&CHAR(10)&User.TableRow.Prompt&"" ""&User.TableRow" & "," & """""" & "))"
 
                     Case 2 ' упр строка
-                        .Cells(PX).FormulaForceU = GS & arrShapeID(CountID - 1) & "!PinX+(Sheet." & arrShapeID(CountID - 1) & "!Width/2)+(Width/2))"
-                        .Cells(PY).FormulaForceU = GS & arrShapeID(0) & "!PinY)"
-                        .Cells(HE).FormulaForceU = GS & arrShapeID(0) & "!Height)"
+                        .Cells(PX).FormulaForceU = GS & arrNewID(CountID - 1) & "!PinX+(Sheet." & arrNewID(CountID - 1) & "!Width/2)+(Width/2))"
+                        .Cells(PY).FormulaForceU = GS & arrNewID(0) & "!PinY)"
+                        .Cells(HE).FormulaForceU = GS & arrNewID(0) & "!Height)"
                         If bytInsertType = 2 Or bytInsertType = 4 Then
                             .Cells(WI).Result(64) = sngTW
                         ElseIf bytInsertType = 3 Then
@@ -280,26 +290,26 @@ errD:
                         Else
                             .Cells(WI).Result(64) = sngWidthCells
                         End If
-                        .Cells(UTN).FormulaU = GS & arrShapeID(0) & "!Name(0))"
+                        .Cells(UTN).FormulaU = GS & arrNewID(0) & "!Name(0))"
                         .Cells(UTC).FormulaForceU = GU & iGT & ")"
                         .Cells(UTR).FormulaForceU = GU & 0 & ")"
                         .Characters.AddCustomFieldU(UTC, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTC & ")"
                         .Cells("Char.Color").FormulaForceU = strThGu255
-                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrShapeID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrShapeID(0) & strATC & "0%" & "," & "50%" & "))"
-                        .Cells("LineColor").FormulaForceU = GI & sh & arrShapeID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
-                        .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrShapeID(0) & "!Actions.Titles.Checked))"
-                        .Cells("Comment").FormulaForceU = GI & sh & arrShapeID(0) & strACC & """Управляющая ячейка столбца""" & "," & """""" & "))"
+                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
+                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
+                        .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+                        .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
+                        .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка столбца""" & "," & """""" & "))"
 
                     Case 1 ' упр столбец
-                        .Cells(PX).FormulaU = GS & arrShapeID(0) & "!PinX)"
+                        .Cells(PX).FormulaU = GS & arrNewID(0) & "!PinX)"
                         If jGT = 1 Then
-                            .Cells(PY).FormulaU = GS & arrShapeID(CountID - intColumnsCount - 1) & "!PinY-(Sheet." & arrShapeID(CountID - intColumnsCount - 1) & "!Height/2)-(Height/2))"
+                            .Cells(PY).FormulaU = GS & arrNewID(CountID - intColumnsCount - 1) & "!PinY-(Sheet." & arrNewID(CountID - intColumnsCount - 1) & "!Height/2)-(Height/2))"
                         Else
-                            .Cells(PY).FormulaForceU = GS & arrShapeID(CountID - 1) & "!PinY-(Sheet." & arrShapeID(CountID - 1) & "!Height/2)-(Height/2))"
+                            .Cells(PY).FormulaForceU = GS & arrNewID(CountID - 1) & "!PinY-(Sheet." & arrNewID(CountID - 1) & "!Height/2)-(Height/2))"
                         End If
-                        .Cells(WI).FormulaU = GS & arrShapeID(0) & "!Width)"
+                        .Cells(WI).FormulaU = GS & arrNewID(0) & "!Width)"
                         If bytInsertType = 2 Or bytInsertType = 4 Then
                             .Cells(HE).Result(64) = sngTH
                         ElseIf bytInsertType = 3 Then
@@ -307,17 +317,17 @@ errD:
                         Else
                             .Cells(HE).Result(64) = sngHeightCells
                         End If
-                        .Cells(UTN).FormulaU = GS & arrShapeID(0) & "!Name(0))"
+                        .Cells(UTN).FormulaU = GS & arrNewID(0) & "!Name(0))"
                         .Cells(UTC).FormulaU = GU & 0 & ")"
                         .Cells(UTR).FormulaForceU = GU & jGT & ")"
                         .Characters.AddCustomFieldU(UTR, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTR & ")"
                         .Cells("Char.Color").FormulaForceU = strThGu255
-                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrShapeID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrShapeID(0) & strATC & "0%" & "," & "50%" & "))"
-                        .Cells("LineColor").FormulaForceU = GI & sh & arrShapeID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
-                        .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrShapeID(0) & "!Actions.Titles.Checked))"
-                        .Cells("Comment").FormulaForceU = GI & sh & arrShapeID(0) & strACC & """Управляющая ячейка строки""" & "," & """""" & "))"
+                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
+                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
+                        .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+                        .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
+                        .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка строки""" & "," & """""" & "))"
 
                     Case 3 ' 1 ГлавУпр
                         .Cells(WI).FormulaForceU = GU & Str(vsoApp.FormatResult(10, "mm", "", frm)) & ")"
@@ -388,30 +398,30 @@ errD:
 
             Select Case TypeCell
                 Case "ClW" ' Рабочая ячейка
-                    AddSectionNum = 240 ' Добавить Action секцию
-                    intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    arrRowData = {{"SelectWindow", "RUNMACRO(""MainModule.LoadSelectfrmWorks"",""Таблица_V"")", """Выде&лить...""", 2035, 1, 0, "FALSE", "FALSE"}, _
-                        {"InsertWindow", "RUNMACRO(""MainModule.LoadInsertfrmWorks"",""Таблица_V"")", """Вставить...""", 22, 2, 0, "FALSE", "FALSE"}, _
-                        {"SizeWindow", "RUNMACRO(""MainModule.LoadSizefrmWorks"",""Таблица_V"")", """Разм&еры...""", 1605, 3, 0, "FALSE", "TRUE"}, _
-                        {"AutoSizeWindow", "RUNMACRO(""MainModule.LoadAutoSizefrmWorks"",""Таблица_V"")", """Авторазмер...""", 583, 4, 0, "FALSE", "FALSE"}, _
-                        {"MoreWindow", "RUNMACRO(""MainModule.LoadMorefrmWorks"",""Таблица_V"")", """Дополнительно...""", 586, 5, 0, "FALSE", "FALSE"}, _
-                        {"GutT", "RUNMACRO(""MainModule.GutT"",""Таблица_V"")", """Вырезать текст из ячеек""", 2046, 6, 0, "FALSE", "TRUE"}, _
-                        {"CopyT", "RUNMACRO(""MainModule.CopyT"",""Таблица_V"")", """Копировать текст из ячеек""", 2045, 7, 0, "FALSE", "FALSE"}, _
-                        {"PasteT", "RUNMACRO(""MainModule.PasteT"",""Таблица_V"")", """Вставить текст в ячейки""", 22, 8, 0, "FALSE", "FALSE"}, _
-                        {"IntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Объединить ячейки""", 402, 9, 0, "FALSE", "TRUE"}, _
-                        {"DeIntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Отменить объединение""", 402, 9, 0, "TRUE", "TRUE"}}
-                    AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
+                    'AddSectionNum = 240 ' Добавить Action секцию
+                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
+                    'arrRowData = {{"SelectWindow", "RUNMACRO(""MainModule.LoadSelectfrmWorks"",""Таблица_V"")", """Выде&лить...""", 2035, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"InsertWindow", "RUNMACRO(""MainModule.LoadInsertfrmWorks"",""Таблица_V"")", """Вставить...""", 22, 2, 0, "FALSE", "FALSE"}, _
+                    '    {"SizeWindow", "RUNMACRO(""MainModule.LoadSizefrmWorks"",""Таблица_V"")", """Разм&еры...""", 1605, 3, 0, "FALSE", "TRUE"}, _
+                    '    {"AutoSizeWindow", "RUNMACRO(""MainModule.LoadAutoSizefrmWorks"",""Таблица_V"")", """Авторазмер...""", 583, 4, 0, "FALSE", "FALSE"}, _
+                    '    {"MoreWindow", "RUNMACRO(""MainModule.LoadMorefrmWorks"",""Таблица_V"")", """Дополнительно...""", 586, 5, 0, "FALSE", "FALSE"}, _
+                    '    {"GutT", "RUNMACRO(""MainModule.GutT"",""Таблица_V"")", """Вырезать текст из ячеек""", 2046, 6, 0, "FALSE", "TRUE"}, _
+                    '    {"CopyT", "RUNMACRO(""MainModule.CopyT"",""Таблица_V"")", """Копировать текст из ячеек""", 2045, 7, 0, "FALSE", "FALSE"}, _
+                    '    {"PasteT", "RUNMACRO(""MainModule.PasteT"",""Таблица_V"")", """Вставить текст в ячейки""", 22, 8, 0, "FALSE", "FALSE"}, _
+                    '    {"IntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Объединить ячейки""", 402, 9, 0, "FALSE", "TRUE"}, _
+                    '    {"DeIntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Отменить объединение""", 402, 9, 0, "TRUE", "TRUE"}}
+                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
                     shape_ClW = vsoShape
 
                 Case "TvR" ' УЯ строки
-                    AddSectionNum = 240 ' Добавить Action секцию
-                    intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    arrRowData = {{"AddRowTop", "RUNMACRO(""MainModule.AddRowBefore"",""Таблица_V"")", """&Добавить строку выше""", 296, 1, 0, "FALSE", "FALSE"}, _
-                        {"AddRowBottom", "RUNMACRO(""MainModule.AddRowAfter"",""Таблица_V"")", """&Добавить строку ниже""", 296, 1, 0, "FALSE", "FALSE"}, _
-                        {"SelectRow", "RUNMACRO(""MainModule.SelRows"",""Таблица_V"")", """Выде&лить строку""", 801, 2, 0, "FALSE", "FALSE"}, _
-                        {"AlignOnTextHeight", "RUNMACRO(""MainModule.OnHeight"",""Таблица_V"")", """По высоте &текста""", 541, 3, 0, "FALSE", "FALSE"}, _
-                        {"DeleteROw", "RUNMACRO(""MainModule.DelRows"",""Таблица_V"")", """&Удалить строку""", 292, 4, 0, "FALSE", "True"}}
-                    AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
+                    'AddSectionNum = 240 ' Добавить Action секцию
+                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
+                    'arrRowData = {{"AddRowTop", "RUNMACRO(""MainModule.AddRowBefore"",""Таблица_V"")", """&Добавить строку выше""", 296, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"AddRowBottom", "RUNMACRO(""MainModule.AddRowAfter"",""Таблица_V"")", """&Добавить строку ниже""", 296, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"SelectRow", "RUNMACRO(""MainModule.SelRows"",""Таблица_V"")", """Выде&лить строку""", 801, 2, 0, "FALSE", "FALSE"}, _
+                    '    {"AlignOnTextHeight", "RUNMACRO(""MainModule.OnHeight"",""Таблица_V"")", """По высоте &текста""", 541, 3, 0, "FALSE", "FALSE"}, _
+                    '    {"DeleteROw", "RUNMACRO(""MainModule.DelRows"",""Таблица_V"")", """&Удалить строку""", 292, 4, 0, "FALSE", "True"}}
+                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
 
                     AddSectionNum = 9 ' Добавить Control секцию
                     intArrNum = {0, 1, 2, 3, 6, 8} ' Сделать не меньше нуля
@@ -424,14 +434,14 @@ errD:
                     shape_TvR = vsoShape
 
                 Case "ThC" ' УЯ столбца
-                    AddSectionNum = 240 ' Добавить Action секцию
-                    intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    arrRowData = {{"AddColumnLeft", "RUNMACRO(""MainModule.AddColBefore"",""Таблица_V"")", """&Добавить столбец слева""", 297, 1, 0, "FALSE", "FALSE"}, _
-                        {"AddColumnRight", "RUNMACRO(""MainModule.AddColAfter"",""Таблица_V"")", """&Добавить столбец справа""", 297, 1, 0, "FALSE", "FALSE"}, _
-                        {"SelectColumn", "RUNMACRO(""MainModule.SelCols"",""Таблица_V"")", """Выде&лить столбец""", 802, 2, 0, "FALSE", "FALSE"}, _
-                        {"AlignOnTextWidth", "RUNMACRO(""MainModule.OnWidth"",""Таблица_V"")", """По ширине &текста""", 542, 3, 0, "FALSE", "FALSE"}, _
-                        {"DeleteColumn", "RUNMACRO(""MainModule.DelCols"",""Таблица_V"")", """&Удалить столбец""", 294, 4, 0, "FALSE", "True"}}
-                    AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
+                    'AddSectionNum = 240 ' Добавить Action секцию
+                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
+                    'arrRowData = {{"AddColumnLeft", "RUNMACRO(""MainModule.AddColBefore"",""Таблица_V"")", """&Добавить столбец слева""", 297, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"AddColumnRight", "RUNMACRO(""MainModule.AddColAfter"",""Таблица_V"")", """&Добавить столбец справа""", 297, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"SelectColumn", "RUNMACRO(""MainModule.SelCols"",""Таблица_V"")", """Выде&лить столбец""", 802, 2, 0, "FALSE", "FALSE"}, _
+                    '    {"AlignOnTextWidth", "RUNMACRO(""MainModule.OnWidth"",""Таблица_V"")", """По ширине &текста""", 542, 3, 0, "FALSE", "FALSE"}, _
+                    '    {"DeleteColumn", "RUNMACRO(""MainModule.DelCols"",""Таблица_V"")", """&Удалить столбец""", 294, 4, 0, "FALSE", "True"}}
+                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
 
                     AddSectionNum = 9 ' Добавить Control секцию
                     intArrNum = {0, 1, 2, 3, 6, 8} ' Сделать не меньше нуля
@@ -445,15 +455,18 @@ errD:
                 Case strNameTable ' Главная УЯ
                     AddSectionNum = 240 ' Добавить Action секцию
                     intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    arrRowData = {{"NewTable", "RUNMACRO(""MainModule.LoadfrmAddTable"",""Таблица_V"")", """Соз&дать таблицу""", 333, 1, 0, "FALSE", "FALSE"}, _
-                        {"SelectTable", "RUNMACRO(""MainModule.SelTable"",""Таблица_V"")", """Выде&лить таблицу""", 803, 2, 0, "FALSE", "FALSE"}, _
-                        {"LockPicture", "RUNMACRO(""MainModule.LoadfrmPicture"",""Таблица_V"")", """Закрепить &фигуры""", 954, 3, 0, "FALSE", "FALSE"}, _
-                        {"LinkData", "RUNMACRO(""MainModule.LoadfrmLinkData"",""Таблица_V"")", """Вне&шние данные""", 4143, 4, 0, "FALSE", "FALSE"}, _
-                        {"Titles", "SETF(GetRef(Actions.Titles.Checked),NOT(Actions.Titles.Checked))", """П&оказывать заголовки""", """""", 5, 1, "FALSE", "TRUE"}, _
+                    arrRowData = {{"Titles", "SETF(GetRef(Actions.Titles.Checked),NOT(Actions.Titles.Checked))", """П&оказывать заголовки""", """""", 5, 1, "FALSE", "TRUE"}, _
                         {"Comments", "SETF(GetRef(Actions.Comments.Checked),NOT(Actions.Comments.Checked))", """Показывать коммента&рии""", """""", 6, 1, "FALSE", "FALSE"}, _
-                        {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}, _
-                        {"DeleteTable", "RUNMACRO(""MainModule.DelTab"",""Таблица_V"")", """&Удалить таблицу""", 2487, 8, 0, "FALSE", "TRUE"}, _
-                        {"Help", "RUNMACRO(""MainModule.CallHelp"",""Таблица_V"")", """Справка""", 3998, 8, 0, "FALSE", "FALSE"}}
+                        {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}}
+                    'arrRowData = {{"NewTable", "RUNMACRO(""MainModule.LoadfrmAddTable"",""Таблица_V"")", """Соз&дать таблицу""", 333, 1, 0, "FALSE", "FALSE"}, _
+                    '    {"SelectTable", "RUNMACRO(""MainModule.SelTable"",""Таблица_V"")", """Выде&лить таблицу""", 803, 2, 0, "FALSE", "FALSE"}, _
+                    '    {"LockPicture", "RUNMACRO(""MainModule.LoadfrmPicture"",""Таблица_V"")", """Закрепить &фигуры""", 954, 3, 0, "FALSE", "FALSE"}, _
+                    '    {"LinkData", "RUNMACRO(""MainModule.LoadfrmLinkData"",""Таблица_V"")", """Вне&шние данные""", 4143, 4, 0, "FALSE", "FALSE"}, _
+                    '    {"Titles", "SETF(GetRef(Actions.Titles.Checked),NOT(Actions.Titles.Checked))", """П&оказывать заголовки""", """""", 5, 1, "FALSE", "TRUE"}, _
+                    '    {"Comments", "SETF(GetRef(Actions.Comments.Checked),NOT(Actions.Comments.Checked))", """Показывать коммента&рии""", """""", 6, 1, "FALSE", "FALSE"}, _
+                    '    {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}, _
+                    '    {"DeleteTable", "RUNMACRO(""MainModule.DelTab"",""Таблица_V"")", """&Удалить таблицу""", 2487, 8, 0, "FALSE", "TRUE"}, _
+                    '    {"Help", "RUNMACRO(""MainModule.CallHelp"",""Таблица_V"")", """Справка""", 3998, 8, 0, "FALSE", "FALSE"}}
                     AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
 
                     .Cells("LineColor").FormulaU = "GUARD(IF(Actions.Titles.Checked=1,THEMEGUARD(RGB(191,191,191)),THEMEGUARD(RGB(255,255,255))))"
