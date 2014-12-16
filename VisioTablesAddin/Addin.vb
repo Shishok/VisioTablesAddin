@@ -21,7 +21,7 @@ Partial Public Class Addin
             Case "btn_gut" : MessageBox.Show(commandId) ': GutT
             Case "btn_copy" : MessageBox.Show(commandId) ': CopyT
             Case "btn_paste" : MessageBox.Show(commandId) ': PasteT
-            Case "btn_deltable" : MessageBox.Show(commandId) ': DelTab
+            Case "btn_deltable" : DelTab()
             Case "btn_delcolumn" : MessageBox.Show(commandId) ': DelCols
             Case "btn_delrow" : MessageBox.Show(commandId) ': DelRows
             Case "btn_intellinput" : MessageBox.Show(commandId) ': LoadfrmIntellInput

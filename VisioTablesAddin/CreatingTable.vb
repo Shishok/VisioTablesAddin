@@ -3,29 +3,49 @@ Imports System.Windows.Forms
 
 Module CreatingTable
 
-#Region "LIST OF VARIABLES"
+#Region "LIST OF VARIABLES AND CONSTANTS"
+
+    Public vsoApp As Visio.Application = Globals.ThisAddIn.Application
+    Public booOpenForm As Boolean = False
+    Public strNameTable As String = ""
+    Public FlagPage As Byte = 0
 
     Dim frmNewTable As System.Windows.Forms.Form = New dlgNewTable
-    Public booOpenForm As Boolean = False
-    Public strNameTable As String
-    Public vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Dim docObj As Visio.Document = vsoApp.ActiveDocument
     Dim winObj As Visio.Window = vsoApp.ActiveWindow
     Dim pagObj As Visio.Page = vsoApp.ActivePage
     Dim shpsObj As Visio.Shapes = pagObj.Shapes
     Dim selObj As Visio.Selection
-    Dim shapeTb, shapeTh, shapeTv, shapeCl As Visio.Shape
+    Dim vsoSelection As Visio.Selection
+
     Dim shpObj As Visio.Shape
     Dim MemSel As Visio.Shape
-    Dim vsoSelection As Visio.Selection
-    Dim shape_TbL As Visio.Shape, shape_ThC As Visio.Shape, shape_TvR As Visio.Shape, shape_ClW As Visio.Shape
-    Dim CountID As Integer
-    Const UTN = "User.TableName", UTR = "User.TableRow", UTC = "User.TableCol", PX = "PinX", PY = "PinY"
-    Const WI = "Width", HE = "Height", CA = "Angle", LD = "LockDelete", GU = "=GUARD("
-    Dim NT As String = "", UndoScopeID As Long = 0
+    Dim shape_TbL As Visio.Shape
+    Dim shape_ThC As Visio.Shape
+    Dim shape_TvR As Visio.Shape
+    Dim shape_ClW As Visio.Shape
+
+    Dim UndoScopeID As Long = 0
+
     Dim arrNewID() As Integer
-    Public FlagPage As Byte
-    Dim LayerVisible As String, LayerLock As String
+    Dim CountID As Integer = 0
+    Dim iGT As Integer = 0
+    Dim jGT As Integer = 0
+
+    Dim NT As String = ""
+    Dim LayerVisible As String = ""
+    Dim LayerLock As String = ""
+
+    Const UTN = "User.TableName"
+    Const UTR = "User.TableRow"
+    Const UTC = "User.TableCol"
+    Const PX = "PinX"
+    Const PY = "PinY"
+    Const WI = "Width"
+    Const HE = "Height"
+    Const CA = "Angle"
+    Const LD = "LockDelete"
+    Const GU = "=GUARD("
     Const strATC = "!Actions.Titles.Checked=1,"
     Const strACC = "!Actions.Comments.Checked=1,"
     Const strThGu000 = "THEMEGUARD(MSOTINT(RGB(0,0,0),50))"
@@ -39,7 +59,7 @@ Module CreatingTable
     Const P50 = "50%"
     Const GT = "GUARD(TRUE)"
     Const G1 = "Guard(1)"
-    Dim iGT As Integer = 0, jGT As Integer = 0
+
 
 #End Region
 
@@ -52,7 +72,6 @@ Module CreatingTable
         h = vsoApp.FormatResult(8, 70, 64, "#.0000")
         strNameTable = "TbL"
         Call CreatTable(strNameTable, 1, nC, nR, w, h, 200, 150, False, False)
-        'MessageBox.Show("Таблица: " & nC & " x " & nR)
     End Sub
 
     Sub Load_dlgNewTable()
@@ -93,25 +112,9 @@ Module CreatingTable
         If sngHeightTable = 0 Then sngHeightTable = 100
         ' -------------------------------------------------------------------------------------------
 
-        'Const strATC = "!Actions.Titles.Checked=1,"
-        'Const strACC = "!Actions.Comments.Checked=1,"
-        'Const strThGu000 = "THEMEGUARD(MSOTINT(RGB(0,0,0),50))"
-        'Const strThGu255 = "THEMEGUARD(RGB(255,255,255))"
-        'Const strThGu191 = "THEMEGUARD(RGB(191,191,191))"
-        'Const GS = "=GUARD(Sheet."
-        'Const GI = "=Guard(IF("
-        'Const sh = "Sheet."
-        'Const frm = "###0.0###"
-        'Const GU5 = "=GUARD(10 mm)" ' Переделать на DrawUn
-        'Const P50 = "50%"
-        'Const GT = "GUARD(TRUE)"
-        'Const G1 = "Guard(1)"
-
         Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
         Dim TypeCell As String, VarCell As Byte, sngTW As Double, sngTH As Double
         Dim sngTX As Double, sngTY As Double
-        'Dim i As Integer
-        'Dim vsoShape As Visio.Shape
         Dim ThemeC As String, ThemeE As String
 
         winObj = vsoApp.ActiveWindow
@@ -119,7 +122,6 @@ Module CreatingTable
 
         ThemeC = pagObj.ThemeColors
         If ThemeC <> "visThemeNone" Then pagObj.ThemeColors = "visThemeNone"
-
         ThemeE = pagObj.ThemeEffects
         If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
 
@@ -168,7 +170,6 @@ Module CreatingTable
         'If booVisibleProgressBar Then
         Dim frm As New dlgWait
         frm.Label1.Text = " " & vbCrLf & "Создание  новой таблицы"
-        'frm.lblProgressBar.Maximum = intRowCount
         frm.Show() : frm.Refresh()
         'End If
 
@@ -237,7 +238,7 @@ Module CreatingTable
         Next
 
         'Call RecUndo(0)
-        'frm.Close()
+        frm.Close()
         'If booVisibleProgressBar Then Unload frmWait
 
         If booDeleteTargetShape Then
@@ -254,7 +255,7 @@ Module CreatingTable
 
         If ThemeC <> pagObj.ThemeColors Then pagObj.ThemeColors = ThemeC
         If ThemeE <> pagObj.ThemeEffects Then pagObj.ThemeEffects = ThemeE
-        frm.Close()
+        'frm.Close()
         Exit Sub
 errD:
         MessageBox.Show("CreatTable" & vbNewLine & Err.Description)
@@ -510,5 +511,52 @@ errD:
     End Sub
 
 #End Region
+
+    Public Sub DelTab() ' Удаление активной таблицы. Основная процедура
+        On Error GoTo errD
+        Dim Response As Byte = 0
+        ' 6 - Да, 7 - нет, 2 - отмена
+        'Call CheckSelCells()
+
+        'If Response = 0 Then
+        Response = MsgBox("Уверены что хотите удалить эту таблицу?", 67, "Удаление!")
+        'End If
+
+        If Response = 6 Then
+            winObj = vsoApp.ActiveWindow
+            shpsObj = winObj.Page.Shapes
+            NT = winObj.Selection(1).Cells(UTN).ResultStr("")
+            'Call RecUndo("Удалить таблицу")
+
+            Dim frm As New dlgWait
+            frm.Label1.Text = " " & vbCrLf & "Удаление таблицы..."
+            frm.Show() : frm.Refresh()
+
+            winObj.DeselectAll()
+            vsoApp.ShowChanges = False
+
+            Dim dblW As Integer, iCount As Integer
+            dblW = shpsObj.Count
+
+            For iCount = shpsObj.Count To 1 Step -1
+                frm.lblProgressBar.Width = (300 / dblW) * iCount : frm.lblProgressBar.Refresh() : Application.DoEvents()
+                With shpsObj.Item(iCount)
+                    If .CellExistsU(UTN, 0) Then
+                        If StrComp(.Cells(UTN).ResultStr(""), NT) = 0 Then
+                            .Cells(LD).FormulaForceU = 0
+                            .Delete()
+                        End If
+                    End If
+                End With
+            Next
+
+            frm.Close()
+            vsoApp.ShowChanges = True
+            'Call RecUndo(0)
+        End If
+        Exit Sub
+errD:
+        MessageBox.Show("DelTab" & vbNewLine & Err.Description)
+    End Sub
 
 End Module
