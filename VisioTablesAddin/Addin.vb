@@ -34,7 +34,11 @@ Partial Public Class Addin
             Case "btn_extdata" : MessageBox.Show(commandId) ': LoadfrmLinkData
             Case "btn_convert1Shape" : MessageBox.Show(commandId) ': ConvertInto1Shape
             Case "btn_lockpicture" : MessageBox.Show(commandId) ': LoadfrmPicture
-            Case "btn_help" : MessageBox.Show(commandId) ': CallHelp
+            Case "btn_help" : Call InitArrShapeID(vsoApp.ActiveWindow.Selection(1).Cells("User.TableName").ResultStr("")) ': CallHelp
+                MessageBox.Show(ArrShapeID(0, 0))
+                MessageBox.Show(UBound(ArrShapeID, 1))
+                MessageBox.Show(UBound(ArrShapeID, 2))
+                MessageBox.Show(Application.ProductVersion)
         End Select
     End Sub
 
