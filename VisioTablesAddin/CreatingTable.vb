@@ -329,11 +329,18 @@ err:
         Call RecUndo("0")
     End Sub
 
+    Sub CopyT() ' Копирование содержимого выделенных ячеек таблицы
+        If Not CheckSelCells() Then Exit Sub
+
+        Dim txt As String = ""
+        My.Computer.Clipboard.SetText(fArrT(txt))
+    End Sub
+
     Sub DelTab() ' Удаление активной таблицы. Основная процедура
         On Error GoTo errD
         Dim Response As Byte = 0
         ' 6 - Да, 7 - нет, 2 - отмена
-        Call CheckSelCells()
+        If Not CheckSelCells() Then Exit Sub
 
         'If Response = 0 Then
         Response = MsgBox("Уверены что хотите удалить эту таблицу?", 67, "Удаление!")
@@ -374,6 +381,66 @@ err:
         Exit Sub
 errD:
         MessageBox.Show("DelTab" & vbNewLine & Err.Description)
+    End Sub
+
+    Sub GutT() ' Вырезание содержимого из выделенных ячеек таблицы
+        If Not CheckSelCells() Then Exit Sub
+
+        Dim txt As String = ""
+        My.Computer.Clipboard.SetText(fArrT(txt))
+
+        Call RecUndo("Вырезать текст из ячеек")
+
+        Dim vsoSelection As Visio.Selection = winObj.Selection
+        For Each shpObj In vsoSelection
+            shpObj.Characters.Text = ""
+        Next
+
+        Call RecUndo("0")
+    End Sub
+
+    Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
+        If Not CheckSelCells() Then Exit Sub
+
+        shpsObj = winObj.Page.Shapes
+
+        Call InitArrShapeID(NT)
+
+        Dim ShapeObj As Visio.Shape
+        Dim arrId(,) As String, arrTMP() As String, arrTMP1() As String, txt As String
+        Dim i As Integer, j As Integer
+
+        On Error GoTo err
+
+        txt = My.Computer.Clipboard.GetText
+        arrTMP = Split(txt, vbCrLf)
+        arrTMP1 = Split(arrTMP(0), vbTab)
+
+        ReDim arrId(UBound(arrTMP, 1) - 1, UBound(arrTMP1, 1))
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            arrTMP1 = Split(arrTMP(i), vbTab)
+            For j = LBound(arrTMP1, 1) To UBound(arrTMP1, 1)
+                arrId(i, j) = arrTMP1(j)
+            Next
+        Next
+
+        ShapeObj = winObj.Selection(1) : shpsObj = winObj.Page.Shapes
+
+        On Error Resume Next
+
+        Call RecUndo("Вставить текст в ячейки")
+
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            For j = LBound(arrId, 2) To UBound(arrId, 2)
+                With shpsObj.ItemFromID(ArrShapeID(j + ShapeObj.Cells(UTC).Result(""), i + ShapeObj.Cells(UTR).Result("")))
+                    .Characters.Text = arrId(i, j)
+                End With
+            Next
+        Next
+
+err:
+        Call RecUndo("0")
+        Erase arrId : Erase arrTMP : Erase arrTMP1
     End Sub
 
     Sub InitArrShapeID(strNameShape)  ' Заполнение массива шейпами активной таблицы
@@ -666,29 +733,6 @@ err:
 
 #Region "Functions"
 
-    Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
-        ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
-        Dim i As Integer
-        rMin = 1000 : cMin = 1000 : rMax = 0 : cMax = 0
-
-        On Error GoTo err
-
-        For i = 1 To vsoSel.Count
-            With vsoSel(i)
-                If rMin > .Cells(UTR).Result("") Then rMin = .Cells(UTR).Result("")
-                If cMin > .Cells(UTC).Result("") Then cMin = .Cells(UTC).Result("")
-                If rMax < .Cells(UTR).Result("") Then rMax = .Cells(UTR).Result("")
-                If cMax < .Cells(UTC).Result("") Then cMax = .Cells(UTC).Result("")
-            End With
-        Next
-
-        GetMinMaxRange = True
-        Exit Function
-
-err:
-        GetMinMaxRange = False
-    End Function
-
     Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе
 
         Dim ErrMsg = Sub()
@@ -717,6 +761,57 @@ err:
         End With
 
         Return True
+    End Function
+
+    Private Function fArrT(txt) ' Заполнение массива данными из ячеек таблицы
+        Dim i As Integer, j As Integer, arrId(,) As String, Response As Boolean
+        Dim cMin As Integer, rMin As Integer, cMax As Integer, rMax As Integer
+
+        Call ClearControlCells(UTC) : Call ClearControlCells(UTR)
+
+        Dim vsoSelection As Visio.Selection = winObj.Selection
+
+        Response = GetMinMaxRange(vsoSelection, cMin, cMax, rMin, rMax)
+
+        ReDim arrId(rMax + 1, cMax + 1)
+
+        For i = 1 To vsoSelection.Count
+            With vsoSelection(i)
+                arrId(.Cells(UTR).Result(""), .Cells(UTC).Result("")) = .Characters.Text
+            End With
+        Next
+
+        For j = rMin To rMax
+            For i = cMin To cMax
+                txt = IIf(i = cMax, txt & arrId(j, i) & vbCrLf, txt & arrId(j, i) & vbTab)
+            Next
+        Next
+
+        Erase arrId
+        fArrT = txt
+    End Function
+
+    Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
+        ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
+        Dim i As Integer
+        rMin = 1000 : cMin = 1000 : rMax = 0 : cMax = 0
+
+        On Error GoTo err
+
+        For i = 1 To vsoSel.Count
+            With vsoSel(i)
+                If rMin > .Cells(UTR).Result("") Then rMin = .Cells(UTR).Result("")
+                If cMin > .Cells(UTC).Result("") Then cMin = .Cells(UTC).Result("")
+                If rMax < .Cells(UTR).Result("") Then rMax = .Cells(UTR).Result("")
+                If cMax < .Cells(UTC).Result("") Then cMax = .Cells(UTC).Result("")
+            End With
+        Next
+
+        GetMinMaxRange = True
+        Exit Function
+
+err:
+        GetMinMaxRange = False
     End Function
 
 #End Region

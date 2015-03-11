@@ -18,9 +18,9 @@ Partial Public Class Addin
             Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : InsertText(commandTag)
             Case "btn_intdeint" : MessageBox.Show(commandId) ': IntDeIntCells
             Case "btn_dropdownlist" : MessageBox.Show(commandId) ': LoadfrmSelectFromList
-            Case "btn_gut" : MessageBox.Show(commandId) ': GutT
-            Case "btn_copy" : MessageBox.Show(commandId) ': CopyT
-            Case "btn_paste" : MessageBox.Show(commandId) ': PasteT
+            Case "btn_gut" : GutT()
+            Case "btn_copy" : CopyT()
+            Case "btn_paste" : PasteT()
             Case "btn_deltable" : DelTab()
             Case "btn_delcolumn" : MessageBox.Show(commandId) ': DelCols
             Case "btn_delrow" : MessageBox.Show(commandId) ': DelRows
