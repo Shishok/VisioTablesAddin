@@ -6,8 +6,14 @@ Public Class dlgNewTable
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         strNameTable = txtNameTable.Text
+        If txtCellDefWidth.Text = Trim("") Then txtCellDefWidth.Text = 0
+        If txtCellDefHeight.Text = Trim("") Then txtCellDefHeight.Text = 0
+        If txtTableCusWidth.Text = Trim("") Then txtTableCusWidth.Text = 0
+        If txtTableCusHeight.Text = Trim("") Then txtTableCusHeight.Text = 0
+        Me.Hide()
         Call CreatTable(strNameTable, bytInsertType, nudColumns.Value, nudRows.Value, txtCellDefWidth.Text, _
         txtCellDefHeight.Text, txtTableCusWidth.Text, txtTableCusHeight.Text, ckbDelShape.Checked, True)
+        SaveSettings(1)
         Me.Close()
     End Sub
 
@@ -41,6 +47,7 @@ Public Class dlgNewTable
 
         Call ToolTipfrm()
         bytInsertType = 1
+        SaveSettings(0)
         Call DelShape()
     End Sub
 
@@ -65,6 +72,7 @@ Public Class dlgNewTable
             Next
         End With
         Call DelShape()
+        bytInsertType = 1
     End Sub
 
     Private Sub optPage_CheckedChanged(sender As Object, e As EventArgs) Handles optPage.CheckedChanged
@@ -92,7 +100,7 @@ Public Class dlgNewTable
     Private Sub DelShape()
         With Me
             .ckbDelShape.Enabled = .optInside.Checked
-            .ckbDelShape.Checked = .optInside.Checked
+            '.ckbDelShape.Checked = .optInside.Checked
         End With
     End Sub
 
@@ -121,6 +129,44 @@ Public Class dlgNewTable
     Protected Overrides Sub OnClosed(ByVal e As EventArgs)
         booOpenForm = False
         MyBase.OnClosed(e)
+    End Sub
+
+    Private Sub SaveSettings(arg)
+        Const An As String = "VisioTableAddin", Sc As String = "NewTableWindow"
+        Select Case arg
+            Case 0
+                If GetSetting(AppName:=An, Section:=Sc, Key:="Top") <> "" Then
+                    Me.Top = GetSetting(AppName:=An, Section:=Sc, Key:="Top")
+                    Me.Left = GetSetting(AppName:=An, Section:=Sc, Key:="Left")
+                    txtNameTable.Text = GetSetting(AppName:=An, Section:=Sc, Key:="Name")
+                    nudColumns.Value = GetSetting(AppName:=An, Section:=Sc, Key:="Columns")
+                    nudRows.Value = GetSetting(AppName:=An, Section:=Sc, Key:="Rows")
+                    txtCellDefWidth.Text = GetSetting(AppName:=An, Section:=Sc, Key:="WidthCell")
+                    txtCellDefHeight.Text = GetSetting(AppName:=An, Section:=Sc, Key:="HeightCell")
+                    txtTableCusWidth.Text = GetSetting(AppName:=An, Section:=Sc, Key:="WidthTable")
+                    txtTableCusHeight.Text = GetSetting(AppName:=An, Section:=Sc, Key:="HeightTable")
+                    ckbDelShape.Checked = GetSetting(AppName:=An, Section:=Sc, Key:="DeleteShape")
+                    bytInsertType = GetSetting(AppName:=An, Section:=Sc, Key:="Method")
+                    Select Case bytInsertType
+                        Case 1 : optDefault.Checked = True
+                        Case 2 : optPage.Checked = True
+                        Case 3 : optCustom.Checked = True
+                        Case 4 : optInside.Checked = True
+                    End Select
+                End If
+            Case 1
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Top", Setting:=Me.Top)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Left", Setting:=Me.Left)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Name", Setting:=txtNameTable.Text)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Columns", Setting:=nudColumns.Value)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Rows", Setting:=nudRows.Value)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="WidthCell", Setting:=txtCellDefWidth.Text)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="HeightCell", Setting:=txtCellDefHeight.Text)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="WidthTable", Setting:=txtTableCusWidth.Text)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="HeightTable", Setting:=txtTableCusHeight.Text)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="DeleteShape", Setting:=ckbDelShape.Checked)
+                SaveSetting(AppName:=An, Section:=Sc, Key:="Method", Setting:=bytInsertType)
+        End Select
     End Sub
 
 End Class

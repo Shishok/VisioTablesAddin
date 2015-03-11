@@ -102,6 +102,7 @@ Partial Class dlgNewTable
         Me.optDefault.Size = New System.Drawing.Size(108, 18)
         Me.optDefault.TabIndex = 1
         Me.optDefault.TabStop = True
+        Me.optDefault.Tag = ""
         Me.optDefault.Text = "По умолчанию"
         Me.optDefault.UseVisualStyleBackColor = True
         '
@@ -113,6 +114,7 @@ Partial Class dlgNewTable
         Me.optPage.Name = "optPage"
         Me.optPage.Size = New System.Drawing.Size(126, 18)
         Me.optPage.TabIndex = 2
+        Me.optPage.Tag = ""
         Me.optPage.Text = "По размеру листа"
         Me.optPage.UseVisualStyleBackColor = True
         '
@@ -124,6 +126,7 @@ Partial Class dlgNewTable
         Me.optCustom.Name = "optCustom"
         Me.optCustom.Size = New System.Drawing.Size(104, 18)
         Me.optCustom.TabIndex = 3
+        Me.optCustom.Tag = ""
         Me.optCustom.Text = "Свои размеры"
         Me.optCustom.UseVisualStyleBackColor = True
         '
@@ -135,6 +138,7 @@ Partial Class dlgNewTable
         Me.optInside.Name = "optInside"
         Me.optInside.Size = New System.Drawing.Size(112, 18)
         Me.optInside.TabIndex = 4
+        Me.optInside.Tag = ""
         Me.optInside.Text = "Внутри фигуры"
         Me.optInside.UseVisualStyleBackColor = True
         '
@@ -307,6 +311,7 @@ Partial Class dlgNewTable
         '
         Me.nudColumns.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
         Me.nudColumns.Location = New System.Drawing.Point(271, 75)
+        Me.nudColumns.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
         Me.nudColumns.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
         Me.nudColumns.Name = "nudColumns"
         Me.nudColumns.Size = New System.Drawing.Size(60, 22)

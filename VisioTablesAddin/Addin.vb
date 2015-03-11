@@ -9,13 +9,13 @@ Partial Public Class Addin
         Select Case commandId
             Case "btn_newcolumnbefore", "btn_newcolumnafter" : MessageBox.Show(commandTag) ': AddColumns (Button.Tag)
             Case "btn_newrowbefore", "btn_newrowafter" : MessageBox.Show(commandTag) ': AddRows (Button.Tag)
-            Case "btn_onwidth" : MessageBox.Show(commandId) ': OnWidth
-            Case "btn_onheight" : MessageBox.Show(commandId) ': OnHeight
-            Case "btn_onwidthheight" : MessageBox.Show(commandId) ': AllOnText
+            Case "btn_onwidth" : AllAlignOnText(True, False, 0, 0, True, True)
+            Case "btn_onheight" : AllAlignOnText(False, True, 0, 0, True, True)
+            Case "btn_onwidthheight" : AllAlignOnText(True, True, 0, 0, False, False)
             Case "btn_newtable" : CreatingTable.Load_dlgNewTable()
-            Case "btn_seltable", "btn_selrange", "btn_selcolumn", "btn_selrow" : MessageBox.Show(commandTag) ': SelCell (Button.Tag)
-            Case "btn_seltxt", "btn_selnum", "btn_selnotnum", "btn_seldate", "btn_selempty", "btn_selnotempty", "btn_selinvert" : MessageBox.Show(commandTag) ': SelInContent (Button.Tag)
-            Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : MessageBox.Show(commandTag) ': InsertText (Button.Tag)
+            Case "btn_seltable", "btn_selrange", "btn_selcolumn", "btn_selrow" : SelCell(commandTag)
+            Case "btn_seltxt", "btn_selnum", "btn_selnotnum", "btn_seldate", "btn_selempty", "btn_selnotempty", "btn_selinvert" : SelInContent(commandTag)
+            Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : InsertText(commandTag)
             Case "btn_intdeint" : MessageBox.Show(commandId) ': IntDeIntCells
             Case "btn_dropdownlist" : MessageBox.Show(commandId) ': LoadfrmSelectFromList
             Case "btn_gut" : MessageBox.Show(commandId) ': GutT
@@ -26,19 +26,16 @@ Partial Public Class Addin
             Case "btn_delrow" : MessageBox.Show(commandId) ': DelRows
             Case "btn_intellinput" : MessageBox.Show(commandId) ': LoadfrmIntellInput
             Case "btn_seldialog" : MessageBox.Show(commandId) ': LoadSelectfrmWorks
+            Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
             Case "btn_size" : MessageBox.Show(commandId) ': LoadSizefrmWorks
             Case "btn_autosize" : MessageBox.Show(commandId) ': LoadAutoSizefrmWorks
             Case "btn_fromfile" : MessageBox.Show(commandId) ': LoadfrmFromFile
-            Case "btn_altlinesrow", "btn_altlinescol" : MessageBox.Show(commandTag) ': AlternatLines (Button.Tag)
+            Case "btn_altlinesrow", "btn_altlinescol" : AlternatLines(commandTag)
             Case "btn_moredialog" : MessageBox.Show(commandId) ': LoadMorefrmWorks
             Case "btn_extdata" : MessageBox.Show(commandId) ': LoadfrmLinkData
-            Case "btn_convert1Shape" : MessageBox.Show(commandId) ': ConvertInto1Shape
+            Case "btn_convert1Shape" : ConvertInto1Shape()
             Case "btn_lockpicture" : MessageBox.Show(commandId) ': LoadfrmPicture
-            Case "btn_help" : Call InitArrShapeID(vsoApp.ActiveWindow.Selection(1).Cells("User.TableName").ResultStr("")) ': CallHelp
-                MessageBox.Show(ArrShapeID(0, 0))
-                MessageBox.Show(UBound(ArrShapeID, 1))
-                MessageBox.Show(UBound(ArrShapeID, 2))
-                MessageBox.Show(Application.ProductVersion)
+            Case "btn_help" : MessageBox.Show(commandId) ': CallHelp
         End Select
     End Sub
 

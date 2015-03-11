@@ -17,6 +17,7 @@ Public Class VisioTable
 #End Region
 
 #Region "List Of Variables"
+
     Private vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Private winObj As Visio.Window = vsoApp.ActiveWindow
     Private pagObj As Visio.Page = vsoApp.ActivePage
@@ -27,12 +28,16 @@ Public Class VisioTable
     Private shape_TvR As Visio.Shape
     Private shape_ClW As Visio.Shape
 
+    Private sngTW As Double = 0
+    Private sngTH As Double = 0
+    Private sngTX As Double = 0
+    Private sngTY As Double = 0
+
     Private arrNewID() As Integer
     Private CountID As Integer = 0
 
-    Private Const UTN = "User.TableName"
-    Private Const UTR = "User.TableRow"
-    Private Const UTC = "User.TableCol"
+    Dim VarCell As Byte = 0
+
     Private Const PX = "PinX"
     Private Const PY = "PinY"
     Private Const WI = "Width"
@@ -53,19 +58,20 @@ Public Class VisioTable
     Private Const P50 = "50%"
     Private Const GT = "GUARD(TRUE)"
     Private Const G1 = "Guard(1)"
+
 #End Region
 
     Public Sub New(ByVal a As String, ByVal b As Byte, ByVal c As Integer, ByVal d As Integer, ByVal e As Single, _
                    ByVal f As Single, ByVal g As Single, ByVal h As Single, ByVal i As Boolean, ByVal j As Boolean)
 
         strNameTable = IIf(Trim(a) = "", "TbL", a)
-        bytInsertType = IIf(b > 0 Or b < 5, b, 1)
-        intColumnsCount = IIf(c > 0 Or c < 1001, c, 5)
-        intRowsCount = IIf(c > 0 Or c < 1001, c, 5)
-        sngWidthCells = IIf(e < 1, 20, e)
-        sngHeightCells = IIf(f < 1, 10, f)
-        sngWidthTable = IIf(g < 1, 200, g)
-        sngHeightTable = IIf(h < 1, 100, h)
+        bytInsertType = IIf(b < 1 Or b > 4, 1, b)
+        intColumnsCount = IIf(c < 1 Or c > 1000, 5, c)
+        intRowsCount = IIf(d < 1 Or d > 1000, 5, d)
+        sngWidthCells = IIf(e = 0 Or e < 0, vsoApp.FormatResult(20, "mm", 64, "0.0000"), e)
+        sngHeightCells = IIf(f = 0 Or f < 0, vsoApp.FormatResult(10, "mm", 64, "0.0000"), f)
+        sngWidthTable = IIf(g = 0 Or g < 0, vsoApp.FormatResult(100, "mm", 64, "0.0000"), g)
+        sngHeightTable = IIf(h = 0 Or h < 0, vsoApp.FormatResult(50, "mm", 64, "0.0000"), h)
         booDeleteTargetShape = i
         booVisibleProgressBar = j
 
@@ -75,8 +81,7 @@ Public Class VisioTable
         On Error GoTo errD
 
         Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
-        Dim TypeCell As String, VarCell As Byte, sngTW As Double, sngTH As Double
-        Dim sngTX As Double, sngTY As Double
+        Dim TypeCell As String
         Dim ThemeC As String, ThemeE As String
         Dim jGT As Integer = 0
         Dim iGT As Integer = 0
@@ -88,15 +93,6 @@ Public Class VisioTable
         If ThemeC <> "visThemeNone" Then pagObj.ThemeColors = "visThemeNone"
         ThemeE = pagObj.ThemeEffects
         If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
-
-        ' Добавление и изменение свойств слоев
-        vsoLayerTitles = pagObj.Layers.Add("Titles_Tables")
-        vsoLayerCells = pagObj.Layers.Add("Cells_Tables")
-        If vsoLayerTitles.CellsC(4).Result("") = 0 Then vsoLayerTitles.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
-        If vsoLayerTitles.CellsC(7).Result("") = 1 Then vsoLayerTitles.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
-        If vsoLayerCells.CellsC(4).Result("") = 0 Then vsoLayerCells.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
-        If vsoLayerCells.CellsC(7).Result("") = 1 Then vsoLayerCells.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
-        vsoLayerTitles.CellsC(5).FormulaU = "GUARD(0)" ' Слой всегда не печатаемый
 
         If bytInsertType = 2 Then
             Dim sngPW As Single, sngPH As Single, sngPLM As Single, sngPRM As Single, sngPTM As Single, sngPBM As Single
@@ -139,12 +135,24 @@ Public Class VisioTable
 
         Call RecUndo("Создание таблицы...")
 
+        ' Добавление и изменение свойств слоев
+        vsoLayerTitles = pagObj.Layers.Add("Titles_Tables")
+        vsoLayerCells = pagObj.Layers.Add("Cells_Tables")
+        If vsoLayerTitles.CellsC(4).Result("") = 0 Then vsoLayerTitles.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
+        If vsoLayerTitles.CellsC(7).Result("") = 1 Then vsoLayerTitles.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
+        If vsoLayerCells.CellsC(4).Result("") = 0 Then vsoLayerCells.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
+        If vsoLayerCells.CellsC(7).Result("") = 1 Then vsoLayerCells.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
+        vsoLayerTitles.CellsC(5).FormulaU = "GUARD(0)" ' Слой всегда не печатаемый
+
+        'pagObj.CellsSRC(visSectionObject, visRowRulerGrid, visXRulerOrigin).FormulaU = "0 mm"
+        'pagObj.CellsSRC(visSectionObject, visRowRulerGrid, visXGridOrigin).FormulaU = "0 mm"
+
         vsoApp.ShowChanges = False
 
         TypeCell = strNameTable : VarCell = 3 'Вставка 1 ячейки
         NewShape(TypeCell)
         shpObj = shape_TbL
-        DrawOfCells(VarCell, sngTW, sngTH, sngTX, sngTY, iGT, jGT)
+        DrawOfCells(iGT, jGT)
         vsoLayerTitles.Add(shpObj, 1)
 
         TypeCell = "ThC" : VarCell = 2 'Вставка 1 ряда таблицы
@@ -155,7 +163,7 @@ Public Class VisioTable
             Else
                 shpObj = shape_ThC.Duplicate
             End If
-            DrawOfCells(VarCell, sngTW, sngTH, sngTX, sngTY, iGT, jGT)
+            DrawOfCells(iGT, jGT)
             vsoLayerTitles.Add(shpObj, 1)
         Next
 
@@ -167,7 +175,7 @@ Public Class VisioTable
             Else
                 shpObj = shape_TvR.Duplicate
             End If
-            DrawOfCells(VarCell, sngTW, sngTH, sngTX, sngTY, iGT, jGT)
+            DrawOfCells(iGT, jGT)
             vsoLayerTitles.Add(shpObj, 1)
         Next
 
@@ -183,7 +191,7 @@ Public Class VisioTable
                 Else
                     shpObj = shape_ClW.Duplicate
                 End If
-                DrawOfCells(VarCell, sngTW, sngTH, sngTX, sngTY, iGT, jGT)
+                DrawOfCells(iGT, jGT)
                 vsoLayerCells.Add(shpObj, 0)
             Next
         Next
@@ -200,7 +208,7 @@ Public Class VisioTable
         frm.Close()
         'If booVisibleProgressBar Then Unload frmWait
 
-        If booDeleteTargetShape Then
+        If bytInsertType = 4 AndAlso booDeleteTargetShape Then
             If pagObj.Shapes.ItemFromID(MemSHID).Cells(LD).Result("") = 0 Then pagObj.Shapes.ItemFromID(MemSHID).DeleteEx(0)
         End If
 
@@ -215,7 +223,7 @@ errD:
         MsgBox("CreatTable-Class" & vbNewLine & Err.Description)
     End Sub
 
-    Private Sub DrawOfCells(VarCell, sngTW, sngTH, sngTX, sngTY, ByVal iGT, ByVal jGT)
+    Private Sub DrawOfCells(ByVal iGT, ByVal jGT)
         On Error GoTo errD
         With pagObj
             CountID = CountID + 1
@@ -298,7 +306,6 @@ errD:
                         .Cells("Char.Color").FormulaForceU = strThGu255
                 End Select
 
-                'Для всех ячеек----------------------------------------------------------------
                 .Cells(CA).FormulaU = GU & "0 deg)"
             End With
         End With
@@ -308,6 +315,9 @@ errD:
     End Sub
 
     Private Sub NewShape(TypeCell)
+
+        ' Вместо LineFormat, FillFormat - ссылка на TbL
+
         On Error GoTo errD
         ' Подпроцедура создания шейпов таблицы и настройка их
         Dim vsoShape As Visio.Shape
@@ -320,14 +330,10 @@ errD:
             ' Добавить User секцию для всех ячеек
             AddSectionNum = 242
             intArrNum = {0, 1}
-            'arrRowData =Array("TableName", "Name(0)", """Таблица"""), _
-            '    Array("TableCol", """""", """Столбец"""), _
-            '    Array("TableRow", """""", """Строка"""))
             arrRowData = {{"TableName", "Name(0)", """Таблица"""}, _
                           {"TableCol", """""", """Столбец"""}, _
                           {"TableRow", """""", """Строка"""}}
             AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
-            '------------------------------------------------------------------
 
             .Cells("LocPinX").FormulaU = "Guard(Width*0.5)"
             .Cells("LocPinY").FormulaU = "Guard(Height*0.5)"
@@ -338,6 +344,7 @@ errD:
             .Cells("LockDelete").FormulaU = G1
             .Cells("LockRotate").FormulaU = G1
             .CellsSRC(1, 16, 1).FormulaU = "char(169)&char(32)&char(82)&char(79)&char(77)&char(65)&char(78)&char(79)&char(86)&char(32)&char(86)&char(54)&char(46)&char(48)"
+
             Select Case TypeCell
                 Case strNameTable, "ThC", "TvR"
                     ' Настройка форматов
@@ -352,31 +359,9 @@ errD:
 
             Select Case TypeCell
                 Case "ClW" ' Рабочая ячейка
-                    'AddSectionNum = 240 ' Добавить Action секцию
-                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    'arrRowData = {{"SelectWindow", "RUNMACRO(""MainModule.LoadSelectfrmWorks"",""Таблица_V"")", """Выде&лить...""", 2035, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"InsertWindow", "RUNMACRO(""MainModule.LoadInsertfrmWorks"",""Таблица_V"")", """Вставить...""", 22, 2, 0, "FALSE", "FALSE"}, _
-                    '    {"SizeWindow", "RUNMACRO(""MainModule.LoadSizefrmWorks"",""Таблица_V"")", """Разм&еры...""", 1605, 3, 0, "FALSE", "TRUE"}, _
-                    '    {"AutoSizeWindow", "RUNMACRO(""MainModule.LoadAutoSizefrmWorks"",""Таблица_V"")", """Авторазмер...""", 583, 4, 0, "FALSE", "FALSE"}, _
-                    '    {"MoreWindow", "RUNMACRO(""MainModule.LoadMorefrmWorks"",""Таблица_V"")", """Дополнительно...""", 586, 5, 0, "FALSE", "FALSE"}, _
-                    '    {"GutT", "RUNMACRO(""MainModule.GutT"",""Таблица_V"")", """Вырезать текст из ячеек""", 2046, 6, 0, "FALSE", "TRUE"}, _
-                    '    {"CopyT", "RUNMACRO(""MainModule.CopyT"",""Таблица_V"")", """Копировать текст из ячеек""", 2045, 7, 0, "FALSE", "FALSE"}, _
-                    '    {"PasteT", "RUNMACRO(""MainModule.PasteT"",""Таблица_V"")", """Вставить текст в ячейки""", 22, 8, 0, "FALSE", "FALSE"}, _
-                    '    {"IntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Объединить ячейки""", 402, 9, 0, "FALSE", "TRUE"}, _
-                    '    {"DeIntCells", "RUNMACRO(""MainModule.IntDeIntCells"",""Таблица_V"")", """Отменить объединение""", 402, 9, 0, "TRUE", "TRUE"}}
-                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
                     shape_ClW = vsoShape
 
                 Case "TvR" ' УЯ строки
-                    'AddSectionNum = 240 ' Добавить Action секцию
-                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    'arrRowData = {{"AddRowTop", "RUNMACRO(""MainModule.AddRowBefore"",""Таблица_V"")", """&Добавить строку выше""", 296, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"AddRowBottom", "RUNMACRO(""MainModule.AddRowAfter"",""Таблица_V"")", """&Добавить строку ниже""", 296, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"SelectRow", "RUNMACRO(""MainModule.SelRows"",""Таблица_V"")", """Выде&лить строку""", 801, 2, 0, "FALSE", "FALSE"}, _
-                    '    {"AlignOnTextHeight", "RUNMACRO(""MainModule.OnHeight"",""Таблица_V"")", """По высоте &текста""", 541, 3, 0, "FALSE", "FALSE"}, _
-                    '    {"DeleteROw", "RUNMACRO(""MainModule.DelRows"",""Таблица_V"")", """&Удалить строку""", 292, 4, 0, "FALSE", "True"}}
-                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
-
                     AddSectionNum = 9 ' Добавить Control секцию
                     intArrNum = {0, 1, 2, 3, 6, 8} ' Сделать не меньше нуля
                     arrRowData = {{"ControlHeight", "GUARD(Width*0)", "Height*0", "GUARD(Controls.ControlHeight)", "GUARD(Controls.ControlHeight.Y)", "False", """Изменение высоты ячейки"""}}
@@ -388,15 +373,6 @@ errD:
                     shape_TvR = vsoShape
 
                 Case "ThC" ' УЯ столбца
-                    'AddSectionNum = 240 ' Добавить Action секцию
-                    'intArrNum = {3, 0, 15, 16, 4, 7, 8}
-                    'arrRowData = {{"AddColumnLeft", "RUNMACRO(""MainModule.AddColBefore"",""Таблица_V"")", """&Добавить столбец слева""", 297, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"AddColumnRight", "RUNMACRO(""MainModule.AddColAfter"",""Таблица_V"")", """&Добавить столбец справа""", 297, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"SelectColumn", "RUNMACRO(""MainModule.SelCols"",""Таблица_V"")", """Выде&лить столбец""", 802, 2, 0, "FALSE", "FALSE"}, _
-                    '    {"AlignOnTextWidth", "RUNMACRO(""MainModule.OnWidth"",""Таблица_V"")", """По ширине &текста""", 542, 3, 0, "FALSE", "FALSE"}, _
-                    '    {"DeleteColumn", "RUNMACRO(""MainModule.DelCols"",""Таблица_V"")", """&Удалить столбец""", 294, 4, 0, "FALSE", "True"}}
-                    'AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
-
                     AddSectionNum = 9 ' Добавить Control секцию
                     intArrNum = {0, 1, 2, 3, 6, 8} ' Сделать не меньше нуля
                     arrRowData = {{"ControlWidth", "Width*1", "GUARD(Height)", "GUARD(Controls.ControlWidth)", "GUARD(Controls.ControlWidth.Y)", "False", """Изменение ширины ячейки"""}}
@@ -412,15 +388,6 @@ errD:
                     arrRowData = {{"Titles", "SETF(GetRef(Actions.Titles.Checked),NOT(Actions.Titles.Checked))", """П&оказывать заголовки""", """""", 5, 1, "FALSE", "TRUE"}, _
                         {"Comments", "SETF(GetRef(Actions.Comments.Checked),NOT(Actions.Comments.Checked))", """Показывать коммента&рии""", """""", 6, 1, "FALSE", "FALSE"}, _
                         {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}}
-                    'arrRowData = {{"NewTable", "RUNMACRO(""MainModule.LoadfrmAddTable"",""Таблица_V"")", """Соз&дать таблицу""", 333, 1, 0, "FALSE", "FALSE"}, _
-                    '    {"SelectTable", "RUNMACRO(""MainModule.SelTable"",""Таблица_V"")", """Выде&лить таблицу""", 803, 2, 0, "FALSE", "FALSE"}, _
-                    '    {"LockPicture", "RUNMACRO(""MainModule.LoadfrmPicture"",""Таблица_V"")", """Закрепить &фигуры""", 954, 3, 0, "FALSE", "FALSE"}, _
-                    '    {"LinkData", "RUNMACRO(""MainModule.LoadfrmLinkData"",""Таблица_V"")", """Вне&шние данные""", 4143, 4, 0, "FALSE", "FALSE"}, _
-                    '    {"Titles", "SETF(GetRef(Actions.Titles.Checked),NOT(Actions.Titles.Checked))", """П&оказывать заголовки""", """""", 5, 1, "FALSE", "TRUE"}, _
-                    '    {"Comments", "SETF(GetRef(Actions.Comments.Checked),NOT(Actions.Comments.Checked))", """Показывать коммента&рии""", """""", 6, 1, "FALSE", "FALSE"}, _
-                    '    {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}, _
-                    '    {"DeleteTable", "RUNMACRO(""MainModule.DelTab"",""Таблица_V"")", """&Удалить таблицу""", 2487, 8, 0, "FALSE", "TRUE"}, _
-                    '    {"Help", "RUNMACRO(""MainModule.CallHelp"",""Таблица_V"")", """Справка""", 3998, 8, 0, "FALSE", "FALSE"}}
                     AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
 
                     .Cells("LineColor").FormulaU = "GUARD(IF(Actions.Titles.Checked=1,THEMEGUARD(RGB(191,191,191)),THEMEGUARD(RGB(255,255,255))))"
@@ -447,13 +414,11 @@ errD:
         Dim intI As Byte, intJ As Byte
 
         With vsoShape
-            'If .SectionExists(AddSectionNum, 0) Then .DeleteSection(AddSectionNum)
             .AddSection(AddSectionNum)
             For intI = 0 To UBound(arrRowData)
                 .AddRow(AddSectionNum, -2, 0)
                 .CellsSRC(AddSectionNum, intI, 0).RowNameU = arrRowData(intI, 0)
                 For intJ = 0 To UBound(intArrNum)
-                    'If AddSectionNum = 9 Then MessageBox.Show(arrRowData(intI, intJ + 1)) ' Удалить потом
                     .CellsSRC(AddSectionNum, intI, intArrNum(intJ)).FormulaU = arrRowData(intI, intJ + 1)
                 Next
             Next
@@ -462,6 +427,5 @@ errD:
 errD:
         MsgBox("AddSections" & vbNewLine & Err.Description)
     End Sub
-
 
 End Class
