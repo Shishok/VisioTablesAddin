@@ -74,21 +74,216 @@ Module CreatingTable
     End Sub
 
     Public Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
-
-        On Error GoTo errD
-
         Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
         NewTable.CreatTable()
         NewTable = Nothing
-
-        Exit Sub
-errD:
-        MessageBox.Show("CreatTable" & vbNewLine & Err.Description)
     End Sub
 
 #End Region
 
 #Region "Friend Sub"
+
+    Sub AddColumns(arg As Byte)  ' Вставка нового столбца. Основная процедура
+        'arg = 0 вставка столбца перед выделенным, arg = 1 вставка столбца после выделенного
+
+        Call CheckSelCells()
+        Call ClearControlCells(UTC)
+        If winObj.Selection.Count = 0 Then Exit Sub
+
+        shpsObj = winObj.Page.Shapes
+
+        Dim shObj As Visio.Shape, vs As Visio.Selection, vsoDups As Visio.Selection, i As Integer, j As Integer
+        Dim iAll As Integer, nCol As Integer, NTNew As String, strF As String
+
+        shObj = winObj.Selection(1)
+
+        Call InitArrShapeID(NT) : winObj.DeselectAll()
+
+        Call PropLayers(1)
+
+        Call SelectCells(shObj.Cells(UTC).Result(""), shObj.Cells(UTC).Result(""), 0, UBound(ArrShapeID, 2))
+
+        vs = winObj.Selection
+        iAll = shpsObj.Item(NT).Cells(UTC).Result("")
+        nCol = shObj.Cells(UTC).Result("")
+
+        Call RecUndo("Добавить столбец")
+        vs.Duplicate() : vsoDups = winObj.Selection
+
+        For i = 2 To vsoDups.Count
+            With vsoDups(i)
+                If Not .Characters.IsField Then .Characters.Text = ""
+                .Cells("Comment").FormulaForceU = "=Guard(IF(" & NT & "!Actions.Comments.Checked=1," & "User.TableCol.Prompt&"" ""&User.TableCol&CHAR(10)&User.TableRow.Prompt&"" ""&User.TableRow" & "," & """""" & "))"
+                If InStr(1, .Cells(WI).FormulaU, "SUM") <> 0 Then
+                    .Cells(LD).FormulaForceU = 0
+                    .Delete()
+                End If
+            End With
+        Next
+
+        NTNew = vsoDups(1).Name
+
+        If arg = 0 Then   ' Вставка столбца перед выделенным
+            With vs(1)
+                .Cells(PX).FormulaForceU = GU & NTNew & "!PinX+(" & NTNew & "!Width/2)+(Width/2))"
+            End With
+            For i = nCol To UBound(ArrShapeID, 1) ' Перенумерация управляющих ячеек
+                shpsObj.ItemFromID(ArrShapeID(i, 0)).Cells(UTC).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(i, 0)).Cells(UTC).Result("") + 1 & ")"
+            Next
+
+        ElseIf arg = 1 Then  ' Вставка столбца после выделенного
+            With vsoDups(1)
+                .Cells(PX).FormulaForceU = GU & vs(1).Name & "!PinX+(" & vs(1).Name & "!Width/2)+(Width/2))"
+                .Cells(UTC).FormulaForceU = GU & .Cells(UTC).Result("") + 1 & ")"
+            End With
+            If nCol <> shpsObj.Item(NT).Cells(UTC).Result("") Then
+                shpsObj.ItemFromID(ArrShapeID(vs(1).Cells(UTC).Result("") + 1, 0)).Cells(PX).FormulaForceU = GU & vsoDups(1).Name & "!PinX+(" & vsoDups(1).Name & "!Width/2)+(Width/2))"
+                For i = nCol + 1 To UBound(ArrShapeID, 1) ' Перенумерация управляющих ячеек
+                    shpsObj.ItemFromID(ArrShapeID(i, 0)).Cells(UTC).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(i, 0)).Cells(UTC).Result("") + 1 & ")"
+                Next
+            End If
+        End If
+
+        With shpsObj
+            .Item(NT).Cells(UTC).FormulaForceU = "GUARD(" & iAll + 1 & ")"
+            .Item(NTNew).Cells("Controls.ControlWidth").FormulaForceU = "Width*1"
+            .Item(NTNew).SendToBack()
+
+            If vsoDups.Count <> iAll + 1 Then ' Определение объединенных ячеек и их обработка
+                For j = 1 To UBound(ArrShapeID, 1)
+                    For i = 1 To UBound(ArrShapeID, 2)
+                        If ArrShapeID(j, i) <> 0 Then
+                            With .ItemFromID(ArrShapeID(j, i))
+                                If InStr(1, .Cells(WI).FormulaU, "SUM", 1) <> 0 Then
+                                    If InStr(1, .Cells(WI).FormulaU, vs(1).Name & "!", 1) <> 0 Then
+                                        If arg = 0 Then
+                                            .Cells(WI).FormulaForceU = Replace$(.Cells(WI).FormulaU, vs(1).Name & "!Width", NTNew & "!Width" & "," & vs(1).Name & "!Width", 1)
+                                            strF = Replace$(.Cells(PX).FormulaU, vs(1).Name & "!PinX-", NTNew & "!PinX-", 1)
+                                            strF = Replace$(strF, vs(1).Name & "!Width/2", NTNew & "!Width/2", 1)
+                                            .Cells(PX).FormulaForceU = Replace$(strF, vs(1).Name & "!Width", NTNew & "!Width" & "," & vs(1).Name & "!Width", 1)
+                                            .Cells(UTC).FormulaForceU = Replace$(.Cells(UTC).FormulaU, vs(1).Name & "!", NTNew & "!", 1)
+                                        End If
+                                        If arg = 1 Then
+                                            .Cells(WI).FormulaForceU = Replace$(.Cells(WI).FormulaU, vs(1).Name & "!Width", NTNew & "!Width" & "," & vs(1).Name & "!Width", 1)
+                                            .Cells(PX).FormulaForceU = Replace$(.Cells(PX).FormulaU, vs(1).Name & "!Width,", vs(1).Name & "!Width" & "," & NTNew & "!Width,", 1)
+                                            .Cells(PX).FormulaForceU = Replace$(.Cells(PX).FormulaU, vs(1).Name & "!Width)", vs(1).Name & "!Width" & "," & NTNew & "!Width)", 1)
+                                        End If
+                                    End If
+                                End If
+                            End With
+                        End If
+                    Next
+                Next
+            End If
+        End With
+
+        Call RecUndo("0")
+        On Error Resume Next
+        winObj.Selection = vsoDups
+        Call PropLayers(0)
+
+    End Sub
+
+    Sub AddRows(arg As Byte) ' Вставка новой строки. Основная процедура
+        'arg = 0 вставка строки перед выделенной, arg = 1 вставка строки после выделенной
+
+        Call CheckSelCells()
+        Call ClearControlCells(UTR)
+        If winObj.Selection.Count = 0 Then Exit Sub
+
+        shpsObj = winObj.Page.Shapes
+
+        Dim shObj As Visio.Shape, vs As Visio.Selection, vsoDups As Visio.Selection, i As Integer, j As Integer
+        Dim iAll As Integer, nRow As Integer, NTNew As String, strF As String
+
+        shObj = winObj.Selection(1)
+
+        Call InitArrShapeID(NT) : winObj.DeselectAll()
+
+        Call PropLayers(1)
+
+        Call SelectCells(0, UBound(ArrShapeID, 1), shObj.Cells(UTR).Result(""), shObj.Cells(UTR).Result(""))
+
+        vs = winObj.Selection
+        iAll = shpsObj.Item(NT).Cells(UTR).Result("")
+        nRow = shObj.Cells(UTR).Result("")
+
+        Call RecUndo("Добавить строку")
+        vs.Duplicate() : vsoDups = winObj.Selection
+
+        For i = 2 To vsoDups.Count
+            With vsoDups(i)
+                If Not .Characters.IsField Then .Characters.Text = ""
+                .Cells("Comment").FormulaForceU = "=Guard(IF(" & NT & "!Actions.Comments.Checked=1," & "User.TableCol.Prompt&"" ""&User.TableCol&CHAR(10)&User.TableRow.Prompt&"" ""&User.TableRow" & "," & """""" & "))"
+                If InStr(1, .Cells(HE).FormulaU, "SUM") <> 0 Then
+                    .Cells(LD).FormulaForceU = 0
+                    .Delete()
+                End If
+            End With
+        Next
+
+        NTNew = vsoDups(1).Name
+
+        If arg = 0 Then ' Вставка строки перед выделенной
+            With vs(1)
+                .Cells(PY).FormulaForceU = GU & NTNew & "!PinY-(" & NTNew & "!Height/2)-(Height/2))"
+            End With
+            For i = nRow To UBound(ArrShapeID, 2) ' Перенумерация управляющих ячеек
+                shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(UTR).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(UTR).Result("") + 1 & ")"
+            Next
+
+        ElseIf arg = 1 Then ' Вставка строки после выделенной
+            With vsoDups(1)
+                .Cells(PY).FormulaForceU = GU & vs(1).Name & "!PinY-(" & vs(1).Name & "!Height/2)-(Height/2))"
+                .Cells(UTR).FormulaForceU = GU & .Cells(UTR).Result("") + 1 & ")"
+            End With
+            If nRow <> shpsObj.Item(NT).Cells(UTR).Result("") Then
+                shpsObj.ItemFromID(ArrShapeID(0, vs(1).Cells(UTR).Result("") + 1)).Cells(PY).FormulaForceU = GU & vsoDups(1).Name & "!PinY-(" & vsoDups(1).Name & "!Height/2)-(Height/2))"
+                For i = nRow + 1 To UBound(ArrShapeID, 2) ' Перенумерация управляющих ячеек
+                    shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(UTR).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(UTR).Result("") + 1 & ")"
+                Next
+            End If
+        End If
+
+        With shpsObj
+            .Item(NT).Cells(UTR).FormulaForceU = "GUARD(" & iAll + 1 & ")"
+            .Item(NTNew).Cells("Controls.ControlHeight").FormulaForceU = "Guard(Height*0)"
+            .Item(NTNew).SendToBack()
+
+            If vsoDups.Count <> iAll + 1 Then ' Определение объединенных ячеек и их обработка
+                For j = 1 To UBound(ArrShapeID, 1)
+                    For i = 1 To UBound(ArrShapeID, 2)
+                        If ArrShapeID(j, i) <> 0 Then
+                            With .ItemFromID(ArrShapeID(j, i))
+                                If InStr(1, .Cells(HE).FormulaU, "SUM", 1) <> 0 Then
+                                    If InStr(1, .Cells(HE).FormulaU, vs(1).Name & "!", 1) <> 0 Then
+                                        If arg = 0 Then
+                                            .Cells(HE).FormulaForceU = Replace$(.Cells(HE).FormulaU, vs(1).Name & "!Height", NTNew & "!Height" & "," & vs(1).Name & "!Height", 1)
+                                            strF = Replace$(.Cells(PY).FormulaU, vs(1).Name & "!PinY+", NTNew & "!PinY+", 1)
+                                            strF = Replace$(strF, vs(1).Name & "!Height/2", NTNew & "!Height/2", 1)
+                                            .Cells(PY).FormulaForceU = Replace$(strF, vs(1).Name & "!Height", NTNew & "!Height" & "," & vs(1).Name & "!Height", 1)
+                                            .Cells(UTR).FormulaForceU = Replace$(.Cells(UTR).FormulaU, vs(1).Name & "!", NTNew & "!", 1)
+                                        End If
+                                        If arg = 1 Then
+                                            .Cells(HE).FormulaForceU = Replace$(.Cells(HE).FormulaU, vs(1).Name & "!Height", vs(1).Name & "!Height" & "," & NTNew & "!Height", 1)
+                                            .Cells(PY).FormulaForceU = Replace$(.Cells(PY).FormulaU, vs(1).Name & "!Height,", vs(1).Name & "!Height" & "," & NTNew & "!Height,", 1)
+                                            .Cells(PY).FormulaForceU = Replace$(.Cells(PY).FormulaU, vs(1).Name & "!Height)", vs(1).Name & "!Height" & "," & NTNew & "!Height)", 1)
+                                        End If
+                                    End If
+                                End If
+                            End With
+                        End If
+                    Next
+                Next
+            End If
+        End With
+
+        Call RecUndo("0")
+        On Error Resume Next
+        winObj.Selection = vsoDups
+        Call PropLayers(0)
+
+    End Sub
 
     Sub AllAlignOnText(booOnWidth As Boolean, booOnHeight As Boolean, bytNothingOrAutoOrLockColumns As Byte, _
         bytNothingOrAutoOrLockRows As Byte, booOnlySelectedColumns As Boolean, booOnlySelectedRow As Boolean)
@@ -269,18 +464,6 @@ err:
 
     End Sub
 
-    Sub ClearControlCells(arg)   ' Deselect УЯ столбцов или строк
-        Dim shObj As Visio.Shape
-
-        With winObj
-            For Each shObj In .Selection
-                If shObj.Cells(arg).Result("") = 0 Then .Select(shObj, 1)
-                If shObj.Name = NT Then .Select(shObj, 1)
-            Next
-        End With
-
-    End Sub
-
     Sub ConvertInto1Shape() ' Преобразование таблицы в одну сгруппированную фигуру
         If Not CheckSelCells() Then Exit Sub
 
@@ -334,6 +517,25 @@ err:
 
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
+    End Sub
+
+    Sub DelColRows(bytColsOrRows As Byte) ' Удаление столбцов/строк из активной таблицы из шейпа. Предварительная процедура
+        If Not CheckSelCells() Then Exit Sub
+
+        shpsObj = winObj.Page.Shapes
+        Dim vsoSel As Visio.Selection = winObj.Selection, shObj As Visio.Shape
+
+        For Each shObj In vsoSel
+            Call InitArrShapeID(NT)
+            If InStr(1, shObj.Name, "Sheet", 1) = 0 Then
+                Select Case bytColsOrRows
+                    Case 0 : Call DeleteColumn(shObj)
+                    Case 1 : Call DeleteRow(shObj)
+                End Select
+            End If
+        Next
+
+        vsoSel = Nothing
     End Sub
 
     Sub DelTab() ' Удаление активной таблицы. Основная процедура
@@ -395,6 +597,28 @@ errD:
         For Each shpObj In vsoSelection
             shpObj.Characters.Text = ""
         Next
+
+        Call RecUndo("0")
+    End Sub
+
+    Sub IntDeIntCells() ' Объединение/Разъединение ячеек из шейпа. Предварительная процедура
+        If Not CheckSelCells() Then Exit Sub
+        Call ClearControlCells(UTC) : Call ClearControlCells(UTR)
+
+        If Not CheckSelCells() Then Exit Sub
+
+        Dim shObj As Visio.Shape, vsoSel As Visio.Selection = winObj.Selection
+        shpsObj = winObj.Page.Shapes
+        shObj = vsoSel(1)
+        Call InitArrShapeID(NT)
+
+        If InStr(1, shObj.Cells("Width").FormulaU, "SUM", 1) <> 0 Or InStr(1, shObj.Cells("Height").FormulaU, "Sum", 1) <> 0 Then
+            Call RecUndo("Разъединить ячейки")
+            Call DeIntegrateCells(shObj)
+        Else
+            Call RecUndo("Объединить ячейки")
+            Call IntegrateCells()
+        End If
 
         Call RecUndo("0")
     End Sub
@@ -535,25 +759,6 @@ err:
         Call RecUndo("0")
     End Sub
 
-    Sub PropLayers(arg As Byte) ' Включение/выключение видимости и блокировки слоев на время выполнения кода - Titles_Tables и Cells_Tables
-
-        With winObj.Page.Layers
-            Select Case arg
-                Case 1
-                    LayerVisible = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaU
-                    '            LayerVisible1 = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0) + 2).CellsC(4).FormulaU
-                    LayerLock = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(7).FormulaU
-                    '            LayerLock1 = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0) + 2).CellsC(7).FormulaU
-                    If LayerVisible <> 1 Then .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaForceU = "1"
-                    If LayerLock <> 0 Then .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).Result("").CellsC(7).FormulaForceU = "0"
-                Case 0
-                    .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaForceU = LayerVisible
-                    .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(7).FormulaForceU = LayerLock
-            End Select
-        End With
-
-    End Sub
-
     Sub RecUndo(index) ' Сохранение данных для операций Undo, Redo
         If index <> "0" Then
             UndoScopeID = vsoApp.BeginUndoScope(index)
@@ -663,19 +868,6 @@ err:
 
     End Sub
 
-    Sub SelectCells(intStartCol As Integer, intEndCol As Integer, intStartRow As Integer, intEndRow As Integer) 'Различное выделение в таблице
-
-        Dim intColNum As Integer, intRowNum As Integer
-
-        On Error Resume Next
-        For intColNum = intStartCol To intEndCol
-            For intRowNum = intStartRow To intEndRow
-                winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(intColNum, intRowNum)), 2)
-            Next
-        Next
-        On Error GoTo 0
-    End Sub
-
 #End Region
 
 #Region "Private Sub"
@@ -716,6 +908,385 @@ err:
 
     End Sub
 
+    Private Sub ClearControlCells(arg)   ' Deselect УЯ столбцов или строк
+        Dim shObj As Visio.Shape
+
+        With winObj
+            For Each shObj In .Selection
+                If shObj.Cells(arg).Result("") = 0 Then .Select(shObj, 1)
+                If shObj.Name = NT Then .Select(shObj, 1)
+            Next
+        End With
+
+    End Sub
+
+    Private Sub IntegrateCells() ' Объединение выделенных ячеек в одну с сохранением содержимого. Основная процедура
+
+        Dim vsoSel As Visio.Selection = winObj.Selection
+        Dim shObj As Visio.Shape, flagCheck As Boolean
+        flagCheck = True
+
+        If vsoSel.Count < 2 Then
+            MsgBox("Должно быть выделено не меньше двух ячеек:" & vbCrLf & "Первая и последняя в предполагаемом диапазоне объединения. Или все объединяемые", 48, "Ошибка!")
+            Exit Sub
+        End If
+        '------------------------------- START --------------------------------------------------------
+        Dim cMin As Integer, rMin As Integer, cMax As Integer, rMax As Integer, NText As String
+        Dim Matr As Integer, i As Integer, fWn As String, fHn As String, fXn As String, fYn As String, shObj1 As Visio.Shape
+
+        If Not GetMinMaxRange(vsoSel, cMin, cMax, rMin, rMax) Then GoTo err
+        shObj1 = shpsObj.ItemFromID(GetShapeId(cMin, rMin))
+        NText = shObj1.Characters.Text
+
+        winObj.DeselectAll()
+        Call SelectCells(cMin, cMax, rMin, rMax)
+        vsoSel = winObj.Selection
+
+        ' Start Проверка на вшивость------------------------------------------------
+        Matr = (cMax - cMin + 1) * (rMax - rMin + 1)
+        If vsoSel.Count <> Matr Then flagCheck = False
+        For i = 1 To vsoSel.Count
+            If InStr(1, winObj.Selection(i).Cells(WI).FormulaU, "SUM", 1) <> 0 Or InStr(1, winObj.Selection(i).Cells(HE).FormulaU, "SUM", 1) <> 0 Then flagCheck = False
+        Next
+        If flagCheck = False Then GoTo err
+        ' End Проверка на вшивость -------------------------------------------------
+
+        winObj.DeselectAll()
+
+        'Start Генерация  и переопределение формул для объединенной ячейки: PinX, PinY, Width, Height
+        If cMax - cMin <> 0 Then
+            fWn = "=GUARD(SUM("
+            fXn = "=GUARD(Sheet." & ArrShapeID(cMin, 0) & "!PinX-(Sheet." & ArrShapeID(cMin, 0) & "!Width/2)+SUM("
+            For i = cMin To cMax
+                shObj = shpsObj.ItemFromID(ArrShapeID(i, 0))
+                fWn = fWn & shObj.Name & "!Width,"
+                fXn = fXn & shObj.Name & "!Width,"
+            Next
+            fWn = Left$(fWn, Len(fWn) - 1) & "))"
+            fXn = Left$(fXn, Len(fXn) - 1) & ")/2)"
+        Else
+            fWn = GU & shpsObj.ItemFromID(ArrShapeID(cMin, 0)).Name & "!Width)"
+            fXn = GU & shpsObj.ItemFromID(ArrShapeID(cMin, 0)).Name & "!PinX)"
+        End If
+
+        '---------------------------------------------------------------------------
+        If rMax - rMin <> 0 Then
+            fHn = "=GUARD(SUM("
+            fYn = "=GUARD(Sheet." & ArrShapeID(0, rMin) & "!PinY+(Sheet." & ArrShapeID(0, rMin) & "!Height/2)-SUM("
+            For i = rMin To rMax
+                shObj = shpsObj.ItemFromID(ArrShapeID(0, i))
+                fHn = fHn & shObj.Name & "!Height,"
+                fYn = fYn & shObj.Name & "!Height,"
+            Next
+            fHn = Left$(fHn, Len(fHn) - 1) & "))"
+            fYn = Left$(fYn, Len(fYn) - 1) & ")/2)"
+        Else
+            fHn = GU & shpsObj.ItemFromID(ArrShapeID(0, rMin)).Name & "!Height)"
+            fYn = GU & shpsObj.ItemFromID(ArrShapeID(0, rMin)).Name & "!PinY)"
+        End If
+
+        '---------------------------------------------------------------------------
+        With shObj1 ' переопределение формул ячейки
+            .Cells(PX).FormulaForceU = fXn
+            .Cells(PY).FormulaForceU = fYn
+            .Cells(WI).FormulaForceU = fWn
+            .Cells(HE).FormulaForceU = fHn
+            .BringToFront()
+            .Characters.Text = NText
+        End With
+        'End переопределение формул =============================================
+
+        For i = 2 To vsoSel.Count ' Удаление мусорных ячеек
+            vsoSel(i).Cells(LD).FormulaForceU = 0
+            vsoSel(i).Delete()
+        Next
+
+        winObj.Select(shObj1, 2)
+        Exit Sub
+
+err:
+        Dim msg As String
+        msg = "Возможные причины ошибки:" & vbCrLf
+        msg = msg & "Выделена уже объединенная ячейка." & vbCrLf
+        msg = msg & "Что-то пошло не так." & vbCrLf
+        MsgBox(msg, 48, "Ошибка!")
+
+    End Sub
+
+    Private Sub DeIntegrateCells(shObj As Visio.Shape) ' Разъединение выделенной ячейки с сохранением содержимого. Основная процедура
+
+        Dim flagCheck As Boolean, flagTxt As Boolean
+        flagCheck = True
+
+        If winObj.Selection.Count <> 1 Then
+            MsgBox("Должна быть выделена одна ячейка:", 48, "Ошибка!")
+            Exit Sub
+        End If
+
+        If InStr(1, shObj.Cells(WI).FormulaU, "SUM", 1) = 0 And InStr(1, shObj.Cells(HE).FormulaU, "SUM", 1) = 0 Then flagCheck = False
+        If Not flagCheck Then GoTo err
+
+        '------------------------------- START --------------------------------------------------------
+        Dim vsoDup As Visio.Shape
+        Dim fx As String, fy As String, arrX() As String, arrY() As String, NText As String
+        Dim j As Integer, i As Integer
+
+        With shObj
+            fx = .Cells(PX).FormulaU : fy = .Cells(PY).FormulaU
+            NText = .Characters.Text
+        End With
+
+        '---------------------------------------------------------------
+        If InStr(1, fx, "SUM", 1) <> 0 Then
+            fx = Left$(fx, Len(fx) - 4)
+            fx = Right$(fx, Len(fx) - InStr(1, fx, "+") - 4)
+            fx = Replace$(fx, WI, "", 1)
+            arrX = Split(fx, ",")
+        Else
+            fx = Replace$(fx, "GUARD(", "", 1)
+            ReDim arrX(0)
+            arrX(0) = Replace$(fx, "PinX)", "", 1)
+        End If
+
+        '---------------------------------------------------------------
+        If InStr(1, fy, "SUM", 1) <> 0 Then
+            fy = Left$(fy, Len(fy) - 4)
+            fy = Right$(fy, Len(fy) - InStr(1, fy, "-") - 4)
+            fy = Replace$(fy, HE, "", 1)
+            arrY = Split(fy, ",")
+        Else
+            fy = Replace$(fy, "GUARD(", "", 1)
+            ReDim arrY(0)
+            arrY(0) = Replace$(fy, "PinY)", "", 1)
+        End If
+
+        '---------------------------------------------------------------
+        flagTxt = True
+
+        shObj.Characters.Text = NText
+
+        For j = 0 To UBound(arrY)
+            For i = 0 To UBound(arrX)
+                vsoDup = shObj.Duplicate
+                With vsoDup ' переопределение формул ячейки
+                    .Cells(PX).FormulaForceU = GU & arrX(i) & "PinX)"
+                    .Cells(PY).FormulaForceU = GU & arrY(j) & "PinY)"
+                    .Cells(WI).FormulaForceU = GU & arrX(i) & "Width)"
+                    .Cells(HE).FormulaForceU = GU & arrY(j) & "Height)"
+                    .Cells(UTN).FormulaForceU = shObj.Cells(UTN).FormulaU
+                    .Cells(UTC).FormulaForceU = GU & arrX(i) & "User.TableCol)"
+                    .Cells(UTR).FormulaForceU = GU & arrY(j) & "User.TableRow)"
+                    If j <> 0 Or i <> 0 Then .Cells("Comment").FormulaForceU = "Guard(IF(" & NT & "!Actions.Comments.Checked=1," & "User.TableCol.Prompt&"" ""&User.TableCol&CHAR(10)&User.TableRow.Prompt&"" ""&User.TableRow" & "," & """""" & "))"
+
+                    If flagTxt Then
+                        .Characters.Text = NText
+                        flagTxt = False
+                    Else
+                        .Characters.Text = ""
+                    End If
+                End With
+
+            Next
+        Next
+        shObj.Cells(LD).FormulaForceU = 0
+        shObj.Delete()
+
+        Exit Sub
+
+err:
+        Dim msg As String
+        msg = "Возможные причины ошибки:" & vbCrLf & vbCrLf
+        msg = msg & "1. Выделено больше одной ячейки" & vbCrLf
+        msg = msg & "2. Выделена не объединенная ячейка" & vbCrLf
+        MsgBox(msg, 48, "Ошибка!")
+
+    End Sub
+
+    Private Sub DeleteColumn(shObj) ' Удаление столбца. Основная процедура
+        If shObj.Cells(UTC).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
+        Call RecUndo("Удалить столбец")
+
+        Dim iAll As Integer, iDel As Integer, i As Integer, j As Integer
+        Dim NTDel As String, strF As String, tmpName As String = "", PropC(1) As String
+
+        iDel = shObj.Cells(UTC).Result("") : iAll = shpsObj.Item(NT).Cells(UTC).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Name
+
+        If iAll = 1 Then
+            MsgBox("Единственный столбец нельзя удалить", 64, "Внимание!")
+            GoTo err
+        End If
+
+        If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
+            PropC(0) = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Cells(PX).FormulaU
+            PropC(1) = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Cells(PY).FormulaU
+        End If
+
+        Call PropLayers(1)
+
+        If iDel <> iAll Then tmpName = shpsObj.ItemFromID(ArrShapeID(iDel + 1, 0)).Name
+
+        With shpsObj ' Определение объединенных ячеек и их обработка
+            For j = 1 To UBound(ArrShapeID, 1)
+                For i = 1 To UBound(ArrShapeID, 2)
+                    With .ItemFromID(ArrShapeID(j, i))
+                        If InStr(1, .Cells(WI).FormulaU, "SUM") <> 0 Then
+                            If InStr(1, .Cells(WI).FormulaU, NTDel) <> 0 And InStr(1, .Cells(WI).FormulaU, ",") <> 0 Then
+                                strF = Replace$(.Cells(WI).FormulaU, NTDel & "!Width", "", 1)
+                                strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
+                                .Cells(WI).FormulaForceU = Replace$(strF, ",,", ",", 1)
+                                '----------------------------------------------------------------------------------------------------------------
+                                strF = .Cells(PX).FormulaU
+                                If iDel <> iAll Then
+                                    strF = Replace$(.Cells(PX).FormulaU, NTDel & "!PinX", tmpName & "!PinX", 1)
+                                    strF = Replace$(strF, NTDel & "!Width/2", tmpName & "!Width/2", 1)
+                                    .Cells(UTC).FormulaForceU = Replace$(.Cells(UTC).FormulaU, NTDel & "!", tmpName & "!", 1)
+                                End If
+                                strF = Replace$(strF, NTDel & "!Width", "", 1)
+                                strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
+                                .Cells(PX).FormulaForceU = Replace$(strF, ",,", ",", 1)
+                            End If
+                            If .Cells(WI).Result(64) = shpsObj.ItemFromID(ArrShapeID(j, 0)).Cells(WI).Result(64) Then
+                                .Cells(WI).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j, 0)).Name & "!Width)"
+                                .Cells(PX).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j, 0)).Name & "!PinX)"
+                            End If
+                        End If
+                    End With
+                Next
+            Next
+
+            For i = LBound(ArrShapeID, 2) To UBound(ArrShapeID, 2) 'Удаление выделенных ячеек по критерию
+                With .ItemFromID(ArrShapeID(iDel, i))
+                    If ArrShapeID(iDel, i) <> 0 Then
+                        If InStr(1, .Cells(WI).FormulaU, "SUM", 1) = 0 Then
+                            .Cells(LD).FormulaForceU = 0
+                            .Delete()
+                            ArrShapeID(iDel, i) = 0
+                        End If
+                    End If
+                End With
+            Next
+        End With
+
+        shpsObj.Item(NT).Cells(UTC).FormulaForceU = "GUARD(" & iAll - 1 & ")"
+
+        If iDel < iAll Then
+            With shpsObj.ItemFromID(ArrShapeID(iDel + 1, 0))
+                .Cells(PX).FormulaForceU = PropC(0)
+                .Cells(PY).FormulaForceU = PropC(1)
+            End With
+
+            With shpsObj ' Перенумерование столбцов
+                j = 0
+                For i = 1 To UBound(ArrShapeID, 1)
+                    If ArrShapeID(i, 0) <> 0 Then
+                        j = j + 1
+                        .ItemFromID(ArrShapeID(i, 0)).Cells(UTC).FormulaForceU = GU & j & ")"
+                    End If
+                Next
+            End With
+        End If
+
+        Erase PropC
+        Call PropLayers(0)
+        winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
+
+err:
+        Call RecUndo("0")
+    End Sub
+
+    Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
+        If shObj.Cells(UTR).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
+        Call RecUndo("Удалить строку")
+
+        Dim iAll As Integer, iDel As Integer, i As Integer, j As Integer
+        Dim NTDel As String, strF As String, tmpName As String = "", PropC(1) As String
+
+        iDel = shObj.Cells(UTR).Result("") : iAll = shpsObj.Item(NT).Cells(UTR).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Name
+
+        If iAll = 1 Then
+            MsgBox("Единственную строку нельзя удалить", 64, "Внимание!")
+            GoTo err
+        End If
+
+        If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
+            PropC(0) = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Cells(PX).FormulaU
+            PropC(1) = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Cells(PY).FormulaU
+        End If
+
+        Call PropLayers(1)
+
+        If iDel <> iAll Then tmpName = shpsObj.ItemFromID(ArrShapeID(0, iDel + 1)).Name
+
+        With shpsObj ' Определение объединенных ячеек и их обработка
+            For j = 1 To UBound(ArrShapeID, 1)
+                For i = 1 To UBound(ArrShapeID, 2)
+                    With .ItemFromID(ArrShapeID(j, i))
+                        If InStr(1, .Cells(HE).FormulaU, "SUM") <> 0 Then
+                            If InStr(1, .Cells(HE).FormulaU, NTDel) <> 0 And InStr(1, .Cells(HE).FormulaU, ",") <> 0 Then
+                                strF = Replace$(.Cells(HE).FormulaU, NTDel & "!Height", "", 1)
+                                strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
+                                .Cells(HE).FormulaForceU = Replace$(strF, ",,", ",", 1)
+                                '-------------------------------------------------------------------------------------------------------------
+                                strF = .Cells(PY).FormulaU
+                                If iDel <> iAll Then
+                                    strF = Replace$(.Cells(PY).FormulaU, NTDel & "!PinY", tmpName & "!PinY", 1)
+                                    strF = Replace$(strF, NTDel & "!Height/2", tmpName & "!Height/2", 1)
+                                    .Cells(UTR).FormulaForceU = Replace$(.Cells(UTR).FormulaU, NTDel & "!", tmpName & "!", 1)
+                                End If
+                                strF = Replace$(strF, NTDel & "!Height", "", 1)
+                                strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
+                                .Cells(PY).FormulaForceU = Replace$(strF, ",,", ",", 1)
+                            End If
+                            If .Cells(HE).Result(64) = shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) Then
+                                .Cells(HE).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Name & "!Height)"
+                                .Cells(PY).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Name & "!PinY)"
+                            End If
+                        End If
+                    End With
+                Next
+            Next
+
+            For i = LBound(ArrShapeID, 1) To UBound(ArrShapeID, 1) 'Удаление выделенных ячеек по критерию
+                With .ItemFromID(ArrShapeID(i, iDel))
+                    If ArrShapeID(i, iDel) <> 0 Then
+                        If InStr(1, .Cells(HE).FormulaU, "SUM", 1) = 0 Then
+                            .Cells(LD).FormulaForceU = 0
+                            .Delete()
+                            ArrShapeID(i, iDel) = 0
+                        End If
+                    End If
+                End With
+            Next
+        End With
+
+        shpsObj.Item(NT).Cells(UTR).FormulaForceU = "GUARD(" & iAll - 1 & ")"
+
+        If iDel < iAll Then
+            With shpsObj.ItemFromID(ArrShapeID(0, iDel + 1))
+                .Cells(PX).FormulaForceU = PropC(0)
+                .Cells(PY).FormulaForceU = PropC(1)
+            End With
+
+            With shpsObj ' Перенумерование строк
+                j = 0
+                For i = 1 To UBound(ArrShapeID, 2)
+                    If ArrShapeID(0, i) <> 0 Then
+                        j = j + 1
+                        .ItemFromID(ArrShapeID(0, i)).Cells(UTR).FormulaForceU = GU & j & ")"
+                    End If
+                Next
+            End With
+        End If
+
+        Erase PropC
+        Call PropLayers(0)
+        winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
+
+err:
+        Call RecUndo("0")
+
+    End Sub
+
     Private Sub NotDub(vsoSel, UT) ' Заполнение коллекции значениями без дубликатов
         Dim Shp As Visio.Shape
 
@@ -727,6 +1298,38 @@ err:
 
         On Error GoTo 0
 
+    End Sub
+
+    Private Sub PropLayers(arg As Byte) ' Включение/выключение видимости и блокировки слоев на время выполнения кода - Titles_Tables и Cells_Tables
+
+        With winObj.Page.Layers
+            Select Case arg
+                Case 1
+                    LayerVisible = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaU
+                    '            LayerVisible1 = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0) + 2).CellsC(4).FormulaU
+                    LayerLock = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(7).FormulaU
+                    '            LayerLock1 = .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0) + 2).CellsC(7).FormulaU
+                    If LayerVisible <> 1 Then .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaForceU = "1"
+                    If LayerLock <> 0 Then .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).Result("").CellsC(7).FormulaForceU = "0"
+                Case 0
+                    .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(4).FormulaForceU = LayerVisible
+                    .Item(shpsObj.Item(NT).CellsSRC(1, 6, 0).Result("") + 1).CellsC(7).FormulaForceU = LayerLock
+            End Select
+        End With
+
+    End Sub
+
+    Private Sub SelectCells(intStartCol As Integer, intEndCol As Integer, intStartRow As Integer, intEndRow As Integer) 'Различное выделение в таблице
+
+        Dim intColNum As Integer, intRowNum As Integer
+
+        On Error Resume Next
+        For intColNum = intStartCol To intEndCol
+            For intRowNum = intStartRow To intEndRow
+                winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(intColNum, intRowNum)), 2)
+            Next
+        Next
+        On Error GoTo 0
     End Sub
 
 #End Region
@@ -791,7 +1394,7 @@ err:
         fArrT = txt
     End Function
 
-    Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
+    Private Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
         ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
         Dim i As Integer
         rMin = 1000 : cMin = 1000 : rMax = 0 : cMax = 0
@@ -812,6 +1415,36 @@ err:
 
 err:
         GetMinMaxRange = False
+    End Function
+
+    Private Function GetShapeId(ByVal intColNum As Integer, ByVal intRowNum As Integer) As Integer
+        ' Получение ID ячейки таблицы по номеру столбца и строки
+
+        On Error GoTo err
+
+        If ArrShapeID(intColNum, intRowNum) <> 0 Then
+            GetShapeId = ArrShapeID(intColNum, intRowNum)
+        Else
+            Dim i As Integer, j As Integer, cN As String, rN As String
+            With winObj.Page.Shapes
+                cN = .ItemFromID(ArrShapeID(intColNum, 0)).Name : rN = .ItemFromID(ArrShapeID(0, intRowNum)).Name
+                For i = 1 To intColNum
+                    For j = 1 To intRowNum
+                        If ArrShapeID(i, j) <> 0 Then
+                            If InStr(1, .ItemFromID(ArrShapeID(i, j)).Cells(PX).FormulaU, cN) <> 0 And _
+                               InStr(1, .ItemFromID(ArrShapeID(i, j)).Cells(PY).FormulaU, rN) <> 0 Then
+                                GetShapeId = ArrShapeID(i, j)
+                                Exit Function
+                            End If
+                        End If
+                    Next
+                Next
+            End With
+        End If
+        Exit Function
+
+err:
+        GetShapeId = 0
     End Function
 
 #End Region

@@ -7,8 +7,8 @@ Partial Public Class Addin
 
     Public Sub OnAction(commandId As String, commandTag As String)
         Select Case commandId
-            Case "btn_newcolumnbefore", "btn_newcolumnafter" : MessageBox.Show(commandTag) ': AddColumns (Button.Tag)
-            Case "btn_newrowbefore", "btn_newrowafter" : MessageBox.Show(commandTag) ': AddRows (Button.Tag)
+            Case "btn_newcolumnbefore", "btn_newcolumnafter" : AddColumns(commandTag)
+            Case "btn_newrowbefore", "btn_newrowafter" : AddRows(commandTag)
             Case "btn_onwidth" : AllAlignOnText(True, False, 0, 0, True, True)
             Case "btn_onheight" : AllAlignOnText(False, True, 0, 0, True, True)
             Case "btn_onwidthheight" : AllAlignOnText(True, True, 0, 0, False, False)
@@ -16,14 +16,14 @@ Partial Public Class Addin
             Case "btn_seltable", "btn_selrange", "btn_selcolumn", "btn_selrow" : SelCell(commandTag)
             Case "btn_seltxt", "btn_selnum", "btn_selnotnum", "btn_seldate", "btn_selempty", "btn_selnotempty", "btn_selinvert" : SelInContent(commandTag)
             Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : InsertText(commandTag)
-            Case "btn_intdeint" : MessageBox.Show(commandId) ': IntDeIntCells
+            Case "btn_intdeint" : IntDeIntCells()
             Case "btn_dropdownlist" : MessageBox.Show(commandId) ': LoadfrmSelectFromList
             Case "btn_gut" : GutT()
             Case "btn_copy" : CopyT()
             Case "btn_paste" : PasteT()
             Case "btn_deltable" : DelTab()
-            Case "btn_delcolumn" : MessageBox.Show(commandId) ': DelCols
-            Case "btn_delrow" : MessageBox.Show(commandId) ': DelRows
+            Case "btn_delcolumn" : DelColRows(0)
+            Case "btn_delrow" : DelColRows(1)
             Case "btn_intellinput" : MessageBox.Show(commandId) ': LoadfrmIntellInput
             Case "btn_seldialog" : MessageBox.Show(commandId) ': LoadSelectfrmWorks
             Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
