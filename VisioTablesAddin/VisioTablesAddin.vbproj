@@ -23,7 +23,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ru</TargetCulture>
-    <ApplicationVersion>1.1.4.7</ApplicationVersion>
+    <ApplicationVersion>1.1.4.8</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -139,7 +139,18 @@
   </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="My Project\" />
-    <Compile Include="EditTable.vb" />
+    <Compile Include="dlgIntellInput.Designer.vb">
+      <DependentUpon>dlgIntellInput.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgIntellInput.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dlgPictures.Designer.vb">
+      <DependentUpon>dlgPictures.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgPictures.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="VisioTable.vb" />
     <Compile Include="CreatingTable.vb" />
     <Compile Include="dlgNewTable.Designer.vb">
@@ -183,8 +194,14 @@
     <Compile Include="Addin.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="dlgIntellInput.resx">
+      <DependentUpon>dlgIntellInput.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="dlgNewTable.resx">
       <DependentUpon>dlgNewTable.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dlgPictures.resx">
+      <DependentUpon>dlgPictures.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="dlgWait.resx">
       <DependentUpon>dlgWait.vb</DependentUpon>

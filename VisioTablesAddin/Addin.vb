@@ -34,8 +34,8 @@ Partial Public Class Addin
             Case "btn_moredialog" : MessageBox.Show(commandId) ': LoadMorefrmWorks
             Case "btn_extdata" : MessageBox.Show(commandId) ': LoadfrmLinkData
             Case "btn_convert1Shape" : ConvertInto1Shape()
-            Case "btn_lockpicture" : MessageBox.Show(commandId) ': LoadfrmPicture
-            Case "btn_help" : MessageBox.Show(commandId) ': CallHelp
+            Case "btn_lockpicture" : LoaddlgPicture()
+            Case "btn_help" : CallHelp()
         End Select
     End Sub
 

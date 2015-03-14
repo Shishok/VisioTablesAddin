@@ -53,7 +53,7 @@ Module CreatingTable
 
 #End Region
 
-#Region "New Table Sub"
+#Region "Load Sub"
 
     Public Sub QuickTable(strV)
         Dim nC As Integer = 0, nR As Integer = 0, w As Single = 0, h As Single = 0
@@ -77,6 +77,12 @@ Module CreatingTable
         Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
         NewTable.CreatTable()
         NewTable = Nothing
+    End Sub
+
+    Sub LoaddlgPicture()
+        Dim dlgNew As New dlgPictures
+        dlgNew.ShowDialog()
+        dlgNew = Nothing
     End Sub
 
 #End Region
@@ -464,6 +470,12 @@ err:
 
     End Sub
 
+    Sub CallHelp() ' Вызов справочного файла - Таблицы в Visio.chm
+        Dim RetVal, strPath As String
+        strPath = "C:\Windows\hh.exe " & vsoApp.MyShapesPath & "\" & "Таблицы в Visio.chm"
+        RetVal = Shell(strPath, 1)
+    End Sub
+
     Sub ConvertInto1Shape() ' Преобразование таблицы в одну сгруппированную фигуру
         If Not CheckSelCells() Then Exit Sub
 
@@ -525,16 +537,19 @@ err:
         shpsObj = winObj.Page.Shapes
         Dim vsoSel As Visio.Selection = winObj.Selection, shObj As Visio.Shape
 
-        For Each shObj In vsoSel
-            Call InitArrShapeID(NT)
+    For Each shObj In vsoSel
             If InStr(1, shObj.Name, "Sheet", 1) = 0 Then
                 Select Case bytColsOrRows
-                    Case 0 : Call DeleteColumn(shObj)
-                    Case 1 : Call DeleteRow(shObj)
+                    Case 0
+                        If shpsObj.Item(NT).Cells(UTC).Result("") = 1 Then GoTo err
+                        Call InitArrShapeID(NT) : Call DeleteColumn(shObj)
+                    Case 1
+                        If shpsObj.Item(NT).Cells(UTR).Result("") = 1 Then GoTo err
+                        Call InitArrShapeID(NT) : Call DeleteRow(shObj)
                 End Select
             End If
         Next
-
+err:
         vsoSel = Nothing
     End Sub
 
@@ -621,50 +636,6 @@ errD:
         End If
 
         Call RecUndo("0")
-    End Sub
-
-    Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
-        If Not CheckSelCells() Then Exit Sub
-
-        shpsObj = winObj.Page.Shapes
-
-        Call InitArrShapeID(NT)
-
-        Dim ShapeObj As Visio.Shape
-        Dim arrId(,) As String, arrTMP() As String, arrTMP1() As String, txt As String
-        Dim i As Integer, j As Integer
-
-        On Error GoTo err
-
-        txt = My.Computer.Clipboard.GetText
-        arrTMP = Split(txt, vbCrLf)
-        arrTMP1 = Split(arrTMP(0), vbTab)
-
-        ReDim arrId(UBound(arrTMP, 1) - 1, UBound(arrTMP1, 1))
-        For i = LBound(arrId, 1) To UBound(arrId, 1)
-            arrTMP1 = Split(arrTMP(i), vbTab)
-            For j = LBound(arrTMP1, 1) To UBound(arrTMP1, 1)
-                arrId(i, j) = arrTMP1(j)
-            Next
-        Next
-
-        ShapeObj = winObj.Selection(1) : shpsObj = winObj.Page.Shapes
-
-        On Error Resume Next
-
-        Call RecUndo("Вставить текст в ячейки")
-
-        For i = LBound(arrId, 1) To UBound(arrId, 1)
-            For j = LBound(arrId, 2) To UBound(arrId, 2)
-                With shpsObj.ItemFromID(ArrShapeID(j + ShapeObj.Cells(UTC).Result(""), i + ShapeObj.Cells(UTR).Result("")))
-                    .Characters.Text = arrId(i, j)
-                End With
-            Next
-        Next
-
-err:
-        Call RecUndo("0")
-        Erase arrId : Erase arrTMP : Erase arrTMP1
     End Sub
 
     Sub InitArrShapeID(strNameShape)  ' Заполнение массива шейпами активной таблицы
@@ -757,6 +728,142 @@ err:
 
 err:
         Call RecUndo("0")
+    End Sub
+
+    Sub LockPicture(hAL, Val, shN, lF) ' Закрепление изображений в ячейках таблицы
+        ' hAL - выравнивание по горизонтали(1-3), vAL - выравнивание по вертикали(1-3)
+        ' shN - помещать названия(0,1),lF - блокировать формулы(True,False)
+        Dim vsoSel As Visio.Selection = winObj.Selection
+        Dim shpObj As Visio.Shape, shpObj1 As Visio.Shape
+        Dim strH As String = "", strV As String = "", strL As String = "", strL1 As String = ""
+        Dim cnt As Integer, intDot As Integer
+        Dim resvar As Byte
+
+        shpsObj = winObj.Page.Shapes
+
+        Select Case hAL
+            Case 1
+                strH = "Width*0"
+            Case 2
+                strH = "Width*0.5"
+            Case 3
+                strH = "Width*1"
+        End Select
+
+        Select Case Val
+            Case 1
+                strV = "Height*1"
+            Case 2
+                strV = "Height*0.5"
+            Case 3
+                strV = "Height*0"
+        End Select
+
+        Select Case lF
+            Case True
+                strL = "Guard(" : strL1 = ")"
+            Case False
+                strL = "" : strL1 = ""
+        End Select
+
+        Call RecUndo("Закрепить изображения")
+
+        For Each shpObj In vsoSel
+            If shpObj.CellExistsU(UTN, 0) Then
+                For Each shpObj1 In shpsObj
+                    If Not shpObj1.CellExistsU(UTN, 0) Then
+                        resvar = shpObj1.SpatialRelation(shpObj, 0, 10)
+                        If resvar = 4 Then
+                            shpObj1.Cells("LocPinX").FormulaForceU = strH
+                            shpObj1.Cells("LocPinY").FormulaForceU = strV
+
+                            Select Case hAL
+                                Case 1 'X слева
+                                    shpObj1.Cells(PX).FormulaForceU = strL & shpObj.Name & "!PinX+" & shpObj.Name & "!LeftMargin-" & shpObj.Name & "!Width/2" & strL1
+                                Case 2 'X по центру
+                                    shpObj1.Cells(PX).FormulaForceU = strL & shpObj.Name & "!PinX" & strL1
+                                Case 3 'X справа
+                                    shpObj1.Cells(PX).FormulaForceU = strL & shpObj.Name & "!PinX-" & shpObj.Name & "!RightMargin+" & shpObj.Name & "!Width*0.5" & strL1
+                            End Select
+
+                            Select Case Val
+                                Case 1 'Y сверху
+                                    shpObj1.Cells(PY).FormulaForceU = strL & shpObj.Name & "!PinY-" & shpObj.Name & "!TopMargin+" & shpObj.Name & "!Height/2" & strL1
+                                Case 2 'Y по центру
+                                    shpObj1.Cells(PY).FormulaForceU = strL & shpObj.Name & "!PinY" & strL1
+                                Case 3 'Y снизу
+                                    shpObj1.Cells(PY).FormulaForceU = strL & shpObj.Name & "!PinY+" & shpObj.Name & "!BottomMargin-" & shpObj.Name & "!Height*0.5" & strL1
+                            End Select
+
+                            If shN <> 0 Then
+                                intDot = InStr(1, shpObj1.Name, ".")
+                                If intDot <> 0 Then
+                                    shpObj.Characters.Text = Left$(shpObj1.Name, intDot - 1)
+                                Else
+                                    shpObj.Characters.Text = shpObj1.Name
+                                End If
+                            End If
+                            cnt = cnt + 1
+                            Exit For
+                        End If
+                    End If
+                Next
+            End If
+        Next
+
+        Call RecUndo("0")
+
+        ' Результаты метода SpatialRelation (resvar)
+        ' 4 - фигура внутри фигуры
+        ' 1 - фигуры перекрываются
+        ' 8 - фигуры соприкасаются
+        ' 0 - фигуры не имеют равных точек
+        MsgBox("Готово." & vbCrLf & "Закреплено " & cnt & " фигур в ячейках.")
+
+    End Sub
+
+    Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
+        If Not CheckSelCells() Then Exit Sub
+
+        shpsObj = winObj.Page.Shapes
+
+        Call InitArrShapeID(NT)
+
+        Dim ShapeObj As Visio.Shape
+        Dim arrId(,) As String, arrTMP() As String, arrTMP1() As String, txt As String
+        Dim i As Integer, j As Integer
+
+        On Error GoTo err
+
+        txt = My.Computer.Clipboard.GetText
+        arrTMP = Split(txt, vbCrLf)
+        arrTMP1 = Split(arrTMP(0), vbTab)
+
+        ReDim arrId(UBound(arrTMP, 1) - 1, UBound(arrTMP1, 1))
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            arrTMP1 = Split(arrTMP(i), vbTab)
+            For j = LBound(arrTMP1, 1) To UBound(arrTMP1, 1)
+                arrId(i, j) = arrTMP1(j)
+            Next
+        Next
+
+        ShapeObj = winObj.Selection(1) : shpsObj = winObj.Page.Shapes
+
+        On Error Resume Next
+
+        Call RecUndo("Вставить текст в ячейки")
+
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            For j = LBound(arrId, 2) To UBound(arrId, 2)
+                With shpsObj.ItemFromID(ArrShapeID(j + ShapeObj.Cells(UTC).Result(""), i + ShapeObj.Cells(UTR).Result("")))
+                    .Characters.Text = arrId(i, j)
+                End With
+            Next
+        Next
+
+err:
+        Call RecUndo("0")
+        Erase arrId : Erase arrTMP : Erase arrTMP1
     End Sub
 
     Sub RecUndo(index) ' Сохранение данных для операций Undo, Redo
@@ -1111,11 +1218,6 @@ err:
 
         iDel = shObj.Cells(UTC).Result("") : iAll = shpsObj.Item(NT).Cells(UTC).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Name
 
-        If iAll = 1 Then
-            MsgBox("Единственный столбец нельзя удалить", 64, "Внимание!")
-            GoTo err
-        End If
-
         If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
             PropC(0) = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Cells(PX).FormulaU
             PropC(1) = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Cells(PY).FormulaU
@@ -1189,9 +1291,8 @@ err:
         Erase PropC
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
-
-err:
         Call RecUndo("0")
+
     End Sub
 
     Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
@@ -1202,11 +1303,6 @@ err:
         Dim NTDel As String, strF As String, tmpName As String = "", PropC(1) As String
 
         iDel = shObj.Cells(UTR).Result("") : iAll = shpsObj.Item(NT).Cells(UTR).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Name
-
-        If iAll = 1 Then
-            MsgBox("Единственную строку нельзя удалить", 64, "Внимание!")
-            GoTo err
-        End If
 
         If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
             PropC(0) = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Cells(PX).FormulaU
@@ -1281,8 +1377,6 @@ err:
         Erase PropC
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
-
-err:
         Call RecUndo("0")
 
     End Sub

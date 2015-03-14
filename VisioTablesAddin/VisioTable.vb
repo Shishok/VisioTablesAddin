@@ -343,7 +343,7 @@ errD:
             .Cells("UpdateAlignBox").FormulaForceU = GT
             .Cells("LockDelete").FormulaU = G1
             .Cells("LockRotate").FormulaU = G1
-            .CellsSRC(1, 16, 1).FormulaU = "char(169)&char(32)&char(82)&char(79)&char(77)&char(65)&char(78)&char(79)&char(86)&char(32)&char(86)&char(54)&char(46)&char(48)"
+            .CellsSRC(1, 16, 1).FormulaU = "char(169)&char(32)&char(82)&char(79)&char(77)&char(65)&char(78)&char(79)&char(86)&char(32)&char(86)&char(55)&char(46)&char(48)"
 
             Select Case TypeCell
                 Case strNameTable, "ThC", "TvR"
