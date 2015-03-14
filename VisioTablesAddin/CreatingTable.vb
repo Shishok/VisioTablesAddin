@@ -79,8 +79,20 @@ Module CreatingTable
         NewTable = Nothing
     End Sub
 
+    Sub LoaddlgFromFile()
+        Dim dlgNew As New dlgFromFile
+        dlgNew.ShowDialog()
+        dlgNew = Nothing
+    End Sub
+
     Sub LoaddlgPicture()
         Dim dlgNew As New dlgPictures
+        dlgNew.ShowDialog()
+        dlgNew = Nothing
+    End Sub
+
+    Sub LoaddlgSelectFromList()
+        Dim dlgNew As New dlgSelectFromList()
         dlgNew.ShowDialog()
         dlgNew = Nothing
     End Sub

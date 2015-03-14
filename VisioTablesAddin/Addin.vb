@@ -17,7 +17,7 @@ Partial Public Class Addin
             Case "btn_seltxt", "btn_selnum", "btn_selnotnum", "btn_seldate", "btn_selempty", "btn_selnotempty", "btn_selinvert" : SelInContent(commandTag)
             Case "btn_text", "btn_date", "btn_time", "btn_comment", "btn_numcol", "btn_numrow" : InsertText(commandTag)
             Case "btn_intdeint" : IntDeIntCells()
-            Case "btn_dropdownlist" : MessageBox.Show(commandId) ': LoadfrmSelectFromList
+            Case "btn_dropdownlist" : LoaddlgSelectFromList()
             Case "btn_gut" : GutT()
             Case "btn_copy" : CopyT()
             Case "btn_paste" : PasteT()
@@ -29,7 +29,7 @@ Partial Public Class Addin
             Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
             Case "btn_size" : MessageBox.Show(commandId) ': LoadSizefrmWorks
             Case "btn_autosize" : MessageBox.Show(commandId) ': LoadAutoSizefrmWorks
-            Case "btn_fromfile" : MessageBox.Show(commandId) ': LoadfrmFromFile
+            Case "btn_fromfile" : LoaddlgFromFile()
             Case "btn_altlinesrow", "btn_altlinescol" : AlternatLines(commandTag)
             Case "btn_moredialog" : MessageBox.Show(commandId) ': LoadMorefrmWorks
             Case "btn_extdata" : MessageBox.Show(commandId) ': LoadfrmLinkData

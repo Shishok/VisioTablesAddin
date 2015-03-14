@@ -23,7 +23,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ru</TargetCulture>
-    <ApplicationVersion>1.1.4.8</ApplicationVersion>
+    <ApplicationVersion>1.1.4.9</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -139,6 +139,12 @@
   </ItemGroup>
   <ItemGroup>
     <AppDesigner Include="My Project\" />
+    <Compile Include="dlgFromFile.Designer.vb">
+      <DependentUpon>dlgFromFile.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgFromFile.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dlgIntellInput.Designer.vb">
       <DependentUpon>dlgIntellInput.vb</DependentUpon>
     </Compile>
@@ -149,6 +155,12 @@
       <DependentUpon>dlgPictures.vb</DependentUpon>
     </Compile>
     <Compile Include="dlgPictures.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dlgSelectFromList.Designer.vb">
+      <DependentUpon>dlgSelectFromList.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgSelectFromList.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="VisioTable.vb" />
@@ -194,6 +206,9 @@
     <Compile Include="Addin.vb" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="dlgFromFile.resx">
+      <DependentUpon>dlgFromFile.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="dlgIntellInput.resx">
       <DependentUpon>dlgIntellInput.vb</DependentUpon>
     </EmbeddedResource>
@@ -202,6 +217,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="dlgPictures.resx">
       <DependentUpon>dlgPictures.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dlgSelectFromList.resx">
+      <DependentUpon>dlgSelectFromList.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="dlgWait.resx">
       <DependentUpon>dlgWait.vb</DependentUpon>
