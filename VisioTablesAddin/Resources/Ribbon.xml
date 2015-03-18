@@ -125,7 +125,7 @@
           </splitButton>
         </group>
         <group id="group_format" label="Форматировать" imageMso="FormatPainter">
-          <button id="btn_onwidthheight" size="large" label="Автоподбор" imageMso="TableAutoFitMenu" onAction="OnRibbonButtonClick" screentip="Выровнять по ширине и высоте текста" supertip ="Выравнивание столбцов и строк всей таблицы по ширине и высоте текста ячеек"/>
+          <button id="btn_onwidthheight" size="large" label="Автоподбор по тексту" imageMso="TableAutoFitMenu" onAction="OnRibbonButtonClick" screentip="Выровнять по ширине и высоте текста" supertip ="Выравнивание столбцов и строк всей таблицы по ширине и высоте текста ячеек"/>
           <button id="btn_onwidth" size="normal" label="По ширине текста" imageMso="ColumnWidth" onAction="OnRibbonButtonClick" screentip="Выровнять по ширине текста" supertip ="Выравнивание выделенных столбцов таблицы по ширине текста ячеек в выделенных столбцах"/>
           <button id="btn_onheight" size="normal" label="По высоте текста" imageMso="RowHeight" onAction="OnRibbonButtonClick" screentip="Выровнять по высоте текста" supertip ="Выравнивание выделенных строк таблицы по высоте текста ячеек в выделенных строках"/>
           <menu id="menu2" label="Дополнительно" imageMso="SlideMasterMasterLayout">
@@ -137,8 +137,8 @@
             <button id="btn_altlinesrow" label="Чередовать строки" imageMso="TableStyleBandedRows" onAction="OnRibbonButtonClick" tag="5" screentip="Чередование цвета строк" supertip ="Чередование цвета заливки строк таблицы для улучшения визуального восприятия"/>
             <button id="btn_altlinescol" label="Чередовать столбцы" imageMso="TableStyleBandedColumns" onAction="OnRibbonButtonClick" tag="4" screentip="Чередование цвета столбцов" supertip ="Чередование цвета заливки столбцов таблицы для улучшения визуального восприятия"/>
             <button id="btn_convert1Shape" label="Преобразовать в 1 фигуру" imageMso="ObjectsGroupMenu" onAction="OnRibbonButtonClick" tag="4" screentip="Преобразовать в 1 фигуру" supertip ="Преобразование таблицы в один сгруппированный шейп"/>
-            <menuSeparator  id="menuseparator2"/>
-            <button id="btn_moredialog" label="Вызов диалога" imageMso="SlideMasterMasterLayout" onAction="OnRibbonButtonClick" screentip="Дополнительно" supertip ="Дополнительные параметра работы с таблицей"/>
+            <!--<menuSeparator  id="menuseparator2"/>
+            <button id="btn_moredialog" label="Вызов диалога" imageMso="SlideMasterMasterLayout" onAction="OnRibbonButtonClick" screentip="Дополнительно" supertip ="Дополнительные параметра работы с таблицей"/>-->
           </menu>
           <separator  id="separator1"/>
           <button id="btn_intdeint" size="large" label="Объединить/ Разъединить" imageMso="MergeCells" onAction="OnRibbonButtonClick" screentip="Объединение/разъединение ячеек" supertip ="Объединение или разъединение выделенных ячеек в таблице"/>
@@ -156,8 +156,8 @@
             <button id="btn_selempty" label="Выделить пустые" imageMso="DataValidationCircleInvalid" onAction="OnRibbonButtonClick" tag="6"/>
             <button id="btn_selnotempty" label="Выделить не пустые" imageMso="DataValidationCircleInvalid" onAction="OnRibbonButtonClick" tag="7"/>
             <button id="btn_selinvert" label="Инвертировать" imageMso="DataValidationCircleInvalid" onAction="OnRibbonButtonClick" tag="8"/>
-            <menuSeparator  id="menuSeparator1"/>
-            <button id="btn_seldialog" label="Вызов диалога" imageMso="SlideMasterMasterLayout" onAction="OnRibbonButtonClick" screentip="Дополнительные опции" supertip ="Дополнительные опции в диалоговом окне"/>
+            <!--<menuSeparator  id="menuSeparator1"/>
+            <button id="btn_seldialog" label="Вызов диалога" imageMso="SlideMasterMasterLayout" onAction="OnRibbonButtonClick" screentip="Дополнительные опции" supertip ="Дополнительные опции в диалоговом окне"/>-->
           </menu>
         </group>
         <group id="group_data" label="Данные" imageMso="FilePrepareMenu">

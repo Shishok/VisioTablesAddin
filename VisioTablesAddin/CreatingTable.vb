@@ -85,6 +85,16 @@ Module CreatingTable
         dlgNew = Nothing
     End Sub
 
+    Sub LoaddlgLinkData()
+        If vsoApp.ActiveDocument.DataRecordsets.Count = 0 Then
+            MsgBox("В активном документе нет доступных подключений к внешним данным.", vbCritical, "Ошибка")
+            Exit Sub
+        End If
+        Dim dlgNew As New dlgLinkData
+        dlgNew.ShowDialog()
+        dlgNew = Nothing
+    End Sub
+
     Sub LoaddlgPicture()
         Dim dlgNew As New dlgPictures
         dlgNew.ShowDialog()
@@ -93,6 +103,13 @@ Module CreatingTable
 
     Sub LoaddlgSelectFromList()
         Dim dlgNew As New dlgSelectFromList()
+        dlgNew.ShowDialog()
+        dlgNew = Nothing
+    End Sub
+
+    Sub LoaddlgTableSize(arg)
+        FlagPage = arg
+        Dim dlgNew As New dlgTableSize()
         dlgNew.ShowDialog()
         dlgNew = Nothing
     End Sub
@@ -742,6 +759,124 @@ err:
         Call RecUndo("0")
     End Sub
 
+    Sub LinkToDataInShapes(intDataIndex, booInsertTableName, TblName, booTitleColumns, _
+        intRowStartSourse, booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
+        ' Связывание таблиц с внешними источниками данных
+        If Not CheckSelCells() Then Exit Sub
+
+        Dim vsoDataRecordset As Visio.DataRecordset
+        Dim vsoSel As Visio.Selection
+        Dim shpObj As Visio.Shape
+        Dim intEndCol As Integer, intEndRow As Integer
+        Dim i As Integer, j As Integer, intRowStart As Integer, intCountCur As Integer, intRS As Integer
+
+        shpsObj = winObj.Page.Shapes
+        vsoSel = winObj.Selection
+        vsoDataRecordset = vsoApp.ActiveDocument.DataRecordsets.Item(intDataIndex + 1)
+
+        Call InitArrShapeID(NT)
+        intRowStart = 0
+
+        winObj.DeselectAll()
+
+        Dim frm As New dlgWait
+        frm.Label1.Text = " " & vbCrLf & "Связать данные с фигурами..."
+        frm.Show() : frm.Refresh()
+
+        Call RecUndo("Связать данные с фигурами")
+
+        ' Определение диапазона ячеек для связи
+        If booInsertTableName Then intRS = intRS + 1
+        If booTitleColumns Then intRS = intRS + 1
+        intEndCol = shpsObj.Item(NT).Cells(UTC).Result("")
+        intEndRow = shpsObj.Item(NT).Cells(UTR).Result("")
+        If shpsObj.Item(NT).Cells(UTC).Result("") > intCountColSourse Then intEndCol = intCountColSourse
+        If shpsObj.Item(NT).Cells(UTR).Result("") - intRS > intCountRowSourse Then intEndRow = intCountRowSourse + intRS + 1
+
+
+        ' Вставить название таблицы         ' (Проверить 1 строку на объединеность!!!!!)
+        If booInsertTableName Then
+            With winObj
+                .DeselectAll()
+                .Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
+                .Select(shpsObj.ItemFromID(GetShapeId(UBound(ArrShapeID, 1), 1)), 2)
+                vsoSel = .Selection
+
+                Call IntegrateCells()
+                shpObj = shpsObj.ItemFromID(GetShapeId(1, 1))
+
+                shpObj.Characters.Text = TblName
+                If booFontBold Then shpObj.CellsSRC(3, 0, 2).FormulaU = 1
+            End With
+            intRowStart = intRowStart + 1
+            Call InitArrShapeID(NT)
+        End If
+
+        ' Вставить заголовки столбцов
+        If booTitleColumns Then
+            winObj.DeselectAll()
+
+            For i = 1 To UBound(ArrShapeID, 1)
+                With shpsObj.ItemFromID(GetShapeId(i, 1 + intRowStart))
+                    .DeleteSection(243)
+                    If .Cells(UTC).Result("") <= intCountColSourse Then
+                        .LinkToData(vsoDataRecordset.ID, intRowStartSourse, False)
+                        .Characters.AddCustomFieldU("=" & .CellsSRC(243, i - 1, 2).Name, 0)
+                        If booFontBold Then .CellsSRC(3, 0, 2).FormulaU = 1
+                    End If
+                End With
+            Next
+            intRowStart = intRowStart + 1
+        End If
+
+        ' Связать ячейки таблицы с внешними данными
+        winObj.DeselectAll()
+
+        Call SelectCells(1, UBound(ArrShapeID, 1), 1, UBound(ArrShapeID, 2))
+        vsoSel = winObj.Selection
+
+        For i = 1 To vsoSel.Count
+            If vsoSel(i).Cells(UTR).Result("") <= intRowStart Or vsoSel(i).Cells(UTC).Result("") > intEndCol Or vsoSel(i).Cells(UTR).Result("") > intEndRow Then winObj.Select(vsoSel(i), 1)
+        Next
+
+        vsoSel = winObj.Selection
+        winObj.DeselectAll()
+
+        vsoApp.ShowChanges = False
+        Dim www1 As Double
+        www1 = (300 / vsoSel.Count)
+
+        For i = 1 To vsoSel.Count
+            frm.lblProgressBar.Width = www1 * i : frm.lblProgressBar.Refresh() : Application.DoEvents()
+            shpObj = vsoSel(i)
+            With shpObj
+                .DeleteSection(243)
+                intCountCur = .Cells(UTR).Result("") - intRowStart + intRowStartSourse - 1
+                .LinkToData(vsoDataRecordset.ID, intCountCur, False)
+
+                For j = 0 To .RowCount(243)
+                    If .Cells(UTC).Result("") = j + 1 And .Cells(UTC).Result("") <= intCountColSourse Then
+                        .Characters.AddCustomFieldU("=" & .CellsSRC(243, j, 0).Name, 0)
+                        If booInvisibleZero Then
+                            .Cells("Fields.Format").FormulaU = "=IF(" & .CellsSRC(243, j, 0).Name & ".Type=2,IF(" & .CellsSRC(243, j, 0).Name & "=0," & """#""" & ",FIELDPICTURE(0)),FIELDPICTURE(0))"
+                        Else
+                            .Cells("Fields.Format").FormulaU = "=" & "FIELDPICTURE(0)"
+                        End If
+                        Exit For
+                    End If
+                Next
+            End With
+        Next
+
+        Call RecUndo("0")
+        vsoApp.ShowChanges = True
+        winObj.DeselectAll()
+        frm.Close()
+
+        'lngRowIDs = vsoDataRecordset.GetDataRowIDs("") ' Массив всех строк
+        'varrow = vsoDataRecordset.GetRowData(i) ' Массив строки i
+    End Sub
+
     Sub LockPicture(hAL, Val, shN, lF) ' Закрепление изображений в ячейках таблицы
         ' hAL - выравнивание по горизонтали(1-3), vAL - выравнивание по вертикали(1-3)
         ' shN - помещать названия(0,1),lF - блокировать формулы(True,False)
@@ -886,6 +1021,73 @@ err:
         End If
     End Sub
 
+    Sub ResizeCells(bytCellsOrTable As Byte, booOnlyActiveCells As Boolean, _
+        sngWidthCell As Single, sngHeightCell As Single, sngWidthTable As Single, _
+        sngHeightTable As Single, booWidth As Boolean, booHeight As Boolean)
+        ' Изменение размеров ячеек таблицы. Основная процедура
+
+        If Not CheckSelCells() Then Exit Sub
+        Dim vsoSel As Visio.Selection, i As Integer
+
+        shpsObj = winObj.Page.Shapes : vsoSel = winObj.Selection
+
+        Call InitArrShapeID(NT)
+
+        Call RecUndo("Размеры")
+
+        With shpsObj
+            Select Case bytCellsOrTable
+                Case 1
+                    If booOnlyActiveCells Then
+                        Dim Shp As Visio.Shape
+                        If booWidth Then ' По ширине, выделенные столбцы
+                            NotDub(vsoSel, UTC)
+                            For i = 1 To NoDupes.Count
+                                If .ItemFromID(ArrShapeID(NoDupes(i), 0)).NameU Like "ThC*" Then .ItemFromID(ArrShapeID(NoDupes(i), 0)).Cells(WI).Result(64) = sngWidthCell
+                            Next
+                            NoDupes.Clear()
+                        End If
+                        If booHeight Then ' По высоте, выделенные строки
+                            NotDub(vsoSel, UTR)
+                            For i = 1 To NoDupes.Count
+                                If .ItemFromID(ArrShapeID(0, NoDupes(i))).NameU Like "TvR*" <> 0 Then .ItemFromID(ArrShapeID(0, NoDupes(i))).Cells(HE).Result(64) = sngHeightCell
+                            Next
+                            NoDupes.Clear()
+                        End If
+                    Else '----------------------------------------------------------------------------------
+                        If booWidth Then ' По ширине, все столбцы
+                            For i = 1 To UBound(ArrShapeID, 1)
+                                .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64) = sngWidthCell
+                            Next
+                        End If
+                        If booHeight Then ' По высоте, все строки
+                            For i = 1 To UBound(ArrShapeID, 2)
+                                .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) = sngHeightCell
+                            Next
+                        End If
+                    End If
+                Case 2
+                    If booWidth Then ' По ширине, таблица
+                        Dim factorW As Single
+                        factorW = sngWidthTable / fSTWH(winObj.Selection(1), 1, False)
+                        For i = 1 To UBound(ArrShapeID, 1)
+                            .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64) = .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64) * factorW
+                        Next
+                    End If
+                    If booHeight Then ' По высоте, таблица
+                        Dim factorH As Single
+                        factorH = sngHeightTable / fSTWH(winObj.Selection(1), 2, False)
+                        For i = 1 To UBound(ArrShapeID, 2)
+                            .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) = .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) * factorH
+                        Next
+                    End If
+            End Select
+        End With
+
+        Call RecUndo("0")
+
+    End Sub
+
     Sub SelCell(arg As Byte) ' Выделение(разное) ячеек таблицы
         If Not CheckSelCells() Then Exit Sub
 
@@ -999,7 +1201,7 @@ err:
 
         Select Case bytColumnOrRow
             Case 4
-                cellName = WI : txt = "MAX(TEXTWIDTH(" : txt1 = "!TheText),TEXTWIDTH(" : lentxt = Len(txt)
+                cellName = WI : txt = "MAX(TEXTWIDTH(" : txt1 = "!TheText),TEXTWIDTH(" : lentxt = Strings.Len(txt)
                 For intCount = 1 To UBound(ArrShapeID, 2)
                     With shpsObj.ItemFromID(ArrShapeID(ShNum, intCount))
                         If InStr(1, .Cells(cellName).FormulaU, ",", 1) = 0 _
@@ -1008,7 +1210,7 @@ err:
                 Next
                 iC = ShNum : iR = 0
             Case 5
-                cellName = HE : txt = "MAX(TEXTHEIGHT(" : txt1 = "!TheText," : txt2 = "!Width),TEXTHEIGHT(" : lentxt = Len(txt)
+                cellName = HE : txt = "MAX(TEXTHEIGHT(" : txt1 = "!TheText," : txt2 = "!Width),TEXTHEIGHT(" : lentxt = Strings.Len(txt)
                 For intCount = 1 To UBound(ArrShapeID, 1)
                     With shpsObj.ItemFromID(ArrShapeID(intCount, ShNum))
                         If InStr(1, .Cells(cellName).FormulaU, ",", 1) = 0 _
@@ -1018,11 +1220,11 @@ err:
                 iC = 0 : iR = ShNum
         End Select
 
-        On Error Resume Next
+        ' On Error Resume Next
         With shpsObj.ItemFromID(ArrShapeID(iC, iR))
-            .Cells(cellName).FormulaForceU = Left$(txt, Len(txt) - lentxt + 3) & ")"
+            .Cells(cellName).FormulaForceU = Strings.Left(txt, Strings.Len(txt) - lentxt + 3) & ")"
             If bytNothingOrAutoOrLock = 0 Then .Cells(cellName).Result(64) = .Cells(cellName).Result(64)
-            If bytNothingOrAutoOrLock = 2 Then .Cells(cellName).FormulaForceU = GU & Left$(txt, Len(txt) - lentxt + 3) & ")" & ")"
+            If bytNothingOrAutoOrLock = 2 Then .Cells(cellName).FormulaForceU = GU & Strings.Left(txt, Strings.Len(txt) - lentxt + 3) & "))"
         End With
 
     End Sub
@@ -1498,6 +1700,25 @@ err:
 
         Erase arrId
         fArrT = txt
+    End Function
+
+    Function fSTWH(sh As Visio.Shape, strWidthOrHeight As Byte, booInit As Boolean) ' Функция подсчета размеров активной таблицы
+
+        If booInit Then Call InitArrShapeID(sh.Cells(UTN).ResultStr(""))
+
+        With winObj.Page.Shapes
+            Select Case strWidthOrHeight
+                Case 1
+                    For i = 1 To UBound(ArrShapeID, strWidthOrHeight)
+                        fSTWH = fSTWH + .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64)
+                    Next
+                Case 2
+                    For i = 1 To UBound(ArrShapeID, strWidthOrHeight)
+                        fSTWH = fSTWH + .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64)
+                    Next
+            End Select
+        End With
+
     End Function
 
     Private Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean

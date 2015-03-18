@@ -25,14 +25,12 @@ Partial Public Class Addin
             Case "btn_delcolumn" : DelColRows(0)
             Case "btn_delrow" : DelColRows(1)
             Case "btn_intellinput" : MessageBox.Show(commandId) ': LoadfrmIntellInput
-            Case "btn_seldialog" : MessageBox.Show(commandId) ': LoadSelectfrmWorks
             Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
-            Case "btn_size" : MessageBox.Show(commandId) ': LoadSizefrmWorks
-            Case "btn_autosize" : MessageBox.Show(commandId) ': LoadAutoSizefrmWorks
+            Case "btn_size" : LoaddlgTableSize(0)
+            Case "btn_autosize" : LoaddlgTableSize(1)
             Case "btn_fromfile" : LoaddlgFromFile()
             Case "btn_altlinesrow", "btn_altlinescol" : AlternatLines(commandTag)
-            Case "btn_moredialog" : MessageBox.Show(commandId) ': LoadMorefrmWorks
-            Case "btn_extdata" : MessageBox.Show(commandId) ': LoadfrmLinkData
+            Case "btn_extdata" : LoaddlgLinkData()
             Case "btn_convert1Shape" : ConvertInto1Shape()
             Case "btn_lockpicture" : LoaddlgPicture()
             Case "btn_help" : CallHelp()

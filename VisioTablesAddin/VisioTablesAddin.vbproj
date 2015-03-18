@@ -23,7 +23,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ru</TargetCulture>
-    <ApplicationVersion>1.1.4.9</ApplicationVersion>
+    <ApplicationVersion>1.1.4.10</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -151,6 +151,12 @@
     <Compile Include="dlgIntellInput.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="dlgLinkData.Designer.vb">
+      <DependentUpon>dlgLinkData.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgLinkData.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="dlgPictures.Designer.vb">
       <DependentUpon>dlgPictures.vb</DependentUpon>
     </Compile>
@@ -161,6 +167,12 @@
       <DependentUpon>dlgSelectFromList.vb</DependentUpon>
     </Compile>
     <Compile Include="dlgSelectFromList.vb">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dlgTableSize.Designer.vb">
+      <DependentUpon>dlgTableSize.vb</DependentUpon>
+    </Compile>
+    <Compile Include="dlgTableSize.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="VisioTable.vb" />
@@ -212,6 +224,9 @@
     <EmbeddedResource Include="dlgIntellInput.resx">
       <DependentUpon>dlgIntellInput.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="dlgLinkData.resx">
+      <DependentUpon>dlgLinkData.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="dlgNewTable.resx">
       <DependentUpon>dlgNewTable.vb</DependentUpon>
     </EmbeddedResource>
@@ -220,6 +235,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="dlgSelectFromList.resx">
       <DependentUpon>dlgSelectFromList.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dlgTableSize.resx">
+      <DependentUpon>dlgTableSize.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="dlgWait.resx">
       <DependentUpon>dlgWait.vb</DependentUpon>
