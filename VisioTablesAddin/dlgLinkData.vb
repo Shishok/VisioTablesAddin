@@ -22,10 +22,11 @@
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
         If vsoApp.ActiveWindow.Selection.Count = 0 Then GoTo err
-        Me.Hide()
+        'Me.Hide()
         Call LinkToDataInShapes(cmbSourseData.SelectedIndex, ckbInsertName.Checked, txtNameTable.Text, _
         ckbTitleColumns.Checked, txtRowStartSourse.Value, ckbInvisibleZero.Checked, _
         UBound(lngRowIDs), vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count, ckbFontBold.Checked)
+
         Me.Close()
         Exit Sub
 

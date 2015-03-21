@@ -2,10 +2,15 @@
 <customUI xmlns="http://schemas.microsoft.com/office/2009/07/customui" onLoad="OnRibbonLoad">
   <ribbon startFromScratch="false">
     <tabs>
-      <tab idMso="TabInsert">
+      <!--<tab idMso="TabInsert">
         <group id="group_table" label="Таблицы">
-            <button id="btn_newtable"  getEnabled="IsRibbonCommandAltEnabled" label="Таблица" size="large" imageMso="TableInsert" onAction="OnRibbonButtonClick" screentip="Создание таблицы" supertip ="Вызов диалогового окна для создания новой таблицы"/>
-              <gallery id="gal1"  getEnabled="IsRibbonCommandAltEnabled" label="Таблица 1 клик"  size="large" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
+
+        </group>
+      </tab>-->
+      <tab id="table1" label="Таблицы" getVisible="IsRibbonCommandEnabled">
+        <group id="group_add" label="Вставить" imageMso="TableInsert">
+             <button id="btn_newtable" label="Новая таблица" size="large" imageMso="TableInsert" onAction="OnRibbonButtonClick" screentip="Создание таблицы" supertip ="Вызов диалогового окна для создания новой таблицы"/>
+              <gallery id="gal1" label="Таблица 1 клик"  size="normal" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
                 <item id="i1x1" imageMso="AppointmentColor0" label="1x1"/>
                 <item id="i2x1" imageMso="AppointmentColor0" label="2x1"/>
                 <item id="i3x1" imageMso="AppointmentColor0" label="3x1"/>
@@ -106,18 +111,14 @@
                 <item id="i8x10" imageMso="AppointmentColor0" label="8x10"/>
                 <item id="i9x10" imageMso="AppointmentColor0" label="9x10"/>
                 <item id="i10x10" imageMso="AppointmentColor0" label="10x10"/>
-              </gallery>
-        </group>
-      </tab>
-      <tab id="table1" label="Таблицы" getVisible="IsRibbonCommandEnabled">
-        <group id="group_add" label="Добавить" imageMso="TableInsert">
-          <splitButton id="split_newcol" size="large">
+              </gallery>         
+          <splitButton id="split_newcol" size="normal">
             <button id="btn_newcolumnbefore" label="Столбец слева" imageMso="TableColumnsInsertLeft" onAction="OnRibbonButtonClick" tag="0" screentip="Добавление столбца" supertip ="Добавление нового столбца в активную таблицу"/>
             <menu id="menu_newcol">
               <button id="btn_newcolumnafter" label="Столбец справа" imageMso="TableColumnsInsertRight" onAction="OnRibbonButtonClick" tag="1" screentip="Добавление столбца" supertip ="Добавление нового столбца в активную таблицу"/>
             </menu>
           </splitButton>
-          <splitButton id="split_newrow" size="large">
+          <splitButton id="split_newrow" size="normal">
             <button id="btn_newrowbefore" label="Строка выше" imageMso="TableRowsInsertAboveWord" onAction="OnRibbonButtonClick" tag="0" screentip="Добавление строки" supertip ="Добавление новой строки в активную таблицу"/>
             <menu id="menu_newrow">
               <button id="btn_newrowafter" label="Строка ниже" imageMso="TableRowsInsertBelowWord" onAction="OnRibbonButtonClick" tag="1" screentip="Добавление строки" supertip ="Добавление новой строки в активную таблицу"/>

@@ -47,9 +47,10 @@ Public Class VisioTable
     Private Const GU = "=GUARD("
     Private Const strATC = "!Actions.Titles.Checked=1,"
     Private Const strACC = "!Actions.Comments.Checked=1,"
-    Private Const strThGu000 = "THEMEGUARD(MSOTINT(RGB(0,0,0),50))"
-    Private Const strThGu255 = "THEMEGUARD(RGB(255,255,255))"
-    Private Const strThGu191 = "THEMEGUARD(RGB(191,191,191))"
+    Private Const strThGu000 = "GUARD(MSOTINT(RGB(0,0,0),50))"
+    Private Const strThGu255 = "GUARD(RGB(255,255,255))"
+    'Private Const strThGu255 = "THEMEGUARD(RGB(255,255,255))"
+    Private Const strThGu191 = "GUARD(RGB(191,191,191))"
     Private Const GS = "=GUARD(Sheet."
     Private Const GI = "=Guard(IF("
     Private Const sh = "Sheet."
@@ -82,17 +83,17 @@ Public Class VisioTable
 
         Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
         Dim TypeCell As String
-        Dim ThemeC As String, ThemeE As String
+        'Dim ThemeC As String, ThemeE As String
         Dim jGT As Integer = 0
         Dim iGT As Integer = 0
 
         winObj = vsoApp.ActiveWindow
         pagObj = vsoApp.ActivePage
 
-        ThemeC = pagObj.ThemeColors
-        If ThemeC <> "visThemeNone" Then pagObj.ThemeColors = "visThemeNone"
-        ThemeE = pagObj.ThemeEffects
-        If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
+        'ThemeC = pagObj.ThemeColors
+        'If ThemeC <> "visThemeNone" Then pagObj.ThemeColors = "visThemeNone"
+        'ThemeE = pagObj.ThemeEffects
+        'If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
 
         If bytInsertType = 2 Then
             Dim sngPW As Single, sngPH As Single, sngPLM As Single, sngPRM As Single, sngPTM As Single, sngPBM As Single
@@ -215,8 +216,8 @@ Public Class VisioTable
         vsoApp.ShowChanges = True
         winObj.Select(shpObj, 258)
 
-        If ThemeC <> pagObj.ThemeColors Then pagObj.ThemeColors = ThemeC
-        If ThemeE <> pagObj.ThemeEffects Then pagObj.ThemeEffects = ThemeE
+        'If ThemeC <> pagObj.ThemeColors Then pagObj.ThemeColors = ThemeC
+        'If ThemeE <> pagObj.ThemeEffects Then pagObj.ThemeEffects = ThemeE
 
         Exit Sub
 errD:
@@ -257,10 +258,14 @@ errD:
                         .Cells(UTR).FormulaForceU = GU & 0 & ")"
                         .Characters.AddCustomFieldU(UTC, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTC & ")"
-                        .Cells("Char.Color").FormulaForceU = strThGu255
-                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
-                        .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+
+                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        '.Cells("Char.Color").FormulaForceU = strThGu255
+                        '.Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
+                        '.Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
+                        '.Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                         .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
                         .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка столбца""" & "," & """""" & "))"
 
@@ -284,10 +289,14 @@ errD:
                         .Cells(UTR).FormulaForceU = GU & jGT & ")"
                         .Characters.AddCustomFieldU(UTR, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTR & ")"
-                        .Cells("Char.Color").FormulaForceU = strThGu255
-                        .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
-                        .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+
+                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        '.Cells("Char.Color").FormulaForceU = strThGu255
+                        '.Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
+                        '.Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
+                        '.Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
                         .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
                         .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка строки""" & "," & """""" & "))"
 
@@ -303,7 +312,7 @@ errD:
                         End If
                         .UpdateAlignmentBox()
                         .Cells(UTN).FormulaU = "=GUARD(Name(0))"
-                        .Cells("Char.Color").FormulaForceU = strThGu255
+                        '.Cells("Char.Color").FormulaForceU = strThGu255 ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 End Select
 
                 .Cells(CA).FormulaU = GU & "0 deg)"
@@ -333,13 +342,13 @@ errD:
             arrRowData = {{"TableName", "Name(0)", """Таблица"""}, _
                           {"TableCol", """""", """Столбец"""}, _
                           {"TableRow", """""", """Строка"""}}
-            AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
+            AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum, True)
 
             .Cells("LocPinX").FormulaU = "Guard(Width*0.5)"
             .Cells("LocPinY").FormulaU = "Guard(Height*0.5)"
-            .Cells("LinePattern").FormulaU = "1"
-            .Cells("LineWeight").FormulaU = "0.1 pt"
-            .Cells("Rounding").FormulaU = "Guard(0 mm)"
+            '.Cells("LinePattern").FormulaU = "1" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            '.Cells("LineWeight").FormulaU = "0.1 pt" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            '.Cells("Rounding").FormulaU = "Guard(0 mm)" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             .Cells("UpdateAlignBox").FormulaForceU = GT
             .Cells("LockDelete").FormulaU = G1
             .Cells("LockRotate").FormulaU = G1
@@ -348,6 +357,7 @@ errD:
             Select Case TypeCell
                 Case strNameTable, "ThC", "TvR"
                     ' Настройка форматов
+                    Call FormatLFM(vsoShape, TypeCell)
                     .Cells("LockFormat").FormulaU = G1
                     .Cells("LockFromGroupFormat").FormulaU = G1
                     .Cells("LockThemeColors").FormulaU = G1
@@ -390,9 +400,10 @@ errD:
                         {"FixingTable", "SETF(GetRef(Actions.FixingTable.Checked),NOT(Actions.FixingTable.Checked))", """Заф&иксировать таблицу""", """""", 7, 0, "FALSE", "FALSE"}}
                     AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
 
-                    .Cells("LineColor").FormulaU = "GUARD(IF(Actions.Titles.Checked=1,THEMEGUARD(RGB(191,191,191)),THEMEGUARD(RGB(255,255,255))))"
-                    .Cells("FillForegnd").FormulaU = "GUARD(IF(Actions.Titles.Checked=1,THEMEGUARD(MSOTINT(RGB(0,0,0),50)),THEMEGUARD(RGB(255,255,255))))"
-                    .Cells("FillForegndTrans").FormulaU = "GUARD(IF(Actions.Titles.Checked=1,0%,50%))"
+                    .Cells("LineColor").FormulaForceU = "GUARD(IF(Actions.Titles.Checked=1,RGB(191,191,191),RGB(255,255,255)))"
+                    .Cells("FillForegnd").FormulaForceU = "GUARD(IF(Actions.Titles.Checked=1,MSOTINT(RGB(0,0,0),50),RGB(255,255,255)))"
+                    .Cells("FillForegndTrans").FormulaForceU = "GUARD(IF(Actions.Titles.Checked=1,0%,50%))"
+
                     .Cells("LockMoveX").FormulaU = "GUARD(Actions.FixingTable.Checked)"
                     .Cells("LockMoveY").FormulaU = "GUARD(Actions.FixingTable.Checked)"
                     .Cells("Width").FormulaU = GU5
@@ -408,13 +419,20 @@ errD:
         MsgBox("NewShape" & vbNewLine & Err.Description)
     End Sub
 
-    Private Sub AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum)
+    Private Sub AddSections(vsoShape, AddSectionNum, arrRowData, intArrNum, Optional DelS = False)
         On Error GoTo errD
         ' Подпроцесс добавления заданной Section, требуемого кол-ва строк в Section и настройка этих строк
         Dim intI As Byte, intJ As Byte
 
         With vsoShape
-            .AddSection(AddSectionNum)
+            Select Case Strings.Left(.NameU, 3)
+                Case "ClW"
+                    If Not .SectionExists(AddSectionNum, 0) Then .AddSection(AddSectionNum)
+                Case Else
+                    If .SectionExists(AddSectionNum, 0) AndAlso DelS Then .DeleteSection(AddSectionNum)
+                    If Not .SectionExists(AddSectionNum, 0) Then .AddSection(AddSectionNum)
+            End Select
+
             For intI = 0 To UBound(arrRowData)
                 .AddRow(AddSectionNum, -2, 0)
                 .CellsSRC(AddSectionNum, intI, 0).RowNameU = arrRowData(intI, 0)
@@ -426,6 +444,45 @@ errD:
         Exit Sub
 errD:
         MsgBox("AddSections" & vbNewLine & Err.Description)
+    End Sub
+
+    Private Sub FormatLFM(Shp, TC)
+        On Error GoTo errD
+        Dim arrL = {"0.1 pt", "0", "1", "0 mm", "0", "0", "0", "0", "0", "0%"}
+        Dim arrF = {"1", "0", "1", "0", "1", "0", "0%", "0%", "0%", "0%", "0", "0 mm", "0 mm", "0 deg", "100%"}
+
+        With Shp
+            'arrL = Array("LineWeight", "LineColor", "LinePattern", "Rounding", "EndArrowSize", "BeginArrow", "EndArrow", "LineCap", "BeginArowSize", "LineColorTrans")
+
+            For i = 0 To 9 ' Линия
+                .CellsSRC(1, 2, i).FormulaU = GU & arrL(i) & ")"
+            Next
+
+            'arrF = Array("FillForegnd", "FillBkgnd", "FillPattern", "ShdwForegnd", "ShdwBkgnd", "ShdwPattern", "FillForegndTrans", "FillBkgndTrans", "ShdwForegndTrans", "ShdwBkgndTrans", "ShapeShdwType", "ShapeShdwOffsetX", "ShapeShdwOffsetY", "ShapeShdwObliqueAngle", "ShapeShdwScaleFactor")
+
+            For i = 0 To 14 ' Заливка
+                .CellsSRC(1, 3, i).FormulaU = GU & arrF(i) & ")"
+            Next
+
+            For i = 0 To 3 ' Поля текстового блока
+                .CellsSRC(1, 11, i).FormulaU = GU & 0 & " pt)"
+            Next
+
+            .Cells("Char.Color[1]").FormulaU = strThGu255
+            .Cells("Char.Font[1]").FormulaU = GU & 4 & ")"
+            .Cells("Char.Size[1]").FormulaU = GU & 10 & " pt)"
+
+            Select Case TC
+                Case "ThC", "TvR"
+                    .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
+                    .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
+                    .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
+            End Select
+
+        End With
+        Exit Sub
+errD:
+        MsgBox("FormatLFM" & vbNewLine & Err.Description)
     End Sub
 
 End Class

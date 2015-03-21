@@ -121,7 +121,7 @@ Module CreatingTable
     Sub AddColumns(arg As Byte)  ' Вставка нового столбца. Основная процедура
         'arg = 0 вставка столбца перед выделенным, arg = 1 вставка столбца после выделенного
 
-        Call CheckSelCells()
+        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTC)
         If winObj.Selection.Count = 0 Then Exit Sub
 
@@ -132,7 +132,8 @@ Module CreatingTable
 
         shObj = winObj.Selection(1)
 
-        Call InitArrShapeID(NT) : winObj.DeselectAll()
+        Call InitArrShapeID(NT) ': winObj.Select(winObj.Page.Shapes.item(1), 256)
+        winObj.DeselectAll()
 
         Call PropLayers(1)
 
@@ -222,7 +223,7 @@ Module CreatingTable
     Sub AddRows(arg As Byte) ' Вставка новой строки. Основная процедура
         'arg = 0 вставка строки перед выделенной, arg = 1 вставка строки после выделенной
 
-        Call CheckSelCells()
+        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTR)
         If winObj.Selection.Count = 0 Then Exit Sub
 
@@ -233,7 +234,8 @@ Module CreatingTable
 
         shObj = winObj.Selection(1)
 
-        Call InitArrShapeID(NT) : winObj.DeselectAll()
+        Call InitArrShapeID(NT) ': winObj.Select(winObj.Page.Shapes.item(1), 256)
+        winObj.DeselectAll()
 
         Call PropLayers(1)
 
@@ -324,10 +326,10 @@ Module CreatingTable
         bytNothingOrAutoOrLockRows As Byte, booOnlySelectedColumns As Boolean, booOnlySelectedRow As Boolean)
         ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Предварительная процедура
 
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoSel As Visio.Selection 'NoDupes As New Collection ', strNameMainCtlCell As String
-        Dim Shp As Visio.Shape, ShNum As Integer, iCount As Integer, bytColumnOrRow As Byte
+        Dim ShNum As Integer, iCount As Integer, bytColumnOrRow As Byte
 
         shpsObj = winObj.Page.Shapes : vsoSel = winObj.Selection
         Call InitArrShapeID(NT)
@@ -382,7 +384,7 @@ Module CreatingTable
     End Sub
 
     Sub AlignOnSize(arg As Byte)
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim i As Integer, strCellWH As String = "", dblResult As Double
         Dim vsoSel As Visio.Selection
@@ -435,7 +437,8 @@ Module CreatingTable
         End With
         NoDupes.Clear()
         Call RecUndo("0")
-        winObj.DeselectAll() : winObj.Selection = vsoSel
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
+        winObj.Selection = vsoSel
 
 err:
     End Sub
@@ -473,7 +476,7 @@ err:
     End Sub
 
     Sub AlternatLines(iAlt As Byte)  'Чередование цвета строк/столбцов
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
         Dim i As Integer, j As Integer, strCellWH As String = UTC
         shpsObj = winObj.Page.Shapes : MemSel = winObj.Selection(1)
 
@@ -495,7 +498,8 @@ err:
 
         Call RecUndo("0")
 
-        winObj.DeselectAll() : winObj.Select(MemSel, 2)
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
+        winObj.Select(MemSel, 2)
 
     End Sub
 
@@ -506,7 +510,7 @@ err:
     End Sub
 
     Sub ConvertInto1Shape() ' Преобразование таблицы в одну сгруппированную фигуру
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim visWorkCells As Visio.Selection, i As Integer
         Dim dblTop As Double, dblBottom As Double, dblLeft As Double, dblRight As Double
@@ -534,7 +538,7 @@ err:
             With visWorkCells(i)
                 .DeleteSection(242)
                 .DeleteSection(240)
-                '.DeleteSection visSectionProp ' Как насчет таблицы с внешними данными?
+                .DeleteSection(243)
                 .CellsSRC(1, 17, 16).FormulaU = ""
                 .CellsSRC(1, 15, 5).FormulaForceU = "0"
                 .CellsSRC(1, 15, 8).FormulaForceU = "0"
@@ -554,14 +558,14 @@ err:
     End Sub
 
     Sub CopyT() ' Копирование содержимого выделенных ячеек таблицы
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
     End Sub
 
     Sub DelColRows(bytColsOrRows As Byte) ' Удаление столбцов/строк из активной таблицы из шейпа. Предварительная процедура
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         shpsObj = winObj.Page.Shapes
         Dim vsoSel As Visio.Selection = winObj.Selection, shObj As Visio.Shape
@@ -586,7 +590,7 @@ err:
         On Error GoTo errD
         Dim Response As Byte = 0
         ' 6 - Да, 7 - нет, 2 - отмена
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         'If Response = 0 Then
         Response = MsgBox("Уверены что хотите удалить эту таблицу?", 67, "Удаление!")
@@ -602,7 +606,7 @@ err:
             frm.Label1.Text = " " & vbCrLf & "Удаление таблицы..."
             frm.Show() : frm.Refresh()
 
-            winObj.DeselectAll()
+            'winObj.Select(winObj.Page.Shapes.item(1), 256)
             vsoApp.ShowChanges = False
 
             Dim dblW As Integer, iCount As Integer
@@ -630,7 +634,7 @@ errD:
     End Sub
 
     Sub GutT() ' Вырезание содержимого из выделенных ячеек таблицы
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
@@ -646,7 +650,7 @@ errD:
     End Sub
 
     Sub IntDeIntCells() ' Объединение/Разъединение ячеек из шейпа. Предварительная процедура
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTC) : Call ClearControlCells(UTR)
 
         If Not CheckSelCells() Then Exit Sub
@@ -691,7 +695,7 @@ errD:
     End Sub
 
     Sub InsertText(arg) ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
         Dim title As String, msgComm As String, txt As String = "", i As Integer
         Dim vsoSel As Visio.Selection = winObj.Selection, arrArg() As String
 
@@ -762,13 +766,14 @@ err:
     Sub LinkToDataInShapes(intDataIndex, booInsertTableName, TblName, booTitleColumns, _
         intRowStartSourse, booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
         ' Связывание таблиц с внешними источниками данных
-        If Not CheckSelCells() Then Exit Sub
+        ' Нужна проверка объединенных ячеек
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoDataRecordset As Visio.DataRecordset
         Dim vsoSel As Visio.Selection
         Dim shpObj As Visio.Shape
         Dim intEndCol As Integer, intEndRow As Integer
-        Dim i As Integer, j As Integer, intRowStart As Integer, intCountCur As Integer, intRS As Integer
+        Dim intRowStart As Integer, intCountCur As Integer, intRS As Integer
 
         shpsObj = winObj.Page.Shapes
         vsoSel = winObj.Selection
@@ -776,14 +781,6 @@ err:
 
         Call InitArrShapeID(NT)
         intRowStart = 0
-
-        winObj.DeselectAll()
-
-        Dim frm As New dlgWait
-        frm.Label1.Text = " " & vbCrLf & "Связать данные с фигурами..."
-        frm.Show() : frm.Refresh()
-
-        Call RecUndo("Связать данные с фигурами")
 
         ' Определение диапазона ячеек для связи
         If booInsertTableName Then intRS = intRS + 1
@@ -793,14 +790,19 @@ err:
         If shpsObj.Item(NT).Cells(UTC).Result("") > intCountColSourse Then intEndCol = intCountColSourse
         If shpsObj.Item(NT).Cells(UTR).Result("") - intRS > intCountRowSourse Then intEndRow = intCountRowSourse + intRS + 1
 
+        'Dim frm As New dlgWait
+        'frm.Label1.Text = " " & vbCrLf & "Связать данные с фигурами..."
+        'frm.Show() : frm.Refresh()
+
+        Call RecUndo("Связать данные с фигурами")
 
         ' Вставить название таблицы         ' (Проверить 1 строку на объединеность!!!!!)
         If booInsertTableName Then
             With winObj
-                .DeselectAll()
+                .Select(winObj.Page.Shapes.item(1), 256)
                 .Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
                 .Select(shpsObj.ItemFromID(GetShapeId(UBound(ArrShapeID, 1), 1)), 2)
-                vsoSel = .Selection
+                'vsoSel = .Selection
 
                 Call IntegrateCells()
                 shpObj = shpsObj.ItemFromID(GetShapeId(1, 1))
@@ -810,11 +812,12 @@ err:
             End With
             intRowStart = intRowStart + 1
             Call InitArrShapeID(NT)
+            winObj.Select(winObj.Page.Shapes.item(1), 256)
         End If
 
         ' Вставить заголовки столбцов
         If booTitleColumns Then
-            winObj.DeselectAll()
+            'winObj.Select(winObj.Page.Shapes.item(1), 256)
 
             For i = 1 To UBound(ArrShapeID, 1)
                 With shpsObj.ItemFromID(GetShapeId(i, 1 + intRowStart))
@@ -829,49 +832,42 @@ err:
             intRowStart = intRowStart + 1
         End If
 
+
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
+        'vsoApp.ShowChanges = False
+        'Dim www1 As Double
+        'www1 = (300 / vsoSel.Count)
+
         ' Связать ячейки таблицы с внешними данными
-        winObj.DeselectAll()
+        For c = 1 To intEndCol
+            Application.DoEvents()
+            For r = intRowStart + 1 To intEndRow
+                'frm.lblProgressBar.Width = www1 * i : frm.lblProgressBar.Refresh() : 
 
-        Call SelectCells(1, UBound(ArrShapeID, 1), 1, UBound(ArrShapeID, 2))
-        vsoSel = winObj.Selection
+                With shpsObj.ItemFromID(ArrShapeID(c, r))
+                    .DeleteSection(243)
+                    intCountCur = .Cells(UTR).Result("") - intRowStart + intRowStartSourse - 1
+                    .LinkToData(vsoDataRecordset.ID, intCountCur, False)
 
-        For i = 1 To vsoSel.Count
-            If vsoSel(i).Cells(UTR).Result("") <= intRowStart Or vsoSel(i).Cells(UTC).Result("") > intEndCol Or vsoSel(i).Cells(UTR).Result("") > intEndRow Then winObj.Select(vsoSel(i), 1)
-        Next
-
-        vsoSel = winObj.Selection
-        winObj.DeselectAll()
-
-        vsoApp.ShowChanges = False
-        Dim www1 As Double
-        www1 = (300 / vsoSel.Count)
-
-        For i = 1 To vsoSel.Count
-            frm.lblProgressBar.Width = www1 * i : frm.lblProgressBar.Refresh() : Application.DoEvents()
-            shpObj = vsoSel(i)
-            With shpObj
-                .DeleteSection(243)
-                intCountCur = .Cells(UTR).Result("") - intRowStart + intRowStartSourse - 1
-                .LinkToData(vsoDataRecordset.ID, intCountCur, False)
-
-                For j = 0 To .RowCount(243)
-                    If .Cells(UTC).Result("") = j + 1 And .Cells(UTC).Result("") <= intCountColSourse Then
-                        .Characters.AddCustomFieldU("=" & .CellsSRC(243, j, 0).Name, 0)
-                        If booInvisibleZero Then
-                            .Cells("Fields.Format").FormulaU = "=IF(" & .CellsSRC(243, j, 0).Name & ".Type=2,IF(" & .CellsSRC(243, j, 0).Name & "=0," & """#""" & ",FIELDPICTURE(0)),FIELDPICTURE(0))"
-                        Else
-                            .Cells("Fields.Format").FormulaU = "=" & "FIELDPICTURE(0)"
-                        End If
-                        Exit For
+                    'For j = 0 To .RowCount(243)
+                    'If .Cells(UTC).Result("") = c And .Cells(UTC).Result("") <= intCountColSourse Then
+                    .Characters.AddCustomFieldU("=" & .CellsSRC(243, c - 1, 0).Name, 0)
+                    If booInvisibleZero Then
+                        .Cells("Fields.Format").FormulaU = "=IF(" & .CellsSRC(243, c - 1, 0).Name & ".Type=2,IF(" & .CellsSRC(243, c - 1, 0).Name & "=0," & """#""" & ",FIELDPICTURE(0)),FIELDPICTURE(0))"
+                    Else
+                        .Cells("Fields.Format").FormulaU = "=" & "FIELDPICTURE(0)"
                     End If
-                Next
-            End With
+                    '    Exit For
+                    'End If
+                    'Next
+                End With
+            Next
         Next
 
         Call RecUndo("0")
-        vsoApp.ShowChanges = True
-        winObj.DeselectAll()
-        frm.Close()
+        'vsoApp.ShowChanges = True
+        winObj.Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
+        'frm.Close()
 
         'lngRowIDs = vsoDataRecordset.GetDataRowIDs("") ' Массив всех строк
         'varrow = vsoDataRecordset.GetRowData(i) ' Массив строки i
@@ -970,7 +966,7 @@ err:
     End Sub
 
     Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         shpsObj = winObj.Page.Shapes
 
@@ -1026,7 +1022,7 @@ err:
         sngHeightTable As Single, booWidth As Boolean, booHeight As Boolean)
         ' Изменение размеров ячеек таблицы. Основная процедура
 
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
         Dim vsoSel As Visio.Selection, i As Integer
 
         shpsObj = winObj.Page.Shapes : vsoSel = winObj.Selection
@@ -1039,7 +1035,7 @@ err:
             Select Case bytCellsOrTable
                 Case 1
                     If booOnlyActiveCells Then
-                        Dim Shp As Visio.Shape
+                        'Dim Shp As Visio.Shape
                         If booWidth Then ' По ширине, выделенные столбцы
                             NotDub(vsoSel, UTC)
                             For i = 1 To NoDupes.Count
@@ -1089,14 +1085,14 @@ err:
     End Sub
 
     Sub SelCell(arg As Byte) ' Выделение(разное) ячеек таблицы
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoSel As Visio.Selection, intMaxC As Integer, intMaxR As Integer
         Dim iCount As Integer, UT As String, Shp As Visio.Shape
 
         vsoSel = winObj.Selection
         Call InitArrShapeID(NT)
-        winObj.DeselectAll()
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
 
         intMaxC = UBound(ArrShapeID, 1) : intMaxR = UBound(ArrShapeID, 2)
 
@@ -1149,7 +1145,7 @@ err:
     End Sub
 
     Sub SelInContent(arg) ' Выделение ячеек таблицы по критерию(текст, дата, значение, пустые/не пустые). Основная процедура
-        If Not CheckSelCells() Then Exit Sub
+        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoSel As Visio.Selection = winObj.Selection, shpObj As Visio.Shape
 
@@ -1272,7 +1268,7 @@ err:
         If flagCheck = False Then GoTo err
         ' End Проверка на вшивость -------------------------------------------------
 
-        winObj.DeselectAll()
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
 
         'Start Генерация  и переопределение формул для объединенной ячейки: PinX, PinY, Width, Height
         If cMax - cMin <> 0 Then
@@ -1646,22 +1642,20 @@ err:
 
     Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе
 
-        Dim ErrMsg = Sub()
-                         MsgBox("На активном листе отсутствуют выделенные ячейки в таблице!" &
-                            vbCrLf & "Дальнейшая работа невозможна." & vbCrLf &
-                            "Нужно выбрать ячейку в таблице и выполнить операцию еще раз." & vbCrLf, 48, "Внимание")
-                         CheckSelCells = False
-                     End Sub
+        'Dim ErrMsg = Function()
+
+
+        '             End Function
 
         With winObj
-            If .Selection.Count = 0 Then ErrMsg()
+            If .Selection.Count = 0 Then GoTo ErrMsg
 
             Dim shObj As Visio.Shape
 
             For Each shObj In .Selection
                 If Not shObj.CellExistsU(UTN, 0) Then .Select(shObj, 1)
             Next
-            If .Selection.Count = 0 Then ErrMsg()
+            If .Selection.Count = 0 Then GoTo ErrMsg
 
             NT = .Selection(1).Cells(UTN).ResultStr("")
 
@@ -1672,6 +1666,11 @@ err:
         End With
 
         Return True
+ErrMsg:
+        MsgBox("На активном листе отсутствуют выделенные ячейки в таблице!" &
+           vbCrLf & "Дальнейшая работа невозможна." & vbCrLf &
+           "Нужно выбрать ячейку в таблице и выполнить операцию еще раз." & vbCrLf, 48, "Внимание")
+        Return False
     End Function
 
     Private Function fArrT(txt) ' Заполнение массива данными из ячеек таблицы

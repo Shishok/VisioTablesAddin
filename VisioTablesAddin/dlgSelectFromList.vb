@@ -60,7 +60,8 @@
         Next
         'cmbSelectValue.ListIndex = 0
 
-        winObj.DeselectAll() : winObj.Selection = sh ' cmbSelectValue.DroppedDown = True
+        'winObj.Select(winObj.Page.Shapes.item(1), 256)
+        winObj.Selection = sh ' cmbSelectValue.DroppedDown = True
         If cmbSelectValue.Items.Count <> 0 Then cmbSelectValue.SelectedIndex = cmbSelectValue.Items.Count - 1
     End Sub
 
