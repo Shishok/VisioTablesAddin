@@ -87,7 +87,7 @@ Public Class dlgIntellInput
 
     Private Sub dlgIntellInput_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
         winObj = Nothing : vsoObj = Nothing
-        Erase ArrShapeID
+        'Erase ArrShapeID
     End Sub
 
     Private Sub dlgIntellInput_Load(sender As Object, e As EventArgs) Handles MyBase.Load
@@ -118,10 +118,10 @@ Public Class dlgIntellInput
     End Sub
 
     Private Sub SaveText()
-        On Error GoTo ex
+        On Error GoTo err
         NoDupes.Add(cmbText.Text, CStr(cmbText.Text))
         cmbText.Items.Add(NoDupes(NoDupes.Count))
-ex:
+err:
     End Sub
 
 End Class

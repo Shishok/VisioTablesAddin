@@ -39,6 +39,7 @@ Partial Public Class Addin
             Case "btn_fromfile" : LoaddlgFromFile()
             Case "btn_altlinesrow", "btn_altlinescol" : AlternatLines(commandTag)
             Case "btn_extdata" : LoaddlgLinkData()
+            Case "btn_rotatetext" : AllRotateText()
             Case "btn_convert1Shape" : ConvertInto1Shape()
         End Select
     End Sub

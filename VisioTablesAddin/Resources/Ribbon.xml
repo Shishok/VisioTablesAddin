@@ -9,8 +9,7 @@
       </tab>-->
       <tab id="table1" label="Таблицы" getVisible="IsRibbonCommandEnabled">
         <group id="group_add" label="Вставить" imageMso="TableInsert">
-             <button id="btn_newtable" label="Новая таблица" size="large" imageMso="TableInsert" onAction="OnRibbonButtonClick" screentip="Создание таблицы" supertip ="Вызов диалогового окна для создания новой таблицы"/>
-              <gallery id="gal1" label="Таблица 1 клик"  size="normal" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
+          <gallery id="gal1" label="Таблица 1 клик"  size="large" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
                 <item id="i1x1" imageMso="AppointmentColor0" label="1x1"/>
                 <item id="i2x1" imageMso="AppointmentColor0" label="2x1"/>
                 <item id="i3x1" imageMso="AppointmentColor0" label="3x1"/>
@@ -111,7 +110,8 @@
                 <item id="i8x10" imageMso="AppointmentColor0" label="8x10"/>
                 <item id="i9x10" imageMso="AppointmentColor0" label="9x10"/>
                 <item id="i10x10" imageMso="AppointmentColor0" label="10x10"/>
-              </gallery>         
+              </gallery>
+          <button id="btn_newtable" label="Новая таблица" size="normal" imageMso="TableInsert" onAction="OnRibbonButtonClick" screentip="Создание таблицы" supertip ="Вызов диалогового окна для создания новой таблицы"/>
           <splitButton id="split_newcol" size="normal">
             <button id="btn_newcolumnbefore" label="Столбец слева" imageMso="TableColumnsInsertLeft" onAction="OnRibbonButtonClick" tag="0" screentip="Добавление столбца" supertip ="Добавление нового столбца в активную таблицу"/>
             <menu id="menu_newcol">
@@ -137,6 +137,7 @@
             <button id="btn_lockpicture" label="Закрепить фигуры" imageMso="ChartEditDataSource" onAction="OnRibbonButtonClick" screentip="Закрепление фигур в ячейках" supertip ="Закрепление фигур или изображений в ячейках таблицы"/>
             <button id="btn_altlinesrow" label="Чередовать строки" imageMso="TableStyleBandedRows" onAction="OnRibbonButtonClick" tag="5" screentip="Чередование цвета строк" supertip ="Чередование цвета заливки строк таблицы для улучшения визуального восприятия"/>
             <button id="btn_altlinescol" label="Чередовать столбцы" imageMso="TableStyleBandedColumns" onAction="OnRibbonButtonClick" tag="4" screentip="Чередование цвета столбцов" supertip ="Чередование цвета заливки столбцов таблицы для улучшения визуального восприятия"/>
+            <button id="btn_rotatetext" label="Поворот текста" imageMso="TextRotate90Degrees" onAction="OnRibbonButtonClick" screentip="Поворот текста" supertip ="Поворот текста в выделенных ячейках на нужный угол"/>
             <button id="btn_convert1Shape" label="Преобразовать в 1 фигуру" imageMso="ObjectsGroupMenu" onAction="OnRibbonButtonClick" tag="4" screentip="Преобразовать в 1 фигуру" supertip ="Преобразование таблицы в один сгруппированный шейп"/>
             <!--<menuSeparator  id="menuseparator2"/>
             <button id="btn_moredialog" label="Вызов диалога" imageMso="SlideMasterMasterLayout" onAction="OnRibbonButtonClick" screentip="Дополнительно" supertip ="Дополнительные параметра работы с таблицей"/>-->

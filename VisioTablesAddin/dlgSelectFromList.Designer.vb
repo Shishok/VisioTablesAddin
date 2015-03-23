@@ -26,7 +26,8 @@ Partial Class dlgSelectFromList
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.Cancel_Button = New System.Windows.Forms.Button()
-        Me.ckbOnlyActiveCell = New System.Windows.Forms.CheckBox()
+        Me.rdbFromCol = New System.Windows.Forms.RadioButton()
+        Me.rdbFromRow = New System.Windows.Forms.RadioButton()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -78,22 +79,35 @@ Partial Class dlgSelectFromList
         Me.Cancel_Button.TabIndex = 13
         Me.Cancel_Button.Text = "Отмена"
         '
-        'ckbOnlyActiveCell
+        'rdbFromCol
         '
-        Me.ckbOnlyActiveCell.AutoSize = True
-        Me.ckbOnlyActiveCell.Location = New System.Drawing.Point(12, 46)
-        Me.ckbOnlyActiveCell.Name = "ckbOnlyActiveCell"
-        Me.ckbOnlyActiveCell.Size = New System.Drawing.Size(208, 17)
-        Me.ckbOnlyActiveCell.TabIndex = 2
-        Me.ckbOnlyActiveCell.Text = "Вставить только в активную ячейку"
-        Me.ckbOnlyActiveCell.UseVisualStyleBackColor = True
+        Me.rdbFromCol.AutoSize = True
+        Me.rdbFromCol.Checked = True
+        Me.rdbFromCol.Location = New System.Drawing.Point(12, 45)
+        Me.rdbFromCol.Name = "rdbFromCol"
+        Me.rdbFromCol.Size = New System.Drawing.Size(83, 17)
+        Me.rdbFromCol.TabIndex = 2
+        Me.rdbFromCol.TabStop = True
+        Me.rdbFromCol.Text = "Из столбца"
+        Me.rdbFromCol.UseVisualStyleBackColor = True
+        '
+        'rdbFromRow
+        '
+        Me.rdbFromRow.AutoSize = True
+        Me.rdbFromRow.Location = New System.Drawing.Point(115, 45)
+        Me.rdbFromRow.Name = "rdbFromRow"
+        Me.rdbFromRow.Size = New System.Drawing.Size(77, 17)
+        Me.rdbFromRow.TabIndex = 3
+        Me.rdbFromRow.Text = "Из строки"
+        Me.rdbFromRow.UseVisualStyleBackColor = True
         '
         'dlgSelectFromList
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(434, 77)
-        Me.Controls.Add(Me.ckbOnlyActiveCell)
+        Me.Controls.Add(Me.rdbFromRow)
+        Me.Controls.Add(Me.rdbFromCol)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.Controls.Add(Me.cmbSelectValue)
         Me.MaximizeBox = False
@@ -115,5 +129,6 @@ Partial Class dlgSelectFromList
     Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
-    Friend WithEvents ckbOnlyActiveCell As System.Windows.Forms.CheckBox
+    Friend WithEvents rdbFromCol As System.Windows.Forms.RadioButton
+    Friend WithEvents rdbFromRow As System.Windows.Forms.RadioButton
 End Class

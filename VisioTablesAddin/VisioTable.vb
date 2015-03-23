@@ -433,13 +433,23 @@ errD:
                     If Not .SectionExists(AddSectionNum, 0) Then .AddSection(AddSectionNum)
             End Select
 
-            For intI = 0 To UBound(arrRowData)
-                .AddRow(AddSectionNum, -2, 0)
-                .CellsSRC(AddSectionNum, intI, 0).RowNameU = arrRowData(intI, 0)
-                For intJ = 0 To UBound(intArrNum)
-                    .CellsSRC(AddSectionNum, intI, intArrNum(intJ)).FormulaU = arrRowData(intI, intJ + 1)
-                Next
-            Next
+            Select Case AddSectionNum
+                Case 242
+                    For intI = 0 To UBound(arrRowData)
+                        .AddNamedRow(AddSectionNum, arrRowData(intI, 0), 0)
+                        .cells("User." & arrRowData(intI, 0) & ".Value").FormulaU = arrRowData(intI, 1)
+                        .cells("User." & arrRowData(intI, 0) & ".Prompt").FormulaU = arrRowData(intI, 2)
+                    Next
+                Case Else
+                    For intI = 0 To UBound(arrRowData)
+                        .AddRow(AddSectionNum, 0, 0) '.AddRow(AddSectionNum, -2, 0)
+                        .CellsSRC(AddSectionNum, intI, 0).RowNameU = arrRowData(intI, 0)
+                        For intJ = 0 To UBound(intArrNum)
+                            .CellsSRC(AddSectionNum, intI, intArrNum(intJ)).FormulaU = arrRowData(intI, intJ + 1)
+                        Next
+                    Next
+            End Select
+
         End With
         Exit Sub
 errD:
@@ -469,7 +479,7 @@ errD:
             Next
 
             .Cells("Char.Color[1]").FormulaU = strThGu255
-            .Cells("Char.Font[1]").FormulaU = GU & 4 & ")"
+            .Cells("Char.Font[1]").FormulaU = GU & vsoApp.ActiveDocument.Fonts("Courier New").ID & ")"
             .Cells("Char.Size[1]").FormulaU = GU & 10 & " pt)"
 
             Select Case TC

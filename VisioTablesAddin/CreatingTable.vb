@@ -55,7 +55,7 @@ Module CreatingTable
 
 #Region "Load Sub"
 
-    Public Sub QuickTable(strV)
+    Sub QuickTable(strV)
         Dim nC As Integer = 0, nR As Integer = 0, w As Single = 0, h As Single = 0
         strV = Strings.Right(strV, Strings.Len(strV) - 1)
         nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
@@ -73,7 +73,7 @@ Module CreatingTable
         End If
     End Sub
 
-    Public Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
+    Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
         Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
         NewTable.CreatTable()
         NewTable = Nothing
@@ -384,70 +384,59 @@ Module CreatingTable
     End Sub
 
     Sub AlignOnSize(arg As Byte)
-        'If Not CheckSelCells() Then Exit Sub
-
-        Dim i As Integer, strCellWH As String = "", dblResult As Double
-        Dim vsoSel As Visio.Selection
-        shpsObj = winObj.Page.Shapes
-
         Call InitArrShapeID(NT)
 
         Select Case arg
-            Case 4
-                ClearControlCells(UTC)
-            Case 5
-                ClearControlCells(UTR)
+            Case 4 : ClearControlCells(UTC)
+            Case 5 : ClearControlCells(UTR)
         End Select
 
         If winObj.Selection.Count = 0 Then GoTo err
 
-        vsoSel = winObj.Selection
-        If vsoSel.Count = 1 Then Call SelCell(2)
+        Dim strCellWH As String = "", dblResult As Double
+        Dim vsoSel As Visio.Selection = winObj.Selection
+
+        If vsoSel.Count = 1 Then
+            Select Case arg
+                Case 4 : Call SelectCells(1, UBound(ArrShapeID, 1), 0, 0)
+                Case 5 : Call SelectCells(0, 0, 1, UBound(ArrShapeID, 2))
+            End Select
+        End If
 
         vsoSelection = winObj.Selection
 
         Select Case arg
-            Case 4
-                NotDub(vsoSelection, UTC) : strCellWH = WI
-                Call RecUndo("Выровнять ширину столбцов")
-            Case 5
-                NotDub(vsoSelection, UTR) : strCellWH = HE
-                Call RecUndo("Выровнять высоту строк")
+            Case 4 : NotDub(vsoSelection, UTC) : strCellWH = WI : Call RecUndo("Выровнять ширину столбцов")
+            Case 5 : NotDub(vsoSelection, UTR) : strCellWH = HE : Call RecUndo("Выровнять высоту строк")
         End Select
 
-        With shpsObj
+        With winObj.Page.Shapes
             For i = 1 To NoDupes.Count
                 Select Case arg
-                    Case 4
-                        dblResult = dblResult + .ItemFromID(ArrShapeID(NoDupes(i), 0)).Cells(strCellWH).Result(64)
-                    Case 5
-                        dblResult = dblResult + .ItemFromID(ArrShapeID(0, NoDupes(i))).Cells(strCellWH).Result(64)
+                    Case 4 : dblResult = dblResult + .ItemFromID(ArrShapeID(NoDupes(i), 0)).Cells(strCellWH).Result(64)
+                    Case 5 : dblResult = dblResult + .ItemFromID(ArrShapeID(0, NoDupes(i))).Cells(strCellWH).Result(64)
                 End Select
             Next
             dblResult = dblResult / NoDupes.Count
-
             For i = 1 To NoDupes.Count
                 Select Case arg
-                    Case 4
-                        .ItemFromID(ArrShapeID(NoDupes(i), 0)).Cells(strCellWH).Result(64) = dblResult
-                    Case 5
-                        .ItemFromID(ArrShapeID(0, NoDupes(i))).Cells(strCellWH).Result(64) = dblResult
+                    Case 4 : .ItemFromID(ArrShapeID(NoDupes(i), 0)).Cells(strCellWH).Result(64) = dblResult
+                    Case 5 : .ItemFromID(ArrShapeID(0, NoDupes(i))).Cells(strCellWH).Result(64) = dblResult
                 End Select
             Next
         End With
+
         NoDupes.Clear()
         Call RecUndo("0")
-        'winObj.Select(winObj.Page.Shapes.item(1), 256)
         winObj.Selection = vsoSel
 
 err:
     End Sub
 
-    Sub AllRotateText(iAng) 'Поворот текста
-        If Not CheckSelCells() Then Exit Sub
-
-        Dim i As Integer
+    Sub AllRotateText() 'Поворот текста
+        Dim iAng = Val(InputBox("Задайте угол в градусах.", "Поворот текста", "90"))
         vsoSelection = winObj.Selection
+
         Call RecUndo("Поворот текста")
 
         For i = 1 To vsoSelection.Count
@@ -465,7 +454,7 @@ err:
                             .Cells("TxtWidth").FormulaU = "Height*1"
                             .Cells("TxtHeight").FormulaU = "Width*1"
                         End If
-                        .Cells("TxtAngle").FormulaU = Val(iAng) & " deg"
+                        .Cells("TxtAngle").FormulaU = iAng & " deg"
                     End If
                 End If
             End With
@@ -510,16 +499,14 @@ err:
     End Sub
 
     Sub ConvertInto1Shape() ' Преобразование таблицы в одну сгруппированную фигуру
-        'If Not CheckSelCells() Then Exit Sub
 
         Dim visWorkCells As Visio.Selection, i As Integer
         Dim dblTop As Double, dblBottom As Double, dblLeft As Double, dblRight As Double
-        'winObj = ActiveWindow
 
         Call InitArrShapeID(winObj.Selection(1).Cells(UTN).ResultStr(""))
         winObj.Page.Shapes.ItemU(NT).BoundingBox(1, dblLeft, dblBottom, dblRight, dblTop)
 
-        Call SelCell(2) : visWorkCells = winObj.Selection
+        Call SelCell(2, False) : visWorkCells = winObj.Selection
         winObj.DeselectAll()
 
         Call SelectCells(0, UBound(ArrShapeID, 1), 0, 0)
@@ -764,10 +751,9 @@ err:
     End Sub
 
     Sub LinkToDataInShapes(intDataIndex, booInsertTableName, TblName, booTitleColumns, _
-        intRowStartSourse, booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
+         booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
         ' Связывание таблиц с внешними источниками данных
         ' Нужна проверка объединенных ячеек
-        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoDataRecordset As Visio.DataRecordset
         Dim vsoSel As Visio.Selection
@@ -790,19 +776,18 @@ err:
         If shpsObj.Item(NT).Cells(UTC).Result("") > intCountColSourse Then intEndCol = intCountColSourse
         If shpsObj.Item(NT).Cells(UTR).Result("") - intRS > intCountRowSourse Then intEndRow = intCountRowSourse + intRS + 1
 
-        'Dim frm As New dlgWait
-        'frm.Label1.Text = " " & vbCrLf & "Связать данные с фигурами..."
-        'frm.Show() : frm.Refresh()
+        Dim frm As New dlgWait
+        frm.Label1.Text = " " & vbCrLf & " " & vbCrLf & "Подождите..."
+        frm.Show() : frm.Refresh()
 
         Call RecUndo("Связать данные с фигурами")
 
         ' Вставить название таблицы         ' (Проверить 1 строку на объединеность!!!!!)
         If booInsertTableName Then
             With winObj
-                .Select(winObj.Page.Shapes.item(1), 256)
+                .DeselectAll()
                 .Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
                 .Select(shpsObj.ItemFromID(GetShapeId(UBound(ArrShapeID, 1), 1)), 2)
-                'vsoSel = .Selection
 
                 Call IntegrateCells()
                 shpObj = shpsObj.ItemFromID(GetShapeId(1, 1))
@@ -817,13 +802,12 @@ err:
 
         ' Вставить заголовки столбцов
         If booTitleColumns Then
-            'winObj.Select(winObj.Page.Shapes.item(1), 256)
 
             For i = 1 To UBound(ArrShapeID, 1)
                 With shpsObj.ItemFromID(GetShapeId(i, 1 + intRowStart))
                     .DeleteSection(243)
                     If .Cells(UTC).Result("") <= intCountColSourse Then
-                        .LinkToData(vsoDataRecordset.ID, intRowStartSourse, False)
+                        .LinkToData(vsoDataRecordset.ID, 1, False)
                         .Characters.AddCustomFieldU("=" & .CellsSRC(243, i - 1, 2).Name, 0)
                         If booFontBold Then .CellsSRC(3, 0, 2).FormulaU = 1
                     End If
@@ -832,8 +816,6 @@ err:
             intRowStart = intRowStart + 1
         End If
 
-
-        'winObj.Select(winObj.Page.Shapes.item(1), 256)
         'vsoApp.ShowChanges = False
         'Dim www1 As Double
         'www1 = (300 / vsoSel.Count)
@@ -846,7 +828,7 @@ err:
 
                 With shpsObj.ItemFromID(ArrShapeID(c, r))
                     .DeleteSection(243)
-                    intCountCur = .Cells(UTR).Result("") - intRowStart + intRowStartSourse - 1
+                    intCountCur = .Cells(UTR).Result("") - intRowStart '+ intRowStartSourse - 1
                     .LinkToData(vsoDataRecordset.ID, intCountCur, False)
 
                     'For j = 0 To .RowCount(243)
@@ -867,7 +849,7 @@ err:
         Call RecUndo("0")
         'vsoApp.ShowChanges = True
         winObj.Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
-        'frm.Close()
+        frm.Close()
 
         'lngRowIDs = vsoDataRecordset.GetDataRowIDs("") ' Массив всех строк
         'varrow = vsoDataRecordset.GetRowData(i) ' Массив строки i
@@ -1084,15 +1066,14 @@ err:
 
     End Sub
 
-    Sub SelCell(arg As Byte) ' Выделение(разное) ячеек таблицы
-        'If Not CheckSelCells() Then Exit Sub
+    Sub SelCell(arg As Byte, Optional booInit As Boolean = True) ' Выделение(разное) ячеек таблицы
 
         Dim vsoSel As Visio.Selection, intMaxC As Integer, intMaxR As Integer
-        Dim iCount As Integer, UT As String, Shp As Visio.Shape
+        Dim iCount As Integer, Shp As Visio.Shape
 
         vsoSel = winObj.Selection
-        Call InitArrShapeID(NT)
-        'winObj.Select(winObj.Page.Shapes.item(1), 256)
+        If booInit Then Call InitArrShapeID(NT)
+        winObj.DeselectAll()
 
         intMaxC = UBound(ArrShapeID, 1) : intMaxR = UBound(ArrShapeID, 2)
 
@@ -1118,14 +1099,14 @@ err:
                 End If
 
             Case 4 ' Выделение столбца
-                UT = UTC : NotDub(vsoSel, UT)
+                NotDub(vsoSel, UTC)
                 For iCount = 1 To NoDupes.Count
                     Call SelectCells(NoDupes(iCount), NoDupes(iCount), 1, intMaxR)
                 Next
                 NoDupes.Clear() : Shp = Nothing
 
             Case 5 ' Выделение строки
-                UT = UTR : NotDub(vsoSel, UT)
+                NotDub(vsoSel, UTR)
                 For iCount = 1 To NoDupes.Count
                     Call SelectCells(1, intMaxC, NoDupes(iCount), NoDupes(iCount))
                 Next

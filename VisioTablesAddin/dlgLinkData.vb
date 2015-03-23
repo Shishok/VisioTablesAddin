@@ -14,24 +14,16 @@
 
         cmbSourseData.SelectedIndex = 0
         txtNameTable.Enabled = ckbInsertName.Checked
-        txtColEndSourse.Value = vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count
-        txtRowEndSourse.Value = UBound(lngRowIDs) + 1
         ckbInsertName.Checked = False
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
-        If vsoApp.ActiveWindow.Selection.Count = 0 Then GoTo err
-        'Me.Hide()
         Call LinkToDataInShapes(cmbSourseData.SelectedIndex, ckbInsertName.Checked, txtNameTable.Text, _
-        ckbTitleColumns.Checked, txtRowStartSourse.Value, ckbInvisibleZero.Checked, _
+        ckbTitleColumns.Checked, ckbInvisibleZero.Checked, _
         UBound(lngRowIDs), vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count, ckbFontBold.Checked)
 
         Me.Close()
-        Exit Sub
-
-err:
-        MsgBox("Необходимо выделить любую ячейку/ячейки в нужной таблице", 64, "Внимание!")
 
     End Sub
 
@@ -49,8 +41,6 @@ err:
         lblCountRow.Text = "Источник содержит " & _
         vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count & " столбцов и " _
         & UBound(lngRowIDs) + 1 & " строк данных"
-        txtColEndSourse.Value = vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count
-        txtRowEndSourse.Value = UBound(lngRowIDs) + 1
     End Sub
 
     Private Sub ckbInsertName_CheckedChanged(sender As Object, e As EventArgs) Handles ckbInsertName.CheckedChanged

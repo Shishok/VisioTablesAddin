@@ -30,24 +30,10 @@ Partial Class dlgLinkData
         Me.ckbTitleColumns = New System.Windows.Forms.CheckBox()
         Me.ckbFontBold = New System.Windows.Forms.CheckBox()
         Me.ckbInvisibleZero = New System.Windows.Forms.CheckBox()
-        Me.Label1 = New System.Windows.Forms.Label()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
-        Me.Label4 = New System.Windows.Forms.Label()
-        Me.Label5 = New System.Windows.Forms.Label()
-        Me.Label6 = New System.Windows.Forms.Label()
-        Me.txtRowStartSourse = New System.Windows.Forms.NumericUpDown()
-        Me.txtRowEndSourse = New System.Windows.Forms.NumericUpDown()
-        Me.txtColStartSourse = New System.Windows.Forms.NumericUpDown()
-        Me.txtColEndSourse = New System.Windows.Forms.NumericUpDown()
         Me.TableLayoutPanel1 = New System.Windows.Forms.TableLayoutPanel()
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.cmdRefreshAll = New System.Windows.Forms.Button()
-        CType(Me.txtRowStartSourse, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.txtRowEndSourse, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.txtColStartSourse, System.ComponentModel.ISupportInitialize).BeginInit()
-        CType(Me.txtColEndSourse, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -134,114 +120,16 @@ Partial Class dlgLinkData
         Me.ckbInvisibleZero.Text = "Не показывать нулевые и пустые значения ячеек"
         Me.ckbInvisibleZero.UseVisualStyleBackColor = True
         '
-        'Label1
-        '
-        Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(12, 177)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(64, 13)
-        Me.Label1.TabIndex = 8
-        Me.Label1.Text = "Начинать с"
-        '
-        'Label2
-        '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(12, 212)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(78, 13)
-        Me.Label2.TabIndex = 9
-        Me.Label2.Text = "Завершить на"
-        '
-        'Label3
-        '
-        Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(190, 177)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(51, 13)
-        Me.Label3.TabIndex = 10
-        Me.Label3.Text = "строки и"
-        '
-        'Label4
-        '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(190, 212)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(51, 13)
-        Me.Label4.TabIndex = 11
-        Me.Label4.Text = "строке и"
-        '
-        'Label5
-        '
-        Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(333, 177)
-        Me.Label5.Name = "Label5"
-        Me.Label5.Size = New System.Drawing.Size(143, 13)
-        Me.Label5.TabIndex = 12
-        Me.Label5.Text = "столбца источника данных"
-        '
-        'Label6
-        '
-        Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(333, 212)
-        Me.Label6.Name = "Label6"
-        Me.Label6.Size = New System.Drawing.Size(143, 13)
-        Me.Label6.TabIndex = 13
-        Me.Label6.Text = "столбце источника данных"
-        '
-        'txtRowStartSourse
-        '
-        Me.txtRowStartSourse.Location = New System.Drawing.Point(104, 173)
-        Me.txtRowStartSourse.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.txtRowStartSourse.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
-        Me.txtRowStartSourse.Name = "txtRowStartSourse"
-        Me.txtRowStartSourse.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.txtRowStartSourse.Size = New System.Drawing.Size(80, 20)
-        Me.txtRowStartSourse.TabIndex = 14
-        Me.txtRowStartSourse.Value = New Decimal(New Integer() {1, 0, 0, 0})
-        '
-        'txtRowEndSourse
-        '
-        Me.txtRowEndSourse.Location = New System.Drawing.Point(104, 208)
-        Me.txtRowEndSourse.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.txtRowEndSourse.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
-        Me.txtRowEndSourse.Name = "txtRowEndSourse"
-        Me.txtRowEndSourse.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.txtRowEndSourse.Size = New System.Drawing.Size(80, 20)
-        Me.txtRowEndSourse.TabIndex = 15
-        Me.txtRowEndSourse.Value = New Decimal(New Integer() {1, 0, 0, 0})
-        '
-        'txtColStartSourse
-        '
-        Me.txtColStartSourse.Location = New System.Drawing.Point(247, 173)
-        Me.txtColStartSourse.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.txtColStartSourse.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
-        Me.txtColStartSourse.Name = "txtColStartSourse"
-        Me.txtColStartSourse.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.txtColStartSourse.Size = New System.Drawing.Size(80, 20)
-        Me.txtColStartSourse.TabIndex = 16
-        Me.txtColStartSourse.Value = New Decimal(New Integer() {1, 0, 0, 0})
-        '
-        'txtColEndSourse
-        '
-        Me.txtColEndSourse.Location = New System.Drawing.Point(247, 208)
-        Me.txtColEndSourse.Maximum = New Decimal(New Integer() {1000, 0, 0, 0})
-        Me.txtColEndSourse.Minimum = New Decimal(New Integer() {1, 0, 0, 0})
-        Me.txtColEndSourse.Name = "txtColEndSourse"
-        Me.txtColEndSourse.RightToLeft = System.Windows.Forms.RightToLeft.No
-        Me.txtColEndSourse.Size = New System.Drawing.Size(80, 20)
-        Me.txtColEndSourse.TabIndex = 17
-        Me.txtColEndSourse.Value = New Decimal(New Integer() {1, 0, 0, 0})
-        '
         'TableLayoutPanel1
         '
-        Me.TableLayoutPanel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.TableLayoutPanel1.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.TableLayoutPanel1.ColumnCount = 2
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.ColumnStyles.Add(New System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
         Me.TableLayoutPanel1.Controls.Add(Me.OK_Button, 0, 0)
         Me.TableLayoutPanel1.Controls.Add(Me.Cancel_Button, 1, 0)
         Me.TableLayoutPanel1.Font = New System.Drawing.Font("Tahoma", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(204, Byte))
-        Me.TableLayoutPanel1.Location = New System.Drawing.Point(379, 254)
+        Me.TableLayoutPanel1.Location = New System.Drawing.Point(379, 178)
         Me.TableLayoutPanel1.Name = "TableLayoutPanel1"
         Me.TableLayoutPanel1.RowCount = 1
         Me.TableLayoutPanel1.RowStyles.Add(New System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50.0!))
@@ -271,8 +159,9 @@ Partial Class dlgLinkData
         '
         'cmdRefreshAll
         '
+        Me.cmdRefreshAll.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.cmdRefreshAll.AutoSize = True
-        Me.cmdRefreshAll.Location = New System.Drawing.Point(12, 257)
+        Me.cmdRefreshAll.Location = New System.Drawing.Point(12, 181)
         Me.cmdRefreshAll.Name = "cmdRefreshAll"
         Me.cmdRefreshAll.Size = New System.Drawing.Size(182, 23)
         Me.cmdRefreshAll.TabIndex = 19
@@ -283,19 +172,9 @@ Partial Class dlgLinkData
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(535, 290)
+        Me.ClientSize = New System.Drawing.Size(535, 214)
         Me.Controls.Add(Me.cmdRefreshAll)
         Me.Controls.Add(Me.TableLayoutPanel1)
-        Me.Controls.Add(Me.txtColEndSourse)
-        Me.Controls.Add(Me.txtColStartSourse)
-        Me.Controls.Add(Me.txtRowEndSourse)
-        Me.Controls.Add(Me.txtRowStartSourse)
-        Me.Controls.Add(Me.Label6)
-        Me.Controls.Add(Me.Label5)
-        Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.Label3)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.ckbInvisibleZero)
         Me.Controls.Add(Me.ckbFontBold)
         Me.Controls.Add(Me.ckbTitleColumns)
@@ -305,9 +184,9 @@ Partial Class dlgLinkData
         Me.Controls.Add(Me.lblSourseData)
         Me.Controls.Add(Me.lblCountRow)
         Me.MaximizeBox = False
-        Me.MaximumSize = New System.Drawing.Size(700, 328)
+        Me.MaximumSize = New System.Drawing.Size(700, 252)
         Me.MinimizeBox = False
-        Me.MinimumSize = New System.Drawing.Size(551, 328)
+        Me.MinimumSize = New System.Drawing.Size(551, 252)
         Me.Name = "dlgLinkData"
         Me.RightToLeft = System.Windows.Forms.RightToLeft.No
         Me.ShowIcon = False
@@ -315,10 +194,6 @@ Partial Class dlgLinkData
         Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Связь с внешними данными"
         Me.TopMost = True
-        CType(Me.txtRowStartSourse, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.txtRowEndSourse, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.txtColStartSourse, System.ComponentModel.ISupportInitialize).EndInit()
-        CType(Me.txtColEndSourse, System.ComponentModel.ISupportInitialize).EndInit()
         Me.TableLayoutPanel1.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
@@ -332,16 +207,6 @@ Partial Class dlgLinkData
     Friend WithEvents ckbTitleColumns As System.Windows.Forms.CheckBox
     Friend WithEvents ckbFontBold As System.Windows.Forms.CheckBox
     Friend WithEvents ckbInvisibleZero As System.Windows.Forms.CheckBox
-    Friend WithEvents Label1 As System.Windows.Forms.Label
-    Friend WithEvents Label2 As System.Windows.Forms.Label
-    Friend WithEvents Label3 As System.Windows.Forms.Label
-    Friend WithEvents Label4 As System.Windows.Forms.Label
-    Friend WithEvents Label5 As System.Windows.Forms.Label
-    Friend WithEvents Label6 As System.Windows.Forms.Label
-    Friend WithEvents txtRowStartSourse As System.Windows.Forms.NumericUpDown
-    Friend WithEvents txtRowEndSourse As System.Windows.Forms.NumericUpDown
-    Friend WithEvents txtColStartSourse As System.Windows.Forms.NumericUpDown
-    Friend WithEvents txtColEndSourse As System.Windows.Forms.NumericUpDown
     Friend WithEvents TableLayoutPanel1 As System.Windows.Forms.TableLayoutPanel
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
