@@ -5,6 +5,8 @@
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
         Dim vsoObj As Visio.Selection = winObj.Selection
+        If ListBox2.Items.Count = 0 Then Exit Sub
+
         Dim iC As Integer, iR As Integer
 
         iC = vsoObj(1).Cells(UTC).Result("") : iR = vsoObj(1).Cells(UTR).Result("")

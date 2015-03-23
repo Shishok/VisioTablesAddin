@@ -1,7 +1,7 @@
 ﻿Imports System.Drawing
 Imports System.Windows.Forms
 
-Public Class VisioTable
+Friend Class VisioTable
 
 #Region "List Of Fields"
     Private strNameTable As String

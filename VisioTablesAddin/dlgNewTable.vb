@@ -17,9 +17,13 @@ Public Class dlgNewTable
         Me.Close()
     End Sub
 
+    Private Sub dlgNewTable_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
+        frmNewTable = Nothing
+    End Sub
+
     Private Sub dlgNewTable_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         vsoApp = Globals.ThisAddIn.Application
-        booOpenForm = True
+        'booOpenForm = True
         Const FRM = "###0.0######"
         Dim strDrawingScale As String
 
@@ -124,11 +128,6 @@ Public Class dlgNewTable
     Private Sub Cancel_Button_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Cancel_Button.Click
         Me.DialogResult = System.Windows.Forms.DialogResult.Cancel
         Me.Close()
-    End Sub
-
-    Protected Overrides Sub OnClosed(ByVal e As EventArgs)
-        booOpenForm = False
-        MyBase.OnClosed(e)
     End Sub
 
     Private Sub SaveSettings(arg)

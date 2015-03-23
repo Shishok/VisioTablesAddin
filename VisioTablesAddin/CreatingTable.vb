@@ -4,52 +4,36 @@ Imports System.Windows.Forms
 Module CreatingTable
 
 #Region "LIST OF VARIABLES AND CONSTANTS"
+    Friend CheckArrID As String = ""
+    Friend vsoApp As Visio.Application = Globals.ThisAddIn.Application
+    Friend winObj As Visio.Window
+    Friend docObj As Visio.Document
+    Friend pagObj As Visio.Page
+    Friend shpsObj As Visio.Shapes
+    Friend frmNewTable As System.Windows.Forms.Form
+    Friend strNameTable As String = ""
+    Friend FlagPage As Byte = 0
+    Friend ArrShapeID(,) As Integer
+    Friend NT As String = ""
 
-    Public vsoApp As Visio.Application = Globals.ThisAddIn.Application
-    Public UndoScopeID As Long = 0
-    Public booOpenForm As Boolean = False
-    Public strNameTable As String = ""
-    Public FlagPage As Byte = 0
-    Public ArrShapeID(,) As Integer
-    Dim NoDupes As New Collection
+    Friend Const UTN = "User.TableName"
+    Friend Const UTR = "User.TableRow"
+    Friend Const UTC = "User.TableCol"
 
-    Dim frmNewTable As System.Windows.Forms.Form = New dlgNewTable
-    Public docObj As Visio.Document = vsoApp.ActiveDocument
-    Public winObj As Visio.Window = vsoApp.ActiveWindow
-    Public pagObj As Visio.Page = vsoApp.ActivePage
-    Public shpsObj As Visio.Shapes = pagObj.Shapes
-    Public selObj As Visio.Selection
-    Public vsoSelection As Visio.Selection
+    Dim selObj As Visio.Selection
+    Dim vsoSelection As Visio.Selection
     Dim MemSel As Visio.Shape
-
-    Public NT As String = ""
+    Dim NoDupes As New Collection
+    Dim UndoScopeID As Long = 0
     Dim LayerVisible As String = ""
     Dim LayerLock As String = ""
 
-    Public Const UTN = "User.TableName"
-    Public Const UTR = "User.TableRow"
-    Public Const UTC = "User.TableCol"
-    Public Const PX = "PinX"
-    Public Const PY = "PinY"
-    Public Const WI = "Width"
-    Public Const HE = "Height"
-    'Const CA = "Angle"
-    Public Const LD = "LockDelete"
-    Public Const GU = "=GUARD("
-    'Const strATC = "!Actions.Titles.Checked=1,"
-    'Const strACC = "!Actions.Comments.Checked=1,"
-    'Const strThGu000 = "THEMEGUARD(MSOTINT(RGB(0,0,0),50))"
-    'Const strThGu255 = "THEMEGUARD(RGB(255,255,255))"
-    'Const strThGu191 = "THEMEGUARD(RGB(191,191,191))"
-    'Const GS = "=GUARD(Sheet."
-    'Const GI = "=Guard(IF("
-    'Const sh = "Sheet."
-    'Const frm = "###0.0###"
-    'Const GU5 = "=GUARD(10 mm)" ' Переделать на DrawUn
-    'Const P50 = "50%"
-    'Const GT = "GUARD(TRUE)"
-    'Const G1 = "Guard(1)"
-
+    Const PX = "PinX"
+    Const PY = "PinY"
+    Const WI = "Width"
+    Const HE = "Height"
+    Const LD = "LockDelete"
+    Const GU = "=GUARD("
 
 #End Region
 
@@ -67,7 +51,7 @@ Module CreatingTable
     End Sub
 
     Sub Load_dlgNewTable()
-        If Not booOpenForm Then
+        If frmNewTable Is Nothing Then
             frmNewTable = New dlgNewTable
             frmNewTable.Show()
         End If
@@ -214,6 +198,7 @@ Module CreatingTable
         End With
 
         Call RecUndo("0")
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
         Call PropLayers(0)
@@ -316,6 +301,7 @@ Module CreatingTable
         End With
 
         Call RecUndo("0")
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
         Call PropLayers(0)
@@ -660,6 +646,7 @@ errD:
 
     Sub InitArrShapeID(strNameShape)  ' Заполнение массива шейпами активной таблицы
         'strNameTable - строковая переменая, значение ячейки "User.TableName" любого шейпа из активной таблицы
+        If CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "0" Then Exit Sub
 
         Dim shObj As Visio.Shape
         Dim cMax As Integer = shpsObj.Item(strNameShape).Cells(UTC).Result("")
@@ -671,7 +658,6 @@ errD:
             With shObj
                 If .CellExistsU(UTN, 0) Then
                     If StrComp(.Cells(UTN).ResultStr(""), strNameShape) = 0 Then
-                        'MsgBox(.Cells(UTC).Result("") & " x " & .Cells(UTR).Result(""))
                         ArrShapeID(.Cells(UTC).Result(""), .Cells(UTR).Result("")) = .ID
                     End If
                 End If
@@ -679,6 +665,7 @@ errD:
         Next
         ArrShapeID(0, 0) = shpsObj.Item(strNameShape).ID
         If ArrShapeID(0, 0) = ArrShapeID(cMax, rMax) Then ArrShapeID(cMax, rMax) = 0
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "0"
     End Sub
 
     Sub InsertText(arg) ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
@@ -1300,6 +1287,7 @@ err:
         Next
 
         winObj.Select(shObj1, 2)
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         Exit Sub
 
 err:
@@ -1388,7 +1376,7 @@ err:
         Next
         shObj.Cells(LD).FormulaForceU = 0
         shObj.Delete()
-
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         Exit Sub
 
 err:
@@ -1483,7 +1471,7 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
-
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
     End Sub
 
     Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
@@ -1569,6 +1557,7 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
+        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
 
     End Sub
 
@@ -1622,11 +1611,6 @@ err:
 #Region "Functions"
 
     Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе
-
-        'Dim ErrMsg = Function()
-
-
-        '             End Function
 
         With winObj
             If .Selection.Count = 0 Then GoTo ErrMsg

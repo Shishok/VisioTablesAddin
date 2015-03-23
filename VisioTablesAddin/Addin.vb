@@ -6,6 +6,12 @@ Partial Public Class Addin
     Public Property Application As Microsoft.Office.Interop.Visio.Application
 
     Public Sub OnAction(commandId As String, commandTag As String)
+        ' Очищать?
+        winObj = vsoApp.ActiveWindow
+        docObj = vsoApp.ActiveDocument
+        pagObj = vsoApp.ActivePage
+        shpsObj = pagObj.Shapes
+        ' Очищать?
 
         Select Case commandId
             Case "btn_newtable" : CreatingTable.Load_dlgNewTable() : Return
@@ -32,7 +38,7 @@ Partial Public Class Addin
             Case "btn_delcolumn" : DelColRows(0)
             Case "btn_delrow" : DelColRows(1)
             Case "btn_deltable" : DelTab()
-            Case "btn_intellinput" : MessageBox.Show(commandId) ': LoadfrmIntellInput
+            Case "btn_intellinput" : MsgBox(commandId) ': LoadfrmIntellInput
             Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
             Case "btn_size" : LoaddlgTableSize(0)
             Case "btn_autosize" : LoaddlgTableSize(1)
