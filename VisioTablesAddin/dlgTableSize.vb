@@ -58,7 +58,7 @@
     End Sub
 
     Private Sub InitSize()
-        Const frm = "###0.0###"
+        Const frm = "####0.####"
         If TabControl1.SelectedIndex = 1 Then m_bytCellsOrTable = 3
         If TabControl1.SelectedIndex = 0 AndAlso winObj.Selection.Count > 0 Then
             txtTableL.Text = Format(fSTWH(winObj.Selection(1), 1, True), frm)

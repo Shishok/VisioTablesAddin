@@ -1,120 +1,99 @@
 ﻿Imports System.Windows.Forms
+Imports System.Text
 
 Public Class dlgIntellInput
-    Private bytColOrRow As Byte
-    Private ReturnPressed As Boolean
-    Private winObj As Visio.Window, vsoObj As Visio.Selection
-    Private iC As Integer, iR As Integer, arr1 As Integer, arr2 As Integer
-    Private NoDupes As New Collection
-
-    Private Sub Enter_down()
-        '        vsoObj = winObj.Selection
-
-        '        Dim SelectShape = Sub() winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(iC, iR)), 258)
-
-        '        Dim NextRow = Sub()
-        '                          If iR <> arr2 Then
-        '                              iR = iR + 1
-        '                          Else
-        '                              iR = 1
-        '                              If iC <> arr1 Then
-        '                                  iC = iC + 1
-        '                              Else
-        '                                  iC = 1
-        '                              End If
-        '                          End If
-        '                          GoTo Line1
-        '                      End Sub
-
-        '        Dim NextColumn = Sub()
-        '                             If iC <> arr1 Then
-        '                                 iC = iC + 1
-        '                             Else
-        '                                 iC = 1
-        '                                 If iR <> arr2 Then
-        '                                     iR = iR + 1
-        '                                 Else
-        '                                     iR = 1
-        '                                 End If
-        '                             End If
-        '                             GoTo Line2
-        '                         End Sub
-        '        On Error GoTo ex
-
-        '        If ReturnPressed Then
-        '            iC = vsoObj(1).Cells("User.TableCol").Result("") : iR = vsoObj(1).Cells("User.TableRow").Result("")
-        '            arr1 = UBound(ArrShapeID, 1) : arr2 = UBound(ArrShapeID, 2)
-
-        '            If Trim(cmbText.Text) <> "" Then
-        '                If ckbSkipNotEmpty.Checked Then
-        '                    If Trim(vsoObj(1).Characters.Text) = "" Then vsoObj(1).Characters.Text = cmbText.Text
-        '                    Call SaveText()
-        '                Else
-        '                    vsoObj(1).Characters.Text = cmbText.Text
-        '                    Call SaveText()
-        '                End If
-        '            End If
-
-
-        '            Select Case bytColOrRow
-        '                Case 1
-        '                    NextRow()
-        'Line1:
-        '                    If ArrShapeID(iC, iR) <> 0 Then
-        '                        SelectShape()
-        '                    Else
-        '                        NextRow()
-        '                    End If
-        '                Case 2
-        '                    NextColumn()
-        'Line2:
-        '                    If ArrShapeID(iC, iR) <> 0 Then
-        '                        SelectShape()
-        '                    Else
-        '                        NextColumn()
-        '                    End If
-        '            End Select
-        '        End If
-
-        '        Exit Sub
-        'ex:
-        '        'End
-        '    End Sub
-
-        'Private Sub cmbText_Exit(ByVal Cancel As MSForms.ReturnBoolean)
-        '    Cancel = ReturnPressed
-    End Sub
-
-    Private Sub dlgIntellInput_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
-        winObj = Nothing : vsoObj = Nothing
-        'Erase ArrShapeID
-    End Sub
+    Dim bytColOrRow As Byte = 0
+    Dim KeyArg As Integer
+    Dim cT As Integer = winObj.Page.Shapes(NT).Cells(UTC).Result("")
+    Dim rT As Integer = winObj.Page.Shapes(NT).Cells(UTR).Result("")
+    Dim NoDupes As New Collection
 
     Private Sub dlgIntellInput_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        'vsoApp = Globals.ThisAddIn.Application
-        winObj = vsoApp.ActiveWindow
-        optCol.Checked = True
-    End Sub
-
-    Private Sub optCol_Click(sender As Object, e As EventArgs) Handles optCol.Click
-        If bytColOrRow = 0 Then Call InitArrShapeID(NT)
-        bytColOrRow = 1
-    End Sub
-
-    Private Sub optRow_Click(sender As Object, e As EventArgs) Handles optRow.Click
-        If bytColOrRow = 0 Then Call InitArrShapeID(NT)
-        bytColOrRow = 2
+        Call InitArrShapeID(NT)
     End Sub
 
     Private Sub cmbText_KeyDown(sender As Object, e As KeyEventArgs) Handles cmbText.KeyDown
-        If (e.KeyCode = Keys.Return) Then
-            ReturnPressed = True
-            Call Enter_down()
-            cmbText.SelectionStart = 0
-            cmbText.SelectionLength = Len(cmbText.Text)
-        Else
-            ReturnPressed = False
+        KeyArg = e.KeyCode
+        Select Case e.KeyCode
+            Case Keys.F1 : bytColOrRow = 0 : InsertText() : JumpToNext()
+            Case Keys.F2 : bytColOrRow = 1 : InsertText() : JumpToNext()
+            Case Keys.F3, Keys.F5, Keys.F6, Keys.F7, Keys.F8 : JumpToNext()
+            Case Keys.Enter : InsertText() : Me.Close()
+            Case Keys.Escape : JumpToNext()
+            Case Keys.F9 : DeleteText()
+        End Select
+    End Sub
+
+    Private Sub InsertText()
+        With winObj.Selection(1)
+            .Characters.Text = cmbText.Text
+        End With
+        cmbText.SelectionStart = 0
+        cmbText.SelectionLength = Len(cmbText.Text)
+        Call SaveText()
+    End Sub
+
+    Private Sub DeleteText()
+        winObj.Selection(1).Characters.Text = ""
+    End Sub
+
+    Private Sub JumpToNext()
+        Dim c As Integer = winObj.Selection(1).Cells(UTC).Result("")
+        Dim r As Integer = winObj.Selection(1).Cells(UTR).Result("")
+        winObj.DeselectAll()
+
+        Select Case KeyArg
+            Case Keys.F1 : SelC(c + 1, r)
+            Case Keys.F2 : SelC(c, r + 1)
+            Case Keys.F3
+                Select Case bytColOrRow
+                    Case 0 : SelC(c + 1, r)
+                    Case 1 : SelC(c, r + 1)
+                End Select
+            Case Keys.F5 : SelC(1, r)
+            Case Keys.F6 : SelC(cT, r)
+            Case Keys.F7 : SelC(c, 1)
+            Case Keys.F8 : SelC(c, rT)
+            Case Keys.Escape
+                Select Case bytColOrRow
+                    Case 0 : SelC(c - 1, r)
+                    Case 1 : SelC(c, r - 1)
+                End Select
+        End Select
+
+    End Sub
+
+    Private Sub SelC(c, r)
+
+        Select Case c + r
+            Case Is > cT + rT : c = 1 : r = 1 : SelC(c, r)
+            Case Is < 2 : c = cT : r = rT : SelC(c, r)
+        End Select
+
+        Select Case c
+            Case Is > cT : c = 1 : r += 1 : SelC(c, r)
+            Case Is < 1 : c = cT : r -= 1 : SelC(c, r)
+        End Select
+
+        Select Case r
+            Case Is > rT : c += 1 : r = 1 : SelC(c, r)
+            Case Is < 1 : c -= 1 : r = rT : SelC(c, r)
+        End Select
+
+        If ArrShapeID(c, r) = 0 Then
+            Select Case KeyArg
+                Case Keys.F1 : c += 1 : SelC(c, r)
+                Case Keys.F2 : r += 1 : SelC(c, r)
+                Case Keys.Escape
+                    Select Case bytColOrRow
+                        Case 0 : c -= 1 : SelC(c, r)
+                        Case 1 : r -= 1 : SelC(c, r)
+                    End Select
+            End Select
         End If
+
+        SelectCells(c, c, r, r)
+
     End Sub
 
     Private Sub SaveText()
@@ -122,6 +101,26 @@ Public Class dlgIntellInput
         NoDupes.Add(cmbText.Text, CStr(cmbText.Text))
         cmbText.Items.Add(NoDupes(NoDupes.Count))
 err:
+    End Sub
+
+    Private Sub btnHelp_Click(sender As Object, e As EventArgs) Handles btnHelp.Click
+        Dim msg As String
+        msg = "Клавиши перехода:" & vbCrLf
+        msg = msg & vbCrLf
+        msg = msg & "F1 - вставить текст и перейти ВПРАВО по строке." & vbCrLf
+        msg = msg & "F2 - вставить текст и перейти ВНИЗ по столбцу." & vbCrLf
+        msg = msg & "F3 - перейти в СЛЕДУЮЩУЮ ячейку. (пропуск текущей ячейки)." & vbCrLf
+        msg = msg & "F4 - открыть список для выбора сохраненных значений." & vbCrLf
+        msg = msg & vbCrLf
+        msg = msg & "F5 - перейти в начало строки." & vbCrLf
+        msg = msg & "F6 - перейти в конец строки." & vbCrLf
+        msg = msg & "F7 - перейти в начало столбца." & vbCrLf
+        msg = msg & "F8 - перейти в конец столбца." & vbCrLf
+        msg = msg & "F9 - удалить текст из ячейки." & vbCrLf
+        msg = msg & vbCrLf
+        msg = msg & "ENTER - вставить текст в выделенную ячейку и закрыть диалог." & vbCrLf
+        msg = msg & "ESC - переход назад в обратном порядке."
+        MsgBox(msg, 64, "Подсказка")
     End Sub
 
 End Class

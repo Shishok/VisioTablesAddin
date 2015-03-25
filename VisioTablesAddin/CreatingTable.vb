@@ -4,6 +4,7 @@ Imports System.Windows.Forms
 Module CreatingTable
 
 #Region "LIST OF VARIABLES AND CONSTANTS"
+
     Friend CheckArrID As String = ""
     Friend vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Friend winObj As Visio.Window
@@ -39,15 +40,19 @@ Module CreatingTable
 
 #Region "Load Sub"
 
+    Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
+        Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
+        NewTable.CreatTable()
+        NewTable = Nothing
+    End Sub
+
     Sub QuickTable(strV)
-        Dim nC As Integer = 0, nR As Integer = 0, w As Single = 0, h As Single = 0
+        Dim nC As Integer = 0, nR As Integer = 0
         strV = Strings.Right(strV, Strings.Len(strV) - 1)
         nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
         nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
-        w = vsoApp.FormatResult(20, 70, 64, "#.0000")
-        h = vsoApp.FormatResult(8, 70, 64, "#.0000")
         strNameTable = "TbL"
-        Call CreatTable(strNameTable, 1, nC, nR, w, h, 200, 150, False, False)
+        Call CreatTable(strNameTable, 1, nC, nR, PtoD(56.69291339), PtoD(28.34645669), 0, 0, False, False)
     End Sub
 
     Sub Load_dlgNewTable()
@@ -57,44 +62,25 @@ Module CreatingTable
         End If
     End Sub
 
-    Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
-        Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
-        NewTable.CreatTable()
-        NewTable = Nothing
-    End Sub
+    Sub LoadDlg(arg)
+        Dim dlgNew As System.Windows.Forms.Form
 
-    Sub LoaddlgFromFile()
-        Dim dlgNew As New dlgFromFile
-        dlgNew.ShowDialog()
-        dlgNew = Nothing
-    End Sub
+        Select Case arg
+            Case 0, 1 : FlagPage = arg : dlgNew = New dlgTableSize
+            Case 2 : dlgNew = New dlgFromFile
+            Case 3
+                If vsoApp.ActiveDocument.DataRecordsets.Count = 0 Then
+                    MsgBox("В активном документе нет доступных подключений к внешним данным.", vbCritical, "Ошибка")
+                    GoTo err
+                End If
+                dlgNew = New dlgLinkData
+            Case 4 : dlgNew = New dlgIntellInput
+            Case 5 : dlgNew = New dlgPictures
+            Case 6 : dlgNew = New dlgSelectFromList
+        End Select
 
-    Sub LoaddlgLinkData()
-        If vsoApp.ActiveDocument.DataRecordsets.Count = 0 Then
-            MsgBox("В активном документе нет доступных подключений к внешним данным.", vbCritical, "Ошибка")
-            Exit Sub
-        End If
-        Dim dlgNew As New dlgLinkData
         dlgNew.ShowDialog()
-        dlgNew = Nothing
-    End Sub
-
-    Sub LoaddlgPicture()
-        Dim dlgNew As New dlgPictures
-        dlgNew.ShowDialog()
-        dlgNew = Nothing
-    End Sub
-
-    Sub LoaddlgSelectFromList()
-        Dim dlgNew As New dlgSelectFromList()
-        dlgNew.ShowDialog()
-        dlgNew = Nothing
-    End Sub
-
-    Sub LoaddlgTableSize(arg)
-        FlagPage = arg
-        Dim dlgNew As New dlgTableSize()
-        dlgNew.ShowDialog()
+err:
         dlgNew = Nothing
     End Sub
 
@@ -105,7 +91,6 @@ Module CreatingTable
     Sub AddColumns(arg As Byte)  ' Вставка нового столбца. Основная процедура
         'arg = 0 вставка столбца перед выделенным, arg = 1 вставка столбца после выделенного
 
-        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTC)
         If winObj.Selection.Count = 0 Then Exit Sub
 
@@ -201,6 +186,7 @@ Module CreatingTable
         CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
+
         Call PropLayers(0)
 
     End Sub
@@ -208,7 +194,6 @@ Module CreatingTable
     Sub AddRows(arg As Byte) ' Вставка новой строки. Основная процедура
         'arg = 0 вставка строки перед выделенной, arg = 1 вставка строки после выделенной
 
-        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTR)
         If winObj.Selection.Count = 0 Then Exit Sub
 
@@ -304,6 +289,7 @@ Module CreatingTable
         CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
+
         Call PropLayers(0)
 
     End Sub
@@ -311,8 +297,6 @@ Module CreatingTable
     Sub AllAlignOnText(booOnWidth As Boolean, booOnHeight As Boolean, bytNothingOrAutoOrLockColumns As Byte, _
         bytNothingOrAutoOrLockRows As Byte, booOnlySelectedColumns As Boolean, booOnlySelectedRow As Boolean)
         ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Предварительная процедура
-
-        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoSel As Visio.Selection 'NoDupes As New Collection ', strNameMainCtlCell As String
         Dim ShNum As Integer, iCount As Integer, bytColumnOrRow As Byte
@@ -451,7 +435,6 @@ err:
     End Sub
 
     Sub AlternatLines(iAlt As Byte)  'Чередование цвета строк/столбцов
-        'If Not CheckSelCells() Then Exit Sub
         Dim i As Integer, j As Integer, strCellWH As String = UTC
         shpsObj = winObj.Page.Shapes : MemSel = winObj.Selection(1)
 
@@ -531,14 +514,11 @@ err:
     End Sub
 
     Sub CopyT() ' Копирование содержимого выделенных ячеек таблицы
-        'If Not CheckSelCells() Then Exit Sub
-
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
     End Sub
 
     Sub DelColRows(bytColsOrRows As Byte) ' Удаление столбцов/строк из активной таблицы из шейпа. Предварительная процедура
-        'If Not CheckSelCells() Then Exit Sub
 
         shpsObj = winObj.Page.Shapes
         Dim vsoSel As Visio.Selection = winObj.Selection, shObj As Visio.Shape
@@ -607,8 +587,6 @@ errD:
     End Sub
 
     Sub GutT() ' Вырезание содержимого из выделенных ячеек таблицы
-        'If Not CheckSelCells() Then Exit Sub
-
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
 
@@ -623,7 +601,6 @@ errD:
     End Sub
 
     Sub IntDeIntCells() ' Объединение/Разъединение ячеек из шейпа. Предварительная процедура
-        'If Not CheckSelCells() Then Exit Sub
         Call ClearControlCells(UTC) : Call ClearControlCells(UTR)
 
         If Not CheckSelCells() Then Exit Sub
@@ -669,7 +646,6 @@ errD:
     End Sub
 
     Sub InsertText(arg) ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
-        'If Not CheckSelCells() Then Exit Sub
         Dim title As String, msgComm As String, txt As String = "", i As Integer
         Dim vsoSel As Visio.Selection = winObj.Selection, arrArg() As String
 
@@ -935,8 +911,6 @@ err:
     End Sub
 
     Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
-        'If Not CheckSelCells() Then Exit Sub
-
         shpsObj = winObj.Page.Shapes
 
         Call InitArrShapeID(NT)
@@ -991,7 +965,6 @@ err:
         sngHeightTable As Single, booWidth As Boolean, booHeight As Boolean)
         ' Изменение размеров ячеек таблицы. Основная процедура
 
-        'If Not CheckSelCells() Then Exit Sub
         Dim vsoSel As Visio.Selection, i As Integer
 
         shpsObj = winObj.Page.Shapes : vsoSel = winObj.Selection
@@ -1112,8 +1085,20 @@ err:
 err:
     End Sub
 
+    Sub SelectCells(intStartCol As Integer, intEndCol As Integer, intStartRow As Integer, intEndRow As Integer) 'Различное выделение в таблице
+
+        Dim intColNum As Integer, intRowNum As Integer
+
+        On Error Resume Next
+        For intColNum = intStartCol To intEndCol
+            For intRowNum = intStartRow To intEndRow
+                winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(intColNum, intRowNum)), 2)
+            Next
+        Next
+        On Error GoTo 0
+    End Sub
+
     Sub SelInContent(arg) ' Выделение ячеек таблицы по критерию(текст, дата, значение, пустые/не пустые). Основная процедура
-        'If Not CheckSelCells() Then Exit Sub
 
         Dim vsoSel As Visio.Selection = winObj.Selection, shpObj As Visio.Shape
 
@@ -1593,22 +1578,21 @@ err:
 
     End Sub
 
-    Private Sub SelectCells(intStartCol As Integer, intEndCol As Integer, intStartRow As Integer, intEndRow As Integer) 'Различное выделение в таблице
-
-        Dim intColNum As Integer, intRowNum As Integer
-
-        On Error Resume Next
-        For intColNum = intStartCol To intEndCol
-            For intRowNum = intStartRow To intEndRow
-                winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(intColNum, intRowNum)), 2)
-            Next
-        Next
-        On Error GoTo 0
-    End Sub
-
 #End Region
 
 #Region "Functions"
+
+    Function PtoD(arg)
+        Return vsoApp.FormatResult(arg, 50, 64, "####0.####")
+    End Function
+
+    Function DtoD(arg)
+        Return vsoApp.FormatResult(arg, 64, 64, "####0.####")
+    End Function
+
+    Function DtoP(arg)
+        Return vsoApp.FormatResult(arg, 64, 50, "####0.####")
+    End Function
 
     Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе
 

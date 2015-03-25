@@ -36,6 +36,9 @@ Friend Class VisioTable
     Private arrNewID() As Integer
     Private CountID As Integer = 0
 
+    Dim Vr As String = Strings.Left(Strings.Replace(vsoApp.Version, ".", ",", 1), InStr(vsoApp.Version, ",") - 1)
+    Dim arrL = {"0.1 pt", "0", "1", "0 mm", "0", "0", "0", "0", "0", "0%"}
+    Dim arrF = {"1", "0", "1", "0", "1", "0", "0%", "0%", "0%", "0%", "0", "0 mm", "0 mm", "0 deg", "100%"}
     Dim VarCell As Byte = 0
 
     Private Const PX = "PinX"
@@ -49,7 +52,6 @@ Friend Class VisioTable
     Private Const strACC = "!Actions.Comments.Checked=1,"
     Private Const strThGu000 = "GUARD(MSOTINT(RGB(0,0,0),50))"
     Private Const strThGu255 = "GUARD(RGB(255,255,255))"
-    'Private Const strThGu255 = "THEMEGUARD(RGB(255,255,255))"
     Private Const strThGu191 = "GUARD(RGB(191,191,191))"
     Private Const GS = "=GUARD(Sheet."
     Private Const GI = "=Guard(IF("
@@ -117,8 +119,8 @@ Friend Class VisioTable
                 With winObj.Selection(1)
                     .BoundingBox(3, sngTX, sngTY, sngTW, sngTH) ' L, B, R, T
                     MemSHID = .ID
-                    sngTX = vsoApp.FormatResult(sngTX, "", 64, "0.0000")
-                    sngTY = vsoApp.FormatResult(sngTH, "", 64, "0.0000")
+                    sngTX = vsoApp.FormatResult(sngTX, "", 64, "0.00000000")
+                    sngTY = vsoApp.FormatResult(sngTH, "", 64, "0.00000000")
                     sngTW = .Cells(WI).Result(64) / intColumnsCount
                     sngTH = .Cells(HE).Result(64) / intRowsCount
                 End With
@@ -346,9 +348,6 @@ errD:
 
             .Cells("LocPinX").FormulaU = "Guard(Width*0.5)"
             .Cells("LocPinY").FormulaU = "Guard(Height*0.5)"
-            '.Cells("LinePattern").FormulaU = "1" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            '.Cells("LineWeight").FormulaU = "0.1 pt" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            '.Cells("Rounding").FormulaU = "Guard(0 mm)" ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             .Cells("UpdateAlignBox").FormulaForceU = GT
             .Cells("LockDelete").FormulaU = G1
             .Cells("LockRotate").FormulaU = G1
@@ -457,37 +456,43 @@ errD:
     End Sub
 
     Private Sub FormatLFM(Shp, TC)
-        On Error GoTo errD
-        Dim arrL = {"0.1 pt", "0", "1", "0 mm", "0", "0", "0", "0", "0", "0%"}
-        Dim arrF = {"1", "0", "1", "0", "1", "0", "0%", "0%", "0%", "0%", "0", "0 mm", "0 mm", "0 deg", "100%"}
+        'arrL = Array("LineWeight", "LineColor", "LinePattern", "Rounding", "EndArrowSize", "BeginArrow", "EndArrow", "LineCap", "BeginArowSize", "LineColorTrans")
+        'arrF = Array("FillForegnd", "FillBkgnd", "FillPattern", "ShdwForegnd", "ShdwBkgnd", "ShdwPattern", "FillForegndTrans", "FillBkgndTrans", "ShdwForegndTrans", "ShdwBkgndTrans", "ShapeShdwType", "ShapeShdwOffsetX", "ShapeShdwOffsetY", "ShapeShdwObliqueAngle", "ShapeShdwScaleFactor")        
 
+        On Error GoTo errD
         With Shp
-            'arrL = Array("LineWeight", "LineColor", "LinePattern", "Rounding", "EndArrowSize", "BeginArrow", "EndArrow", "LineCap", "BeginArowSize", "LineColorTrans")
 
             For i = 0 To 9 ' Линия
-                .CellsSRC(1, 2, i).FormulaU = GU & arrL(i) & ")"
+                .CellsSRC(1, 2, i).FormulaForceU = GU & arrL(i) & ")"
             Next
 
-            'arrF = Array("FillForegnd", "FillBkgnd", "FillPattern", "ShdwForegnd", "ShdwBkgnd", "ShdwPattern", "FillForegndTrans", "FillBkgndTrans", "ShdwForegndTrans", "ShdwBkgndTrans", "ShapeShdwType", "ShapeShdwOffsetX", "ShapeShdwOffsetY", "ShapeShdwObliqueAngle", "ShapeShdwScaleFactor")
-
             For i = 0 To 14 ' Заливка
-                .CellsSRC(1, 3, i).FormulaU = GU & arrF(i) & ")"
+                .CellsSRC(1, 3, i).FormulaForceU = GU & arrF(i) & ")"
             Next
 
             For i = 0 To 3 ' Поля текстового блока
-                .CellsSRC(1, 11, i).FormulaU = GU & 0 & " pt)"
+                .CellsSRC(1, 11, i).FormulaForceU = GU & 0 & " pt)"
             Next
 
-            .Cells("Char.Color[1]").FormulaU = strThGu255
-            .Cells("Char.Font[1]").FormulaU = GU & vsoApp.ActiveDocument.Fonts("Courier New").ID & ")"
-            .Cells("Char.Size[1]").FormulaU = GU & 10 & " pt)"
+            ' Настройка цвета, размера шрифта, выравнивания текста в ячейках
+            .Cells("Char.Color[1]").FormulaForceU = strThGu255
+            .Cells("Char.Font[1]").FormulaForceU = GU & vsoApp.ActiveDocument.Fonts("Courier New").ID & ")"
+            .Cells("Char.Size[1]").FormulaForceU = GU & 10 & " pt)"
+            .Cells("VerticalAlign").FormulaForceU = G1
+            .Cells("Para.HorzAlign[1]").FormulaForceU = G1
 
-            Select Case TC
+            Select Case TC ' Зависимости
                 Case "ThC", "TvR"
                     .Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
                     .Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
                     .Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
             End Select
+
+            If Vr = 15 Then ' Секция Theme Properties для Visio 2013
+                For i = 0 To 7
+                    .CellsSRC(1, 31, i).FormulaForceU = GU & 0 & ")"
+                Next
+            End If
 
         End With
         Exit Sub

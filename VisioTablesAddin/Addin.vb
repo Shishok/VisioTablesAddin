@@ -15,8 +15,7 @@ Partial Public Class Addin
 
         Select Case commandId
             Case "btn_newtable" : CreatingTable.Load_dlgNewTable() : Return
-            Case "btn_dropdownlist" : LoaddlgSelectFromList() : Return
-            Case "btn_lockpicture" : LoaddlgPicture() : Return
+            Case "btn_lockpicture" : LoadDlg(5) : Return
             Case "btn_help" : CallHelp() : Return
         End Select
 
@@ -38,13 +37,14 @@ Partial Public Class Addin
             Case "btn_delcolumn" : DelColRows(0)
             Case "btn_delrow" : DelColRows(1)
             Case "btn_deltable" : DelTab()
-            Case "btn_intellinput" : MsgBox(commandId) ': LoadfrmIntellInput
+            Case "btn_intellinput" : LoadDlg(4)
             Case "btn_sizeonwidth", "btn_sizeonheight" : AlignOnSize(commandTag)
-            Case "btn_size" : LoaddlgTableSize(0)
-            Case "btn_autosize" : LoaddlgTableSize(1)
-            Case "btn_fromfile" : LoaddlgFromFile()
+            Case "btn_size" : LoadDlg(0)
+            Case "btn_autosize" : LoadDlg(1)
+            Case "btn_fromfile" : LoadDlg(2)
+            Case "btn_dropdownlist" : LoadDlg(6)
             Case "btn_altlinesrow", "btn_altlinescol" : AlternatLines(commandTag)
-            Case "btn_extdata" : LoaddlgLinkData()
+            Case "btn_extdata" : LoadDlg(3)
             Case "btn_rotatetext" : AllRotateText()
             Case "btn_convert1Shape" : ConvertInto1Shape()
         End Select

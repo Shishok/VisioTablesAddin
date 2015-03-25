@@ -23,70 +23,50 @@ Partial Class dlgIntellInput
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.cmbText = New System.Windows.Forms.ComboBox()
-        Me.optCol = New System.Windows.Forms.RadioButton()
-        Me.optRow = New System.Windows.Forms.RadioButton()
-        Me.ckbSkipNotEmpty = New System.Windows.Forms.CheckBox()
+        Me.btnHelp = New System.Windows.Forms.Button()
         Me.SuspendLayout()
         '
         'cmbText
         '
+        Me.cmbText.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.cmbText.FormattingEnabled = True
-        Me.cmbText.Location = New System.Drawing.Point(12, 35)
+        Me.cmbText.Location = New System.Drawing.Point(12, 12)
         Me.cmbText.Name = "cmbText"
-        Me.cmbText.Size = New System.Drawing.Size(387, 21)
+        Me.cmbText.Size = New System.Drawing.Size(343, 21)
         Me.cmbText.TabIndex = 0
         '
-        'optCol
+        'btnHelp
         '
-        Me.optCol.AutoSize = True
-        Me.optCol.Location = New System.Drawing.Point(12, 12)
-        Me.optCol.Name = "optCol"
-        Me.optCol.Size = New System.Drawing.Size(91, 17)
-        Me.optCol.TabIndex = 1
-        Me.optCol.TabStop = True
-        Me.optCol.Text = "По столбцам"
-        Me.optCol.UseVisualStyleBackColor = True
-        '
-        'optRow
-        '
-        Me.optRow.AutoSize = True
-        Me.optRow.Location = New System.Drawing.Point(119, 12)
-        Me.optRow.Name = "optRow"
-        Me.optRow.Size = New System.Drawing.Size(85, 17)
-        Me.optRow.TabIndex = 2
-        Me.optRow.TabStop = True
-        Me.optRow.Text = "По строкам"
-        Me.optRow.UseVisualStyleBackColor = True
-        '
-        'ckbSkipNotEmpty
-        '
-        Me.ckbSkipNotEmpty.AutoSize = True
-        Me.ckbSkipNotEmpty.Location = New System.Drawing.Point(221, 12)
-        Me.ckbSkipNotEmpty.Name = "ckbSkipNotEmpty"
-        Me.ckbSkipNotEmpty.Size = New System.Drawing.Size(178, 17)
-        Me.ckbSkipNotEmpty.TabIndex = 3
-        Me.ckbSkipNotEmpty.Text = "Пропускать не пустые ячейки"
-        Me.ckbSkipNotEmpty.UseVisualStyleBackColor = True
+        Me.btnHelp.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnHelp.AutoSize = True
+        Me.btnHelp.Location = New System.Drawing.Point(369, 11)
+        Me.btnHelp.Name = "btnHelp"
+        Me.btnHelp.Size = New System.Drawing.Size(23, 23)
+        Me.btnHelp.TabIndex = 4
+        Me.btnHelp.Text = "?"
+        Me.btnHelp.UseVisualStyleBackColor = True
         '
         'dlgIntellInput
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(412, 72)
-        Me.Controls.Add(Me.ckbSkipNotEmpty)
-        Me.Controls.Add(Me.optRow)
-        Me.Controls.Add(Me.optCol)
+        Me.ClientSize = New System.Drawing.Size(404, 47)
+        Me.Controls.Add(Me.btnHelp)
         Me.Controls.Add(Me.cmbText)
         Me.MaximizeBox = False
+        Me.MaximumSize = New System.Drawing.Size(600, 85)
         Me.MinimizeBox = False
+        Me.MinimumSize = New System.Drawing.Size(420, 85)
         Me.Name = "dlgIntellInput"
+        Me.ShowIcon = False
+        Me.ShowInTaskbar = False
+        Me.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen
         Me.Text = "Ввод текста с переходом по ячейкам"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
     Friend WithEvents cmbText As System.Windows.Forms.ComboBox
-    Friend WithEvents optCol As System.Windows.Forms.RadioButton
-    Friend WithEvents optRow As System.Windows.Forms.RadioButton
-    Friend WithEvents ckbSkipNotEmpty As System.Windows.Forms.CheckBox
+    Friend WithEvents btnHelp As System.Windows.Forms.Button
 End Class
