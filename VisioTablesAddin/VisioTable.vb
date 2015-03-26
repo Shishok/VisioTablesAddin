@@ -448,7 +448,8 @@ errD:
                         Next
                     Next
             End Select
-
+            'ActiveWindow.Selection(1).AddNamedRow 242, "ID", 0
+            'ActiveWindow.Selection(1).Cells("User.ID.Value").FormulaForceU = Str(Year(Now) & Month(Now) & Day(Now) & Hour(Now) & Minute(Now) & Second(Now) & ActiveWindow.Selection(1).id & "_")
         End With
         Exit Sub
 errD:

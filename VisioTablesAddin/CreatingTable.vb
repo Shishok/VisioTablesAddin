@@ -1373,10 +1373,11 @@ err:
         If shObj.Cells(UTC).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
         Call RecUndo("Удалить столбец")
 
-        Dim iAll As Integer, iDel As Integer, i As Integer, j As Integer
-        Dim NTDel As String, strF As String, tmpName As String = "", PropC(1) As String
-
-        iDel = shObj.Cells(UTC).Result("") : iAll = shpsObj.Item(NT).Cells(UTC).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Name
+        Dim iAll As Integer = shpsObj.Item(NT).Cells(UTC).Result("")
+        Dim iDel As Integer = shObj.Cells(UTC).Result("")
+        Dim NTDel As String = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Name
+        Dim i As Integer, j As Integer
+        Dim strF As String, tmpName As String = "", PropC(1) As String
 
         If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
             PropC(0) = shpsObj.ItemFromID(ArrShapeID(iDel, 0)).Cells(PX).FormulaU
@@ -1392,7 +1393,7 @@ err:
                 For i = 1 To UBound(ArrShapeID, 2)
                     With .ItemFromID(ArrShapeID(j, i))
                         If InStr(1, .Cells(WI).FormulaU, "SUM") <> 0 Then
-                            If InStr(1, .Cells(WI).FormulaU, NTDel) <> 0 And InStr(1, .Cells(WI).FormulaU, ",") <> 0 Then
+                            If InStr(1, .Cells(WI).FormulaU, NTDel) <> 0 Then 'AndAlso InStr(1, .Cells(WI).FormulaU, ",") <> 0 Then
                                 strF = Replace$(.Cells(WI).FormulaU, NTDel & "!Width", "", 1)
                                 strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
                                 .Cells(WI).FormulaForceU = Replace$(strF, ",,", ",", 1)
@@ -1407,7 +1408,13 @@ err:
                                 strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
                                 .Cells(PX).FormulaForceU = Replace$(strF, ",,", ",", 1)
                             End If
-                            If .Cells(WI).Result(64) = shpsObj.ItemFromID(ArrShapeID(j, 0)).Cells(WI).Result(64) Then
+                            If .Cells(WI).Result(64) = shpsObj.ItemFromID(ArrShapeID(j, 0)).Cells(WI).Result(64) _
+                                AndAlso .Cells(UTC).Result("") = iDel + 1 Then
+                                .Cells(WI).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j + 1, 0)).Name & "!Width)"
+                                .Cells(PX).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j + 1, 0)).Name & "!PinX)"
+                            End If
+                            If .Cells(WI).Result(64) = shpsObj.ItemFromID(ArrShapeID(j, 0)).Cells(WI).Result(64) _
+                                AndAlso .Cells(UTC).Result("") <> iDel + 1 Then
                                 .Cells(WI).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j, 0)).Name & "!Width)"
                                 .Cells(PX).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(j, 0)).Name & "!PinX)"
                             End If
@@ -1419,10 +1426,12 @@ err:
             For i = LBound(ArrShapeID, 2) To UBound(ArrShapeID, 2) 'Удаление выделенных ячеек по критерию
                 With .ItemFromID(ArrShapeID(iDel, i))
                     If ArrShapeID(iDel, i) <> 0 Then
-                        If InStr(1, .Cells(WI).FormulaU, "SUM", 1) = 0 Then
-                            .Cells(LD).FormulaForceU = 0
-                            .Delete()
-                            ArrShapeID(iDel, i) = 0
+                        If .Cells(UTC).Result("") = iDel Then
+                            If InStr(1, .Cells(WI).FormulaU, "SUM", 1) = 0 Then
+                                .Cells(LD).FormulaForceU = 0
+                                .Delete()
+                                ArrShapeID(iDel, i) = 0
+                            End If
                         End If
                     End If
                 End With
@@ -1459,10 +1468,11 @@ err:
         If shObj.Cells(UTR).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
         Call RecUndo("Удалить строку")
 
-        Dim iAll As Integer, iDel As Integer, i As Integer, j As Integer
-        Dim NTDel As String, strF As String, tmpName As String = "", PropC(1) As String
-
-        iDel = shObj.Cells(UTR).Result("") : iAll = shpsObj.Item(NT).Cells(UTR).Result("") : NTDel = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Name
+        Dim iAll As Integer = shpsObj.Item(NT).Cells(UTR).Result("")
+        Dim iDel As Integer = shObj.Cells(UTR).Result("")
+        Dim NTDel As String = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Name
+        Dim i As Integer, j As Integer
+        Dim strF As String, tmpName As String = "", PropC(1) As String
 
         If iDel < iAll Then ' Сохранение свойств удаляемой упр. ячейки
             PropC(0) = shpsObj.ItemFromID(ArrShapeID(0, iDel)).Cells(PX).FormulaU
@@ -1478,7 +1488,7 @@ err:
                 For i = 1 To UBound(ArrShapeID, 2)
                     With .ItemFromID(ArrShapeID(j, i))
                         If InStr(1, .Cells(HE).FormulaU, "SUM") <> 0 Then
-                            If InStr(1, .Cells(HE).FormulaU, NTDel) <> 0 And InStr(1, .Cells(HE).FormulaU, ",") <> 0 Then
+                            If InStr(1, .Cells(HE).FormulaU, NTDel) <> 0 Then 'AndAlso InStr(1, .Cells(HE).FormulaU, ",") <> 0 Then
                                 strF = Replace$(.Cells(HE).FormulaU, NTDel & "!Height", "", 1)
                                 strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
                                 .Cells(HE).FormulaForceU = Replace$(strF, ",,", ",", 1)
@@ -1493,7 +1503,13 @@ err:
                                 strF = Replace$(strF, "(,", "(", 1) : strF = Replace$(strF, ",)", ")", 1)
                                 .Cells(PY).FormulaForceU = Replace$(strF, ",,", ",", 1)
                             End If
-                            If .Cells(HE).Result(64) = shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) Then
+                            If .Cells(HE).Result(64) = shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) _
+                                AndAlso .Cells(UTR).Result("") = iDel + 1 Then
+                                .Cells(HE).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i + 1)).Name & "!Height)"
+                                .Cells(PY).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i + 1)).Name & "!PinY)"
+                            End If
+                            If .Cells(HE).Result(64) = shpsObj.ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) _
+                                AndAlso .Cells(UTR).Result("") <> iDel + 1 Then
                                 .Cells(HE).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Name & "!Height)"
                                 .Cells(PY).FormulaForceU = GU & shpsObj.ItemFromID(ArrShapeID(0, i)).Name & "!PinY)"
                             End If
@@ -1505,10 +1521,12 @@ err:
             For i = LBound(ArrShapeID, 1) To UBound(ArrShapeID, 1) 'Удаление выделенных ячеек по критерию
                 With .ItemFromID(ArrShapeID(i, iDel))
                     If ArrShapeID(i, iDel) <> 0 Then
-                        If InStr(1, .Cells(HE).FormulaU, "SUM", 1) = 0 Then
-                            .Cells(LD).FormulaForceU = 0
-                            .Delete()
-                            ArrShapeID(i, iDel) = 0
+                        If .Cells(UTR).Result("") = iDel Then
+                            If InStr(1, .Cells(HE).FormulaU, "SUM", 1) = 0 Then
+                                .Cells(LD).FormulaForceU = 0
+                                .Delete()
+                                ArrShapeID(i, iDel) = 0
+                            End If
                         End If
                     End If
                 End With
