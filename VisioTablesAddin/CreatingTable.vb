@@ -5,7 +5,6 @@ Module CreatingTable
 
 #Region "LIST OF VARIABLES AND CONSTANTS"
 
-    Friend CheckArrID As String = ""
     Friend vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Friend winObj As Visio.Window
     Friend docObj As Visio.Document
@@ -183,7 +182,7 @@ err:
         End With
 
         Call RecUndo("0")
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
+
         On Error Resume Next
         winObj.Selection = vsoDups
 
@@ -286,7 +285,7 @@ err:
         End With
 
         Call RecUndo("0")
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
+
         On Error Resume Next
         winObj.Selection = vsoDups
 
@@ -623,7 +622,6 @@ errD:
 
     Sub InitArrShapeID(strNameShape)  ' Заполнение массива шейпами активной таблицы
         'strNameTable - строковая переменая, значение ячейки "User.TableName" любого шейпа из активной таблицы
-        If CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "0" Then Exit Sub
 
         Dim shObj As Visio.Shape
         Dim cMax As Integer = shpsObj.Item(strNameShape).Cells(UTC).Result("")
@@ -642,7 +640,7 @@ errD:
         Next
         ArrShapeID(0, 0) = shpsObj.Item(strNameShape).ID
         If ArrShapeID(0, 0) = ArrShapeID(cMax, rMax) Then ArrShapeID(cMax, rMax) = 0
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "0"
+
     End Sub
 
     Sub InsertText(arg) ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
@@ -1272,7 +1270,6 @@ err:
         Next
 
         winObj.Select(shObj1, 2)
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         Exit Sub
 
 err:
@@ -1361,7 +1358,6 @@ err:
         Next
         shObj.Cells(LD).FormulaForceU = 0
         shObj.Delete()
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
         Exit Sub
 
 err:
@@ -1456,7 +1452,7 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
+
     End Sub
 
     Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
@@ -1542,7 +1538,6 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
-        CheckArrID = docObj.Path & docObj.Name & pagObj.NameU & NT & "1"
 
     End Sub
 
