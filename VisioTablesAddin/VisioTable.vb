@@ -56,7 +56,6 @@ Friend Class VisioTable
     Private Const GS = "=GUARD(Sheet."
     Private Const GI = "=Guard(IF("
     Private Const sh = "Sheet."
-    Private Const frm = "###0.0###"
     Private Const GU5 = "=GUARD(10 mm)" ' Переделать на DrawUn
     Private Const P50 = "50%"
     Private Const GT = "GUARD(TRUE)"
@@ -71,10 +70,10 @@ Friend Class VisioTable
         bytInsertType = IIf(b < 1 Or b > 4, 1, b)
         intColumnsCount = IIf(c < 1 Or c > 1000, 5, c)
         intRowsCount = IIf(d < 1 Or d > 1000, 5, d)
-        sngWidthCells = IIf(e = 0 Or e < 0, vsoApp.FormatResult(20, "mm", 64, "0.0000"), e)
-        sngHeightCells = IIf(f = 0 Or f < 0, vsoApp.FormatResult(10, "mm", 64, "0.0000"), f)
-        sngWidthTable = IIf(g = 0 Or g < 0, vsoApp.FormatResult(100, "mm", 64, "0.0000"), g)
-        sngHeightTable = IIf(h = 0 Or h < 0, vsoApp.FormatResult(50, "mm", 64, "0.0000"), h)
+        sngWidthCells = IIf(e = 0 Or e < 0, PtoD(56.69291339), e)
+        sngHeightCells = IIf(f = 0 Or f < 0, PtoD(28.34645669), f)
+        sngWidthTable = IIf(g = 0 Or g < 0, PtoD(283.4646), g)
+        sngHeightTable = IIf(h = 0 Or h < 0, PtoD(283.4646), h)
         booDeleteTargetShape = i
         booVisibleProgressBar = j
 
@@ -82,20 +81,14 @@ Friend Class VisioTable
 
     Public Sub CreatTable()
         On Error GoTo errD
-
+        Dim frm As New dlgWait
         Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
         Dim TypeCell As String
-        'Dim ThemeC As String, ThemeE As String
         Dim jGT As Integer = 0
         Dim iGT As Integer = 0
 
         winObj = vsoApp.ActiveWindow
         pagObj = vsoApp.ActivePage
-
-        'ThemeC = pagObj.ThemeColors
-        'If ThemeC <> "visThemeNone" Then pagObj.ThemeColors = "visThemeNone"
-        'ThemeE = pagObj.ThemeEffects
-        'If ThemeE <> "visThemeEffectsNone" Then pagObj.ThemeEffects = "visThemeEffectsNone"
 
         If bytInsertType = 2 Then
             Dim sngPW As Single, sngPH As Single, sngPLM As Single, sngPRM As Single, sngPTM As Single, sngPBM As Single
@@ -119,8 +112,8 @@ Friend Class VisioTable
                 With winObj.Selection(1)
                     .BoundingBox(3, sngTX, sngTY, sngTW, sngTH) ' L, B, R, T
                     MemSHID = .ID
-                    sngTX = vsoApp.FormatResult(sngTX, "", 64, "0.00000000")
-                    sngTY = vsoApp.FormatResult(sngTH, "", 64, "0.00000000")
+                    sngTX = ItoD(sngTX)
+                    sngTY = ItoD(sngTH)
                     sngTW = .Cells(WI).Result(64) / intColumnsCount
                     sngTH = .Cells(HE).Result(64) / intRowsCount
                 End With
@@ -130,11 +123,10 @@ Friend Class VisioTable
         ReDim arrNewID((intRowsCount * intColumnsCount) + (intRowsCount + intColumnsCount))
         CountID = -1
 
-        'If booVisibleProgressBar Then
-        Dim frm As New dlgWait
-        frm.Label1.Text = " " & vbCrLf & "Создание  новой таблицы"
-        frm.Show() : frm.Refresh()
-        'End If
+        If booVisibleProgressBar Then
+            frm.Label1.Text = " " & vbCrLf & "Создание  новой таблицы"
+            frm.Show() : frm.Refresh()
+        End If
 
         Call RecUndo("Создание таблицы...")
 
@@ -146,9 +138,6 @@ Friend Class VisioTable
         If vsoLayerCells.CellsC(4).Result("") = 0 Then vsoLayerCells.CellsC(4).FormulaForceU = 1 ' Сделать если надо слой видимым
         If vsoLayerCells.CellsC(7).Result("") = 1 Then vsoLayerCells.CellsC(7).FormulaForceU = 0 ' Разблокировать если надо слой
         vsoLayerTitles.CellsC(5).FormulaU = "GUARD(0)" ' Слой всегда не печатаемый
-
-        'pagObj.CellsSRC(visSectionObject, visRowRulerGrid, visXRulerOrigin).FormulaU = "0 mm"
-        'pagObj.CellsSRC(visSectionObject, visRowRulerGrid, visXGridOrigin).FormulaU = "0 mm"
 
         vsoApp.ShowChanges = False
 
@@ -184,9 +173,9 @@ Friend Class VisioTable
 
         TypeCell = "ClW" : VarCell = 0 'Вставка рабочих ячеек
         For jGT = 1 To intRowsCount
-            'If booVisibleProgressBar Then
-            frm.lblProgressBar.Width = (300 / intRowsCount) * jGT : frm.lblProgressBar.Refresh() : Application.DoEvents()
-            'End If
+            If booVisibleProgressBar Then
+                frm.lblProgressBar.Width = (300 / intRowsCount) * jGT : frm.lblProgressBar.Refresh() : Application.DoEvents()
+            End If
             For iGT = 1 To intColumnsCount
                 If jGT = 1 And iGT = 1 Then
                     NewShape(TypeCell)
@@ -200,16 +189,19 @@ Friend Class VisioTable
         Next
 
         shpObj = pagObj.Shapes.ItemFromID(arrNewID(0))
-        shpObj.Cells(UTC).FormulaU = "GUARD(" & intColumnsCount & ")"
-        shpObj.Cells(UTR).FormulaU = "GUARD(" & intRowsCount & ")"
+        shpObj.Cells(UTC).FormulaU = GU & intColumnsCount & ")"
+        shpObj.Cells(UTR).FormulaU = GU & intRowsCount & ")"
 
         For iGT = 0 To intColumnsCount + intRowsCount - 1
             winObj.Page.Shapes.ItemFromID(arrNewID(iGT)).Cells("LockTextEdit").FormulaU = "Guard(1)"
         Next
 
         Call RecUndo("0")
-        frm.Close()
-        'If booVisibleProgressBar Then Unload frmWait
+
+        If booVisibleProgressBar Then
+            frm.Close() : frm = Nothing
+        End If
+
 
         If bytInsertType = 4 AndAlso booDeleteTargetShape Then
             If pagObj.Shapes.ItemFromID(MemSHID).Cells(LD).Result("") = 0 Then pagObj.Shapes.ItemFromID(MemSHID).DeleteEx(0)
@@ -217,10 +209,6 @@ Friend Class VisioTable
 
         vsoApp.ShowChanges = True
         winObj.Select(shpObj, 258)
-
-        'If ThemeC <> pagObj.ThemeColors Then pagObj.ThemeColors = ThemeC
-        'If ThemeE <> pagObj.ThemeEffects Then pagObj.ThemeEffects = ThemeE
-
         Exit Sub
 errD:
         MsgBox("CreatTable-Class" & vbNewLine & Err.Description)
@@ -260,14 +248,6 @@ errD:
                         .Cells(UTR).FormulaForceU = GU & 0 & ")"
                         .Characters.AddCustomFieldU(UTC, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTC & ")"
-
-                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        '.Cells("Char.Color").FormulaForceU = strThGu255
-                        '.Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        '.Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
-                        '.Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
-                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
                         .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
                         .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка столбца""" & "," & """""" & "))"
 
@@ -291,18 +271,13 @@ errD:
                         .Cells(UTR).FormulaForceU = GU & jGT & ")"
                         .Characters.AddCustomFieldU(UTR, 0)
                         .Cells("Fields.Value").FormulaU = "GUARD(" & UTR & ")"
-
-                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        '.Cells("Char.Color").FormulaForceU = strThGu255
-                        '.Cells("FillForegnd").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu000 & "," & strThGu255 & "))"
-                        '.Cells("FillForegndTrans").FormulaForceU = GI & sh & arrNewID(0) & strATC & "0%" & "," & "50%" & "))"
-                        '.Cells("LineColor").FormulaForceU = GI & sh & arrNewID(0) & strATC & strThGu191 & "," & strThGu255 & "))"
-                        ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
                         .Cells("HideText").FormulaForceU = "=GUARD(NOT(" & sh & arrNewID(0) & "!Actions.Titles.Checked))"
                         .Cells("Comment").FormulaForceU = GI & sh & arrNewID(0) & strACC & """Управляющая ячейка строки""" & "," & """""" & "))"
 
                     Case 3 ' 1 ГлавУпр
+                        Const frm = "###0.0###"
+                        '.Cells(WI).FormulaForceU = GU & PtoD(28.34645669) & ")"
+                        '.Cells(HE).FormulaForceU = GU & PtoD(28.34645669) & ")"
                         .Cells(WI).FormulaForceU = GU & Str(vsoApp.FormatResult(10, "mm", "", frm)) & ")"
                         .Cells(HE).FormulaForceU = GU & Str(vsoApp.FormatResult(10, "mm", "", frm)) & ")"
                         If bytInsertType = 4 Then
@@ -314,7 +289,6 @@ errD:
                         End If
                         .UpdateAlignmentBox()
                         .Cells(UTN).FormulaU = "=GUARD(Name(0))"
-                        '.Cells("Char.Color").FormulaForceU = strThGu255 ' !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 End Select
 
                 .Cells(CA).FormulaU = GU & "0 deg)"
@@ -326,9 +300,6 @@ errD:
     End Sub
 
     Private Sub NewShape(TypeCell)
-
-        ' Вместо LineFormat, FillFormat - ссылка на TbL
-
         On Error GoTo errD
         ' Подпроцедура создания шейпов таблицы и настройка их
         Dim vsoShape As Visio.Shape
@@ -408,6 +379,11 @@ errD:
                     .Cells("Width").FormulaU = GU5
                     .Cells("Height").FormulaU = GU5
                     .Cells("Comment").FormulaU = "GUARD(IF(Actions.Comments.Checked=1," & "User.TableName&CHAR(10)&" & """Основная управляющая ячейка"", """"))"
+                    Dim Ui = .UniqueID(1)
+                    '.AddNamedRow(242, "BirthDay", 0)
+                    '.Cells("User.BirthDay.Value").FormulaU = """" & Now & """"
+                    '.Cells("EventDrop").FormulaForceU = "GUARD(SETF(GetRef(User.BirthDay), CHAR(34)&Now()&CHAR(34)))"
+                    '.Cells("EventMultiDrop").FormulaForceU = "GUARD(SETF(GetRef(User.BirthDay), CHAR(34)&Now()&CHAR(34)))"
                     shape_TbL = vsoShape
             End Select
         End With
@@ -441,15 +417,13 @@ errD:
                     Next
                 Case Else
                     For intI = 0 To UBound(arrRowData)
-                        .AddRow(AddSectionNum, 0, 0) '.AddRow(AddSectionNum, -2, 0)
+                        .AddRow(AddSectionNum, 0, 0)
                         .CellsSRC(AddSectionNum, intI, 0).RowNameU = arrRowData(intI, 0)
                         For intJ = 0 To UBound(intArrNum)
                             .CellsSRC(AddSectionNum, intI, intArrNum(intJ)).FormulaU = arrRowData(intI, intJ + 1)
                         Next
                     Next
             End Select
-            'ActiveWindow.Selection(1).AddNamedRow 242, "ID", 0
-            'ActiveWindow.Selection(1).Cells("User.ID.Value").FormulaForceU = Str(Year(Now) & Month(Now) & Day(Now) & Hour(Now) & Minute(Now) & Second(Now) & ActiveWindow.Selection(1).id & "_")
         End With
         Exit Sub
 errD:

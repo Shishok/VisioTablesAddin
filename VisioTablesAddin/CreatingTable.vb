@@ -4,7 +4,8 @@ Imports System.Windows.Forms
 Module CreatingTable
 
 #Region "LIST OF VARIABLES AND CONSTANTS"
-
+    Friend Matrica As String = ""
+    Friend CheckArrID As String = ""
     Friend vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Friend winObj As Visio.Window
     Friend docObj As Visio.Document
@@ -45,14 +46,14 @@ Module CreatingTable
         NewTable = Nothing
     End Sub
 
-    Sub QuickTable(strV)
-        Dim nC As Integer = 0, nR As Integer = 0
-        strV = Strings.Right(strV, Strings.Len(strV) - 1)
-        nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
-        nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
-        strNameTable = "TbL"
-        Call CreatTable(strNameTable, 1, nC, nR, PtoD(56.69291339), PtoD(28.34645669), 0, 0, False, False)
-    End Sub
+    'Sub QuickTable(strV)
+    '    Dim nC As Integer = 0, nR As Integer = 0
+    '    strV = Strings.Right(strV, Strings.Len(strV) - 1)
+    '    nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
+    '    nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
+    '    strNameTable = "TbL"
+    '    Call CreatTable(strNameTable, 1, nC, nR, PtoD(56.69291339), PtoD(28.34645669), 0, 0, False, False)
+    'End Sub
 
     Sub Load_dlgNewTable()
         If frmNewTable Is Nothing Then
@@ -182,7 +183,7 @@ err:
         End With
 
         Call RecUndo("0")
-
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
 
@@ -285,7 +286,7 @@ err:
         End With
 
         Call RecUndo("0")
-
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
         On Error Resume Next
         winObj.Selection = vsoDups
 
@@ -620,26 +621,27 @@ errD:
         Call RecUndo("0")
     End Sub
 
-    Sub InitArrShapeID(strNameShape)  ' Заполнение массива шейпами активной таблицы
-        'strNameTable - строковая переменая, значение ячейки "User.TableName" любого шейпа из активной таблицы
+    Sub InitArrShapeID(NSh)  ' Заполнение массива ID шейпов активной таблицы
+        'NSh - строковая переменая, значение ячейки "User.TableName" любого шейпа из активной таблицы
+        Dim Ui = winObj.Page.Shapes(NT).UniqueID(0)
+        If Len(Ui) = 0 Then Ui = winObj.Page.Shapes(NT).UniqueID(1)
+        If CheckArrID = Ui & "0" Then Exit Sub
 
         Dim shObj As Visio.Shape
-        Dim cMax As Integer = shpsObj.Item(strNameShape).Cells(UTC).Result("")
-        Dim rMax As Integer = shpsObj.Item(strNameShape).Cells(UTR).Result("")
+        Dim cMax As Integer = shpsObj.Item(NSh).Cells(UTC).Result("")
+        Dim rMax As Integer = shpsObj.Item(NSh).Cells(UTR).Result("")
 
         ReDim ArrShapeID(cMax, rMax)
 
         For Each shObj In shpsObj
             With shObj
-                If .CellExistsU(UTN, 0) Then
-                    If StrComp(.Cells(UTN).ResultStr(""), strNameShape) = 0 Then
-                        ArrShapeID(.Cells(UTC).Result(""), .Cells(UTR).Result("")) = .ID
-                    End If
-                End If
+                If .CellExistsU(UTN, 0) AndAlso StrComp(.Cells(UTN).ResultStr(""), NSh) = 0 Then ArrShapeID(.Cells(UTC).Result(""), .Cells(UTR).Result("")) = .ID
             End With
         Next
-        ArrShapeID(0, 0) = shpsObj.Item(strNameShape).ID
-        If ArrShapeID(0, 0) = ArrShapeID(cMax, rMax) Then ArrShapeID(cMax, rMax) = 0
+
+        ArrShapeID(0, 0) = shpsObj.Item(NSh).ID
+        If ArrShapeID(cMax, rMax) = ArrShapeID(0, 0) Then ArrShapeID(cMax, rMax) = 0
+        CheckArrID = Ui & "0"
 
     End Sub
 
@@ -1083,16 +1085,17 @@ err:
 err:
     End Sub
 
-    Sub SelectCells(intStartCol As Integer, intEndCol As Integer, intStartRow As Integer, intEndRow As Integer) 'Различное выделение в таблице
-
-        Dim intColNum As Integer, intRowNum As Integer
-
+    Sub SelectCells(StartCol, EndCol, StartRow, EndRow) 'Выделение блоками в таблице по заданным значениям
         On Error Resume Next
-        For intColNum = intStartCol To intEndCol
-            For intRowNum = intStartRow To intEndRow
-                winObj.Select(winObj.Page.Shapes.ItemFromID(ArrShapeID(intColNum, intRowNum)), 2)
+
+        With winObj.Page.Shapes
+            For c = StartCol To EndCol
+                For r = StartRow To EndRow
+                    winObj.Select(.ItemFromID(ArrShapeID(c, r)), 2)
+                Next
             Next
-        Next
+        End With
+
         On Error GoTo 0
     End Sub
 
@@ -1270,6 +1273,7 @@ err:
         Next
 
         winObj.Select(shObj1, 2)
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
         Exit Sub
 
 err:
@@ -1358,6 +1362,7 @@ err:
         Next
         shObj.Cells(LD).FormulaForceU = 0
         shObj.Delete()
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
         Exit Sub
 
 err:
@@ -1461,7 +1466,7 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
-
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
     End Sub
 
     Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
@@ -1556,7 +1561,7 @@ err:
         Call PropLayers(0)
         winObj.Select(shpsObj.ItemFromID(ArrShapeID(0, 0)), 2)
         Call RecUndo("0")
-
+        CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
     End Sub
 
     Private Sub NotDub(vsoSel, UT) ' Заполнение коллекции значениями без дубликатов
@@ -1605,6 +1610,10 @@ err:
 
     Function DtoP(arg)
         Return vsoApp.FormatResult(arg, 64, 50, "####0.####")
+    End Function
+
+    Function ItoD(arg)
+        Return vsoApp.FormatResult(arg, 65, 64, "####0.####")
     End Function
 
     Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе

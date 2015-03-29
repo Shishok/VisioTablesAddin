@@ -30,7 +30,9 @@ Partial Public Class Addin
     End Sub
 
     Public Sub OnRibbonGalleryClick(control As Microsoft.Office.Core.IRibbonControl, id As String, index As Integer)
-        QuickTable(id)
+        AddHandler Application.ShapeAdded, AddressOf Application_ShapeAdded
+        Matrica = id
+        Application.DoCmd(1223)
     End Sub
 
     Public Sub OnRibbonLoad(ribbonUI As Microsoft.Office.Core.IRibbonUI)

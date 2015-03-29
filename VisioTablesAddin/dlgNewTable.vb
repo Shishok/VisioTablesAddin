@@ -1,16 +1,17 @@
 ﻿Imports System.Windows.Forms
+Imports System.Drawing
 
 Public Class dlgNewTable
     Dim ctl As System.Windows.Forms.Control
     Dim bytInsertType As Byte, booDeleteTargetShape As Boolean
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If txtNameTable.Text = Trim(" ") Then txtNameTable.Text = "TbL"
+        If Trim(txtNameTable.Text) = "" Then txtNameTable.Text = "TbL"
         strNameTable = txtNameTable.Text
-        If txtCellDefWidth.Text = Trim("") Then txtCellDefWidth.Text = 0
-        If txtCellDefHeight.Text = Trim("") Then txtCellDefHeight.Text = 0
-        If txtTableCusWidth.Text = Trim("") Then txtTableCusWidth.Text = 0
-        If txtTableCusHeight.Text = Trim("") Then txtTableCusHeight.Text = 0
+        If Val(txtCellDefWidth.Text) = 0 Then txtCellDefWidth.Text = 0
+        If Val(txtCellDefHeight.Text) = 0 Then txtCellDefHeight.Text = 0
+        If Val(txtTableCusWidth.Text) = 0 Then txtTableCusWidth.Text = 0
+        If Val(txtTableCusHeight.Text) = 0 Then txtTableCusHeight.Text = 0
         Me.Hide()
         Dim w = DtoD(txtCellDefWidth.Text)
         Dim h = DtoD(txtCellDefHeight.Text)

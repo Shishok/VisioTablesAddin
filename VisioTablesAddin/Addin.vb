@@ -66,7 +66,6 @@ Partial Public Class Addin
     Sub Startup(app As Object)
         Application = DirectCast(app, Microsoft.Office.Interop.Visio.Application)
         System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(False)
-        'AddHandler Application.SelectionChanged, AddressOf Application_SelectionChanged
         AddHandler Application.DocumentCreated, AddressOf Application_DocumentListChanged
         AddHandler Application.DocumentOpened, AddressOf Application_DocumentListChanged
         AddHandler Application.BeforeDocumentClose, AddressOf Application_DocumentListChanged
@@ -76,9 +75,15 @@ Partial Public Class Addin
         UpdateRibbon()
     End Sub
 
-    'Private Sub Application_SelectionChanged(ByVal window As Microsoft.Office.Interop.Visio.Window)
-    '    UpdateRibbon()
-    'End Sub
+    Sub Application_ShapeAdded(ByVal Sh As Microsoft.Office.Interop.Visio.Shape)
+        Dim nC As Integer = 0, nR As Integer = 0, strV As String = Strings.Right(Matrica, Strings.Len(Matrica) - 1)
+        nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
+        nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
+        strNameTable = "TbL"
+        RemoveHandler Application.ShapeAdded, AddressOf Application_ShapeAdded
+        Call CreatTable(strNameTable, 4, nC, nR, 0, 0, 0, 0, True, False)
+        Application.DoCmd(1907)
+    End Sub
 
 #End Region
 

@@ -10,6 +10,7 @@ Public Class dlgIntellInput
 
     Private Sub dlgIntellInput_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         Call InitArrShapeID(NT)
+        Call RecUndo("Ручной набор текста")
     End Sub
 
     Private Sub cmbText_KeyDown(sender As Object, e As KeyEventArgs) Handles cmbText.KeyDown
@@ -121,6 +122,10 @@ err:
         msg = msg & "ENTER - вставить текст в выделенную ячейку и закрыть диалог." & vbCrLf
         msg = msg & "ESC - переход назад в обратном порядке."
         MsgBox(msg, 64, "Подсказка")
+    End Sub
+
+    Private Sub dlgIntellInput_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
+        Call RecUndo("0")
     End Sub
 
 End Class
