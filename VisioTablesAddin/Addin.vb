@@ -76,9 +76,8 @@ Partial Public Class Addin
     End Sub
 
     Sub Application_ShapeAdded(ByVal Sh As Microsoft.Office.Interop.Visio.Shape)
-        Dim nC As Integer = 0, nR As Integer = 0, strV As String = Strings.Right(Matrica, Strings.Len(Matrica) - 1)
-        nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
-        nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
+        Dim nC As Integer = Val(Strings.Left(Matrica, Strings.InStr(1, Matrica, "x", 1) - 1))
+        Dim nR As Integer = Val(Strings.Right(Matrica, Strings.Len(Matrica) - Strings.InStr(1, Matrica, "x", 1)))
         strNameTable = "TbL"
         RemoveHandler Application.ShapeAdded, AddressOf Application_ShapeAdded
         Call CreatTable(strNameTable, 4, nC, nR, 0, 0, 0, 0, True, False)

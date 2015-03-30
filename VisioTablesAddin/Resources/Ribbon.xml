@@ -9,7 +9,7 @@
       </tab>-->
       <tab id="table1" label="Таблицы" getVisible="IsRibbonCommandEnabled">
         <group id="group_add" label="Вставить" imageMso="TableInsert">
-          <gallery id="gal1" label="Таблица 1 клик"  size="large" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick">
+          <gallery id="gal1" label="Таблица 1 клик"  size="large" imageMso="TableInsert" showItemLabel="false" itemWidth="16" itemHeight="16" onAction="OnRibbonGalleryClick" screentip="Быстрая таблица" supertip ="Выберите размерность таблицы и обведите нужную область">
                 <item id="i1x1" imageMso="AppointmentColor0" label="1x1"/>
                 <item id="i2x1" imageMso="AppointmentColor0" label="2x1"/>
                 <item id="i3x1" imageMso="AppointmentColor0" label="3x1"/>

@@ -15,14 +15,11 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        If winObj.Selection.Count = 0 Then
-            MsgBox("Нет выделенных ячеек", 48, "Ошибка!")
-            Exit Sub
-        End If
 
         Select Case TabControl1.SelectedIndex
 
             Case 0 ' Размеры
+                If Val(txtCellL.Text) = 0 Or Val(txtTableL.Text) = 0 Or Val(txtCellH.Text) = 0 Or Val(txtTableH.Text) = 0 Then Exit Sub
                 Dim TableW As Single, TableH As Single
                 TableW = txtTableL.Text : TableH = txtTableH.Text
                 With winObj.Page.PageSheet

@@ -31,7 +31,7 @@ Partial Public Class Addin
 
     Public Sub OnRibbonGalleryClick(control As Microsoft.Office.Core.IRibbonControl, id As String, index As Integer)
         AddHandler Application.ShapeAdded, AddressOf Application_ShapeAdded
-        Matrica = id
+        Matrica = Strings.Right(id, Strings.Len(id) - 1)
         Application.DoCmd(1223)
     End Sub
 

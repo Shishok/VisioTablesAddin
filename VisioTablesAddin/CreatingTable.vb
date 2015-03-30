@@ -46,15 +46,6 @@ Module CreatingTable
         NewTable = Nothing
     End Sub
 
-    'Sub QuickTable(strV)
-    '    Dim nC As Integer = 0, nR As Integer = 0
-    '    strV = Strings.Right(strV, Strings.Len(strV) - 1)
-    '    nC = Val(Strings.Left(strV, Strings.InStr(1, strV, "x", 1) - 1))
-    '    nR = Val(Strings.Right(strV, Strings.Len(strV) - Strings.InStr(1, strV, "x", 1)))
-    '    strNameTable = "TbL"
-    '    Call CreatTable(strNameTable, 1, nC, nR, PtoD(56.69291339), PtoD(28.34645669), 0, 0, False, False)
-    'End Sub
-
     Sub Load_dlgNewTable()
         If frmNewTable Is Nothing Then
             frmNewTable = New dlgNewTable
@@ -96,24 +87,22 @@ err:
 
         shpsObj = winObj.Page.Shapes
 
-        Dim shObj As Visio.Shape, vs As Visio.Selection, vsoDups As Visio.Selection, i As Integer, j As Integer
-        Dim iAll As Integer, nCol As Integer, NTNew As String, strF As String
+        Dim shObj As Visio.Shape = winObj.Selection(1)
+        Dim strF As String
 
-        shObj = winObj.Selection(1)
-
-        Call InitArrShapeID(NT) ': winObj.Select(winObj.Page.Shapes.item(1), 256)
+        Call InitArrShapeID(NT)
         winObj.DeselectAll()
 
         Call PropLayers(1)
 
         Call SelectCells(shObj.Cells(UTC).Result(""), shObj.Cells(UTC).Result(""), 0, UBound(ArrShapeID, 2))
 
-        vs = winObj.Selection
-        iAll = shpsObj.Item(NT).Cells(UTC).Result("")
-        nCol = shObj.Cells(UTC).Result("")
+        Dim vs As Visio.Selection = winObj.Selection
+        Dim iAll As Integer = shpsObj.Item(NT).Cells(UTC).Result("")
+        Dim nCol As Integer = shObj.Cells(UTC).Result("")
 
         Call RecUndo("Добавить столбец")
-        vs.Duplicate() : vsoDups = winObj.Selection
+        vs.Duplicate() : Dim vsoDups As Visio.Selection = winObj.Selection
 
         For i = 2 To vsoDups.Count
             With vsoDups(i)
@@ -126,7 +115,7 @@ err:
             End With
         Next
 
-        NTNew = vsoDups(1).Name
+        Dim NTNew As String = vsoDups(1).Name
 
         If arg = 0 Then   ' Вставка столбца перед выделенным
             With vs(1)
@@ -199,10 +188,8 @@ err:
 
         shpsObj = winObj.Page.Shapes
 
-        Dim shObj As Visio.Shape, vs As Visio.Selection, vsoDups As Visio.Selection, i As Integer, j As Integer
-        Dim iAll As Integer, nRow As Integer, NTNew As String, strF As String
-
-        shObj = winObj.Selection(1)
+        Dim shObj As Visio.Shape = winObj.Selection(1)
+        Dim strF As String
 
         Call InitArrShapeID(NT) ': winObj.Select(winObj.Page.Shapes.item(1), 256)
         winObj.DeselectAll()
@@ -211,12 +198,12 @@ err:
 
         Call SelectCells(0, UBound(ArrShapeID, 1), shObj.Cells(UTR).Result(""), shObj.Cells(UTR).Result(""))
 
-        vs = winObj.Selection
-        iAll = shpsObj.Item(NT).Cells(UTR).Result("")
-        nRow = shObj.Cells(UTR).Result("")
+        Dim vs As Visio.Selection = winObj.Selection
+        Dim iAll As Integer = shpsObj.Item(NT).Cells(UTR).Result("")
+        Dim nRow As Integer = shObj.Cells(UTR).Result("")
 
         Call RecUndo("Добавить строку")
-        vs.Duplicate() : vsoDups = winObj.Selection
+        vs.Duplicate() : Dim vsoDups As Visio.Selection = winObj.Selection
 
         For i = 2 To vsoDups.Count
             With vsoDups(i)
@@ -229,7 +216,7 @@ err:
             End With
         Next
 
-        NTNew = vsoDups(1).Name
+        Dim NTNew As String = vsoDups(1).Name
 
         If arg = 0 Then ' Вставка строки перед выделенной
             With vs(1)
@@ -1198,7 +1185,7 @@ err:
         flagCheck = True
 
         If vsoSel.Count < 2 Then
-            MsgBox("Должно быть выделено не меньше двух ячеек:" & vbCrLf & "Первая и последняя в предполагаемом диапазоне объединения. Или все объединяемые", 48, "Ошибка!")
+            MsgBox("Должно быть выделено не меньше двух ячеек! Без управляющих ячеек.", 48, "Ошибка!")
             Exit Sub
         End If
         '------------------------------- START --------------------------------------------------------
@@ -1289,11 +1276,6 @@ err:
 
         Dim flagCheck As Boolean, flagTxt As Boolean
         flagCheck = True
-
-        If winObj.Selection.Count <> 1 Then
-            MsgBox("Должна быть выделена одна ячейка:", 48, "Ошибка!")
-            Exit Sub
-        End If
 
         If InStr(1, shObj.Cells(WI).FormulaU, "SUM", 1) = 0 And InStr(1, shObj.Cells(HE).FormulaU, "SUM", 1) = 0 Then flagCheck = False
         If Not flagCheck Then GoTo err
