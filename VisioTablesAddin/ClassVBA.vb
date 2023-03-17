@@ -55,7 +55,7 @@ Public Interface IClassVBA
     Sub LinkToData(a As Integer, b As Boolean, c As String, d As Boolean, e As Boolean, h As Boolean)
     Sub SetCellsText(arg As Object, c As Integer, r As Integer, c1 As Integer, r1 As Integer, byCorR As Byte)
     Sub SetCellsFormula(cell As String, c As Integer, r As Integer, c1 As Integer, r1 As Integer, txt As Object)
-    Sub SortTable(NumColumn As Byte, a As Boolean, b As Boolean)
+    Sub SortTable(NumColumn As Byte, DigOrTxt As Boolean, SortDirection As Boolean)
     Sub GetCellsFormula(cell As String, c As Integer, r As Integer, c1 As Integer, r1 As Integer, ByRef arr As Object, res As String)
     Sub GetCellsProp(ByRef arr As Object, c As Integer, r As Integer, c1 As Integer, r1 As Integer, arg As String)
     Sub AutoFit(arg As String)
@@ -591,9 +591,9 @@ Line1:
     End Sub
 
 	' Сортировка выделенных ячеек (по столбцам)
-    Public Sub SortTable(NumColumn As Byte, a As Boolean, b As Boolean) Implements IClassVBA.SortTable
+    Public Sub SortTable(NumColumn As Byte, DigOrTxt As Boolean, SortDirection As Boolean) Implements IClassVBA.SortTable
         If Not CheckCells() Then Exit Sub
-        Call SortTableData(NumColumn, a, b)
+        Call SortTableData(NumColumn, DigOrTxt, SortDirection)
     End Sub
 
 	' Извлечение формулы/значения заданных ячеек из активной таблицы

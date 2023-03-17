@@ -101,6 +101,7 @@ Partial Class dlgSortTable
         Me.Controls.Add(Me.cb_DigitOrText)
         Me.Controls.Add(Me.cb_SortingDirection)
         Me.Controls.Add(Me.Label1)
+        Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog
         Me.MaximizeBox = False
         Me.MinimizeBox = False
         Me.Name = "dlgSortTable"

@@ -21,7 +21,23 @@
         Me.Close()
     End Sub
 
-    'Private Sub dlgSortTable_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-    '    Num_Column.Maximum = SelColRow(1)
-    'End Sub
+    Private Sub dlgSortTable_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Num_Column.Maximum = MaxColumn()
+    End Sub
+
+    ' Функция определения количества выделенных столбцов
+    Private Function MaxColumn()
+        Dim MaxC As Integer = 0
+        Dim MinC As Integer = 1000
+
+        With vsoApp.ActiveWindow
+            For i = 1 To .Selection.Count
+                If MinC > .Selection(i).Cells(UTC).Result("") Then MinC = .Selection(i).Cells(UTC).Result("")
+                If MaxC < .Selection(i).Cells(UTC).Result("") Then MaxC = .Selection(i).Cells(UTC).Result("")
+            Next
+        End With
+
+        Return MaxC - MinC + 1
+    End Function
+
 End Class

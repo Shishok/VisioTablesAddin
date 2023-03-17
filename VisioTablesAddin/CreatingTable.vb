@@ -1273,7 +1273,7 @@ Line1:
     End Sub
 
     ' Сортировка выделенных ячеек таблицы
-    Sub SortTableData(NumColumn, a, b)
+    Sub SortTableData(NumColumn, DigOrTxt, SortDirection)
         Dim vsoSel As Visio.Selection = winObj.Selection
         If vsoSel.Count < 2 Then
             MsgBox("Должно быть выделено не меньше двух ячеек! Без управляющих ячеек.", 48, "Ошибка!")
@@ -1283,8 +1283,8 @@ Line1:
         Call RecUndo("Сортировать данные")
 
         Dim arr, arrTMP
-        Dim cS As Integer, rS As Integer, ci As Integer, ri As Integer
-        Dim i As Integer, j As Integer, allN As Integer, TCol As Byte
+        Dim cS, rS, ci, ri As Integer
+        Dim i, j, allN As Integer, TCol As Byte
 
         SelCell(3, True) ' выделение диапазона ячеек
 
@@ -1310,14 +1310,13 @@ Line1:
         TCol = NumColumn - 1
         If TCol < 0 Or TCol > UBound(arrTMP, 1) Then TCol = 0
 
-        On Error Resume Next
-
         ' сортировка пузырьковым методом
-        Dim Temp, n As Integer, SortDir
+        Dim n As Integer, SortDir
+        Dim Temp
 
-        Select Case a ' выбор: сортировка текста или чисел
+        Select Case DigOrTxt ' выбор: сортировка текста или чисел
             Case False ' сортировка текста
-                SortDir = Switch(b = False, 1, b = True, -1)
+                SortDir = Switch(SortDirection = False, 1, SortDirection = True, -1)
                 For i = 0 To UBound(arrTMP, 2)
                     For j = i + 1 To UBound(arrTMP, 2)
                         If StrComp(arrTMP(TCol, i), arrTMP(TCol, j), 1) = SortDir Then
@@ -1339,7 +1338,7 @@ Line1:
                     Next
                 Next
             Case True ' сортировка чисел
-                SortDir = Switch(b = False, True, b = True, False)
+                SortDir = Switch(SortDirection = False, True, SortDirection = True, False)
                 For i = 0 To UBound(arrTMP, 2)
                     For j = i + 1 To UBound(arrTMP, 2)
                         If CDbl(arrTMP(TCol, i)) > CDbl(arrTMP(TCol, j)) = SortDir Then
@@ -1362,15 +1361,13 @@ Line1:
                 Next
         End Select
 
-        ' вставка отсортированных данных в таблицу
-        ' .SetCellsText(arrTMP, ci, ri, ci + cS - 1, ri + rS - 1, 0)
         Call SetText(arrTMP, ci, ri, ci + cS - 1, ri + rS - 1, 0)
 
         Call RecUndo("0")
         Exit Sub
 
 err:
-        MsgBox("Ошибка", 48, "Ошибка!") '111111111111111111111111111111111111111111
+        MsgBox("Номер ошибки: " & Err.Number & vbNewLine & "Описание ошибки: " & Err.Description, 48, "Ошибка!")
     End Sub
 
     ' Извлечение формулы/значения  заданных ячеек из активной таблицы
@@ -1472,7 +1469,7 @@ err:
 
     End Sub
 
-	' Поиск текста в ячейках
+    ' Поиск текста в ячейках
     Sub SearchText(Operand As String, Pattern As String, Action As String)
         Dim selObj As Visio.Selection = winObj.Selection, sh As Visio.Shape, booCheck As Boolean = False
 
@@ -1502,7 +1499,7 @@ err:
 
     End Sub
 
-	' Замена текста в ячейках
+    ' Замена текста в ячейках
     Sub ReplaceTxt(txt As String, txt1 As String, Optional istart As Integer = 1, Optional icount As Integer = -1)
         Dim selObj As Visio.Selection = winObj.Selection, sh As Visio.Shape
 
