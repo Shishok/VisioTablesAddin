@@ -41,8 +41,10 @@ Module CreatingTable
 #Region "Load Sub"
 
     Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
-        Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
-        NewTable.CreatTable()
+        'Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
+        'NewTable.CreatTable()
+        Dim NewTable As New VisioTable
+        NewTable.CreatTable(a, b, c, d, e, f, g, h, i, j)
         NewTable = Nothing
     End Sub
 
@@ -68,6 +70,7 @@ Module CreatingTable
             Case 4 : dlgNew = New dlgIntellInput
             Case 5 : dlgNew = New dlgPictures
             Case 6 : dlgNew = New dlgSelectFromList
+			case 7 : dlgNew = New dlgSortTable
         End Select
 
         dlgNew.ShowDialog()
@@ -79,7 +82,8 @@ err:
 
 #Region "Friend Sub"
 
-    Sub AddColumns(arg As Byte)  ' Вставка нового столбца. Основная процедура
+    ' Вставка нового столбца. Основная процедура
+    Sub AddColumns(arg As Byte)
         'arg = 0 вставка столбца перед выделенным, arg = 1 вставка столбца после выделенного
 
         Call ClearControlCells(UTC)
@@ -95,7 +99,7 @@ err:
 
         Call PropLayers(1)
 
-        Call SelectCells(shObj.Cells(UTC).Result(""), shObj.Cells(UTC).Result(""), 0, UBound(ArrShapeID, 2))
+        Call SelectCls(shObj.Cells(UTC).Result(""), 0, shObj.Cells(UTC).Result(""), UBound(ArrShapeID, 2))
 
         Dim vs As Visio.Selection = winObj.Selection
         Dim iAll As Integer = shpsObj.Item(NT).Cells(UTC).Result("")
@@ -180,7 +184,8 @@ err:
 
     End Sub
 
-    Sub AddRows(arg As Byte) ' Вставка новой строки. Основная процедура
+    ' Вставка новой строки. Основная процедура
+    Sub AddRows(arg As Byte)
         'arg = 0 вставка строки перед выделенной, arg = 1 вставка строки после выделенной
 
         Call ClearControlCells(UTR)
@@ -196,7 +201,7 @@ err:
 
         Call PropLayers(1)
 
-        Call SelectCells(0, UBound(ArrShapeID, 1), shObj.Cells(UTR).Result(""), shObj.Cells(UTR).Result(""))
+        Call SelectCls(0, shObj.Cells(UTR).Result(""), UBound(ArrShapeID, 1), shObj.Cells(UTR).Result(""))
 
         Dim vs As Visio.Selection = winObj.Selection
         Dim iAll As Integer = shpsObj.Item(NT).Cells(UTR).Result("")
@@ -281,11 +286,12 @@ err:
 
     End Sub
 
+    ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Предварительная процедура
     Sub AllAlignOnText(booOnWidth As Boolean, booOnHeight As Boolean, bytNothingOrAutoOrLockColumns As Byte, _
         bytNothingOrAutoOrLockRows As Byte, booOnlySelectedColumns As Boolean, booOnlySelectedRow As Boolean)
-        ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Предварительная процедура
 
-        Dim vsoSel As Visio.Selection 'NoDupes As New Collection ', strNameMainCtlCell As String
+
+        Dim vsoSel As Visio.Selection
         Dim ShNum As Integer, iCount As Integer, bytColumnOrRow As Byte
 
         shpsObj = winObj.Page.Shapes : vsoSel = winObj.Selection
@@ -317,7 +323,7 @@ err:
                 bytColumnOrRow = 4 : NotDub(vsoSel, UTC)
                 Call RecUndo("Выровнять по ширине текста")
                 For iCount = 1 To NoDupes.Count
-                    If NoDupes(iCount) <> 0 Then Call AlignOnText(NoDupes(iCount), bytColumnOrRow)
+                    If NoDupes(iCount) <> 0 Then Call AlignOnText(NoDupes(iCount), bytColumnOrRow, bytNothingOrAutoOrLockColumns)
                 Next
                 Call RecUndo("0")
                 NoDupes.Clear()
@@ -327,7 +333,7 @@ err:
                 bytColumnOrRow = 5 : NotDub(vsoSel, UTR)
                 Call RecUndo("Выровнять по высоте текста")
                 For iCount = 1 To NoDupes.Count
-                    If NoDupes(iCount) <> 0 Then Call AlignOnText(NoDupes(iCount), bytColumnOrRow)
+                    If NoDupes(iCount) <> 0 Then Call AlignOnText(NoDupes(iCount), bytColumnOrRow, bytNothingOrAutoOrLockRows)
                 Next
                 Call RecUndo("0")
                 NoDupes.Clear()
@@ -339,6 +345,7 @@ err:
         winObj.Selection = vsoSel
 
     End Sub
+
 
     Sub AlignOnSize(arg As Byte)
         Call InitArrShapeID(NT)
@@ -355,8 +362,8 @@ err:
 
         If vsoSel.Count = 1 Then
             Select Case arg
-                Case 4 : Call SelectCells(1, UBound(ArrShapeID, 1), 0, 0)
-                Case 5 : Call SelectCells(0, 0, 1, UBound(ArrShapeID, 2))
+                Case 4 : Call SelectCls(1, 0, UBound(ArrShapeID, 1), 0)
+                Case 5 : Call SelectCls(0, 1, 0, UBound(ArrShapeID, 2))
             End Select
         End If
 
@@ -390,9 +397,16 @@ err:
 err:
     End Sub
 
-    Sub AllRotateText() 'Поворот текста
-        Dim iAng = Val(InputBox("Задайте угол в градусах.", "Поворот текста", "90"))
+    ' Разворот текста в выделенных ячейках в соответствии с заданным углом
+    Sub AllRotateText(Optional arg As Boolean = False, Optional ang As Double = 0)
+        Dim iAng As Double
         vsoSelection = winObj.Selection
+
+        If arg Then
+            iAng = ang
+        Else
+            iAng = Val(InputBox("Задайте угол в градусах.", "Поворот текста", "90"))
+        End If
 
         Call RecUndo("Поворот текста")
 
@@ -411,7 +425,7 @@ err:
                             .Cells("TxtWidth").FormulaU = "Height*1"
                             .Cells("TxtHeight").FormulaU = "Width*1"
                         End If
-                        .Cells("TxtAngle").FormulaU = iAng & " deg"
+                        .Cells("TxtAngle").FormulaU = Str(iAng) & " deg"
                     End If
                 End If
             End With
@@ -421,7 +435,8 @@ err:
 
     End Sub
 
-    Sub AlternatLines(iAlt As Byte)  'Чередование цвета строк/столбцов
+    ' Создание "полосатой" по столбцам или строкам таблицы 
+    Sub AlternatLines(iAlt As Byte)
         Dim i As Integer, j As Integer, strCellWH As String = UTC
         shpsObj = winObj.Page.Shapes : MemSel = winObj.Selection(1)
 
@@ -448,14 +463,15 @@ err:
 
     End Sub
 
-    Sub CallHelp() ' Вызов справочного файла - Таблицы в Visio.chm
+    ' Вызов справочного файла - Таблицы в Visio.chm
+    Sub CallHelp()
         Dim RetVal, strPath As String
         strPath = "C:\Windows\hh.exe " & vsoApp.MyShapesPath & "\" & "Таблицы в Visio.chm"
         RetVal = Shell(strPath, 1)
     End Sub
 
-    Sub ConvertInto1Shape() ' Преобразование таблицы в одну сгруппированную фигуру
-
+    ' Преобразование таблицы в одну сгруппированную фигуру
+    Sub ConvertInto1Shape()
         Dim visWorkCells As Visio.Selection, i As Integer
         Dim dblTop As Double, dblBottom As Double, dblLeft As Double, dblRight As Double
 
@@ -465,8 +481,8 @@ err:
         Call SelCell(2, False) : visWorkCells = winObj.Selection
         winObj.DeselectAll()
 
-        Call SelectCells(0, UBound(ArrShapeID, 1), 0, 0)
-        Call SelectCells(0, 0, 1, UBound(ArrShapeID, 2))
+        Call SelectCls(0, 0, UBound(ArrShapeID, 1), 0)
+        Call SelectCls(0, 1, 0, UBound(ArrShapeID, 2))
 
         Call RecUndo("Преобразовать в 1 фигуру")
         On Error GoTo err
@@ -500,18 +516,75 @@ err:
         Call RecUndo("0")
     End Sub
 
-    Sub CopyT() ' Копирование содержимого выделенных ячеек таблицы
+    ' Вырезание содержимого из выделенных ячеек таблицы
+    Sub GutT()
+        Dim txt As String = ""
+        My.Computer.Clipboard.SetText(fArrT(txt))
+
+        Call RecUndo("Вырезать текст из ячеек")
+
+        Dim vsoSelection As Visio.Selection = winObj.Selection
+        For Each shpObj In vsoSelection
+            shpObj.Characters.Text = ""
+        Next
+
+        Call RecUndo("0")
+    End Sub
+
+    ' Копирование содержимого выделенных ячеек таблицы
+    Sub CopyT()
         Dim txt As String = ""
         My.Computer.Clipboard.SetText(fArrT(txt))
     End Sub
 
-    Sub DelColRows(bytColsOrRows As Byte) ' Удаление столбцов/строк из активной таблицы из шейпа. Предварительная процедура
+    ' Вставка содержимого буфера обмена в ячейки таблицы
+    Sub PasteT()
+        shpsObj = winObj.Page.Shapes
 
+        Call InitArrShapeID(NT)
+
+        Dim ShapeObj As Visio.Shape
+        Dim arrId(,) As String, arrTMP() As String, arrTMP1() As String, txt As String
+        Dim i As Integer, j As Integer
+
+        On Error GoTo err
+
+        txt = My.Computer.Clipboard.GetText
+        arrTMP = Split(txt, vbCrLf)
+        arrTMP1 = Split(arrTMP(0), vbTab)
+
+        ReDim arrId(UBound(arrTMP, 1) - 1, UBound(arrTMP1, 1))
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            arrTMP1 = Split(arrTMP(i), vbTab)
+            For j = LBound(arrTMP1, 1) To UBound(arrTMP1, 1)
+                arrId(i, j) = arrTMP1(j)
+            Next
+        Next
+
+        ShapeObj = winObj.Selection(1) : shpsObj = winObj.Page.Shapes
+
+        On Error Resume Next
+
+        Call RecUndo("Вставить текст в ячейки")
+
+        For i = LBound(arrId, 1) To UBound(arrId, 1)
+            For j = LBound(arrId, 2) To UBound(arrId, 2)
+                shpsObj.ItemFromID(ArrShapeID(j + ShapeObj.Cells(UTC).Result(""), i + ShapeObj.Cells(UTR).Result(""))).Characters.Text = arrId(i, j)
+            Next
+        Next
+
+err:
+        Call RecUndo("0")
+        Erase arrId : Erase arrTMP : Erase arrTMP1
+    End Sub
+
+    ' Удаление столбцов/строк из активной таблицы из шейпа. Предварительная процедура
+    Sub DelColRows(bytColsOrRows As Byte)
         shpsObj = winObj.Page.Shapes
         Dim vsoSel As Visio.Selection = winObj.Selection, shObj As Visio.Shape
 
-    For Each shObj In vsoSel
-            If InStr(1, shObj.Name, "Sheet", 1) = 0 Then
+        For Each shObj In vsoSel
+            If shObj.CellExists(UTN, 0) = -1 Then
                 Select Case bytColsOrRows
                     Case 0
                         If shpsObj.Item(NT).Cells(UTC).Result("") = 1 Then GoTo err
@@ -526,14 +599,19 @@ err:
         vsoSel = Nothing
     End Sub
 
-    Sub DelTab() ' Удаление активной таблицы. Основная процедура
+    ' Удаление активной таблицы. Основная процедура
+    Sub DelTab(arg As Boolean)
         On Error GoTo errD
         Dim Response As Byte = 0
         ' 6 - Да, 7 - нет, 2 - отмена
         'If Not CheckSelCells() Then Exit Sub
 
         'If Response = 0 Then
-        Response = MsgBox("Уверены что хотите удалить эту таблицу?", 67, "Удаление!")
+        If arg Then
+            Response = MsgBox("Уверены что хотите удалить эту таблицу?", 67, "Удаление!")
+        Else
+            Response = 6
+        End If
         'End If
 
         If Response = 6 Then
@@ -573,21 +651,8 @@ errD:
         MessageBox.Show("DelTab" & vbNewLine & Err.Description)
     End Sub
 
-    Sub GutT() ' Вырезание содержимого из выделенных ячеек таблицы
-        Dim txt As String = ""
-        My.Computer.Clipboard.SetText(fArrT(txt))
-
-        Call RecUndo("Вырезать текст из ячеек")
-
-        Dim vsoSelection As Visio.Selection = winObj.Selection
-        For Each shpObj In vsoSelection
-            shpObj.Characters.Text = ""
-        Next
-
-        Call RecUndo("0")
-    End Sub
-
-    Sub IntDeIntCells() ' Объединение/Разъединение ячеек из шейпа. Предварительная процедура
+    ' Объединение/Разъединение ячеек из шейпа. Предварительная процедура
+    Sub IntDeIntCells()
         Call ClearControlCells(UTC) : Call ClearControlCells(UTR)
 
         If Not CheckSelCells() Then Exit Sub
@@ -608,7 +673,8 @@ errD:
         Call RecUndo("0")
     End Sub
 
-    Sub InitArrShapeID(NSh)  ' Заполнение массива ID шейпов активной таблицы
+    ' Заполнение массива ID шейпов активной таблицы
+    Sub InitArrShapeID(NSh)
         'NSh - строковая переменая, значение ячейки "User.TableName" любого шейпа из активной таблицы
         Dim Ui = winObj.Page.Shapes(NT).UniqueID(0)
         If Len(Ui) = 0 Then Ui = winObj.Page.Shapes(NT).UniqueID(1)
@@ -623,6 +689,7 @@ errD:
         For Each shObj In shpsObj
             With shObj
                 If .CellExistsU(UTN, 0) AndAlso StrComp(.Cells(UTN).ResultStr(""), NSh) = 0 Then ArrShapeID(.Cells(UTC).Result(""), .Cells(UTR).Result("")) = .ID
+                'If Left$(.NameU, 5) = "Sheet" Then MsgBox("Возможно таблица повреждена!") 
             End With
         Next
 
@@ -632,7 +699,8 @@ errD:
 
     End Sub
 
-    Sub InsertText(arg) ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
+    ' Вставить в ячейки текст, дату, время, комментарий, номер столбца, номер строки
+    Sub InsertText(arg)
         Dim title As String, msgComm As String, txt As String = "", i As Integer
         Dim vsoSel As Visio.Selection = winObj.Selection, arrArg() As String
 
@@ -700,9 +768,9 @@ err:
         Call RecUndo("0")
     End Sub
 
+    ' Связывание таблиц с внешними источниками данных
     Sub LinkToDataInShapes(intDataIndex, booInsertTableName, TblName, booTitleColumns, _
          booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
-        ' Связывание таблиц с внешними источниками данных
         ' Нужна проверка объединенных ячеек
 
         Dim vsoDataRecordset As Visio.DataRecordset
@@ -805,9 +873,10 @@ err:
         'varrow = vsoDataRecordset.GetRowData(i) ' Массив строки i
     End Sub
 
-    Sub LockPicture(hAL, Val, shN, lF) ' Закрепление изображений в ячейках таблицы
+    ' Закрепление изображений в ячейках таблицы
+    Sub LockPicture(hAL As Byte, Val As Byte, shN As Boolean, lF As Boolean, msg As Boolean)
         ' hAL - выравнивание по горизонтали(1-3), vAL - выравнивание по вертикали(1-3)
-        ' shN - помещать названия(0,1),lF - блокировать формулы(True,False)
+        ' shN - помещать названия(True,False),lF - блокировать формулы(True,False)
         Dim vsoSel As Visio.Selection = winObj.Selection
         Dim shpObj As Visio.Shape, shpObj1 As Visio.Shape
         Dim strH As String = "", strV As String = "", strL As String = "", strL1 As String = ""
@@ -870,7 +939,7 @@ err:
                                     shpObj1.Cells(PY).FormulaForceU = strL & shpObj.Name & "!PinY+" & shpObj.Name & "!BottomMargin-" & shpObj.Name & "!Height*0.5" & strL1
                             End Select
 
-                            If shN <> 0 Then
+                            If shN Then
                                 intDot = InStr(1, shpObj1.Name, ".")
                                 If intDot <> 0 Then
                                     shpObj.Characters.Text = Left$(shpObj1.Name, intDot - 1)
@@ -893,53 +962,12 @@ err:
         ' 1 - фигуры перекрываются
         ' 8 - фигуры соприкасаются
         ' 0 - фигуры не имеют равных точек
-        MsgBox("Готово." & vbCrLf & "Закреплено " & cnt & " фигур в ячейках.")
+        If msg Then MsgBox("Готово." & vbCrLf & "Закреплено " & cnt & " фигур в ячейках.")
 
     End Sub
 
-    Sub PasteT() ' Вставка содержимого буфера обмена в ячейки таблицы
-        shpsObj = winObj.Page.Shapes
-
-        Call InitArrShapeID(NT)
-
-        Dim ShapeObj As Visio.Shape
-        Dim arrId(,) As String, arrTMP() As String, arrTMP1() As String, txt As String
-        Dim i As Integer, j As Integer
-
-        On Error GoTo err
-
-        txt = My.Computer.Clipboard.GetText
-        arrTMP = Split(txt, vbCrLf)
-        arrTMP1 = Split(arrTMP(0), vbTab)
-
-        ReDim arrId(UBound(arrTMP, 1) - 1, UBound(arrTMP1, 1))
-        For i = LBound(arrId, 1) To UBound(arrId, 1)
-            arrTMP1 = Split(arrTMP(i), vbTab)
-            For j = LBound(arrTMP1, 1) To UBound(arrTMP1, 1)
-                arrId(i, j) = arrTMP1(j)
-            Next
-        Next
-
-        ShapeObj = winObj.Selection(1) : shpsObj = winObj.Page.Shapes
-
-        On Error Resume Next
-
-        Call RecUndo("Вставить текст в ячейки")
-
-        For i = LBound(arrId, 1) To UBound(arrId, 1)
-            For j = LBound(arrId, 2) To UBound(arrId, 2)
-                With shpsObj.ItemFromID(ArrShapeID(j + ShapeObj.Cells(UTC).Result(""), i + ShapeObj.Cells(UTR).Result("")))
-                    .Characters.Text = arrId(i, j)
-                End With
-            Next
-        Next
-
-err:
-        Call RecUndo("0")
-        Erase arrId : Erase arrTMP : Erase arrTMP1
-    End Sub
-
-    Sub RecUndo(index) ' Сохранение данных для операций Undo, Redo
+    ' Сохранение данных для операций Undo, Redo
+    Sub RecUndo(index)
         If index <> "0" Then
             UndoScopeID = vsoApp.BeginUndoScope(index)
         Else
@@ -947,10 +975,11 @@ err:
         End If
     End Sub
 
+    ' Изменение размеров ячеек таблицы. Основная процедура
     Sub ResizeCells(bytCellsOrTable As Byte, booOnlyActiveCells As Boolean, _
         sngWidthCell As Single, sngHeightCell As Single, sngWidthTable As Single, _
         sngHeightTable As Single, booWidth As Boolean, booHeight As Boolean)
-        ' Изменение размеров ячеек таблицы. Основная процедура
+
 
         Dim vsoSel As Visio.Selection, i As Integer
 
@@ -993,15 +1022,13 @@ err:
                     End If
                 Case 2
                     If booWidth Then ' По ширине, таблица
-                        Dim factorW As Single
-                        factorW = sngWidthTable / fSTWH(winObj.Selection(1), 1, False)
+                        Dim factorW = sngWidthTable / fSTWH(winObj.Selection(1), 1, False)
                         For i = 1 To UBound(ArrShapeID, 1)
                             .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64) = .ItemFromID(ArrShapeID(i, 0)).Cells(WI).Result(64) * factorW
                         Next
                     End If
                     If booHeight Then ' По высоте, таблица
-                        Dim factorH As Single
-                        factorH = sngHeightTable / fSTWH(winObj.Selection(1), 2, False)
+                        Dim factorH = sngHeightTable / fSTWH(winObj.Selection(1), 2, False)
                         For i = 1 To UBound(ArrShapeID, 2)
                             .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) = .ItemFromID(ArrShapeID(0, i)).Cells(HE).Result(64) * factorH
                         Next
@@ -1013,8 +1040,8 @@ err:
 
     End Sub
 
-    Sub SelCell(arg As Byte, Optional booInit As Boolean = True) ' Выделение(разное) ячеек таблицы
-
+    ' Выделение(разное) ячеек таблицы
+    Sub SelCell(arg As Byte, Optional booInit As Boolean = True)
         Dim vsoSel As Visio.Selection, intMaxC As Integer, intMaxR As Integer
         Dim iCount As Integer, Shp As Visio.Shape
 
@@ -1027,10 +1054,10 @@ err:
         Select Case arg
 
             Case 1 ' Выделение таблицы с УЯ
-                Call SelectCells(0, intMaxC, 0, intMaxR)
+                Call SelectCls(0, 0, intMaxC, intMaxR)
 
             Case 2 ' Выделение таблицы без УЯ
-                Call SelectCells(1, intMaxC, 1, intMaxR)
+                Call SelectCls(1, 1, intMaxC, intMaxR)
 
             Case 3 ' Выделение диапазона ячеек
                 If vsoSel.Count < 2 Then
@@ -1042,28 +1069,28 @@ err:
                     If Not GetMinMaxRange(vsoSel, cMin, cMax, rMin, rMax) Then GoTo err
                     If cMin = 0 Then cMin = 1
                     If rMin = 0 Then rMin = 1
-                    Call SelectCells(cMin, cMax, rMin, rMax)
+                    Call SelectCls(cMin, rMin, cMax, rMax)
                 End If
 
             Case 4 ' Выделение столбца
                 NotDub(vsoSel, UTC)
                 For iCount = 1 To NoDupes.Count
-                    Call SelectCells(NoDupes(iCount), NoDupes(iCount), 1, intMaxR)
+                    Call SelectCls(NoDupes(iCount), 1, NoDupes(iCount), intMaxR)
                 Next
                 NoDupes.Clear() : Shp = Nothing
 
             Case 5 ' Выделение строки
                 NotDub(vsoSel, UTR)
                 For iCount = 1 To NoDupes.Count
-                    Call SelectCells(1, intMaxC, NoDupes(iCount), NoDupes(iCount))
+                    Call SelectCls(1, NoDupes(iCount), intMaxC, NoDupes(iCount))
                 Next
                 NoDupes.Clear() : Shp = Nothing
 
             Case 6 ' Выделение  УЯ столбцов
-                Call SelectCells(1, intMaxC, 0, 0)
+                Call SelectCls(1, 0, intMaxC, 0)
 
             Case 7 ' Выделение  УЯ строк
-                Call SelectCells(0, 0, 1, intMaxR)
+                Call SelectCls(0, 1, 0, intMaxR)
 
         End Select
 
@@ -1072,67 +1099,346 @@ err:
 err:
     End Sub
 
-    Sub SelectCells(StartCol, EndCol, StartRow, EndRow) 'Выделение блоками в таблице по заданным значениям
+    'Выделение блоками в таблице по заданным значениям
+    Sub SelectCls(StartCol, StartRow, EndCol, EndRow)
+        Dim vsoSel As Visio.Selection = vsoApp.ActiveWindow.Selection
+
         On Error Resume Next
 
         With winObj.Page.Shapes
             For c = StartCol To EndCol
                 For r = StartRow To EndRow
-                    winObj.Select(.ItemFromID(ArrShapeID(c, r)), 2)
+                    vsoSel.Select(.ItemFromID(ArrShapeID(c, r)), 2)
                 Next
             Next
         End With
 
+        vsoApp.ActiveWindow.Selection = vsoSel
+
         On Error GoTo 0
     End Sub
 
-    Sub SelInContent(arg) ' Выделение ячеек таблицы по критерию(текст, дата, значение, пустые/не пустые). Основная процедура
-
+    ' Выделение ячеек таблицы по критерию(текст, дата, значение, пустые/не пустые). Основная процедура
+    Sub SelInContent(arg)
         Dim vsoSel As Visio.Selection = winObj.Selection, shpObj As Visio.Shape
 
-        Dim SelShp = Sub() winObj.Select(shpObj, 1)
+        Dim SelShp = Sub() vsoSel.Select(shpObj, 1)
 
-        If arg = 8 Then
+        If arg <> 8 Then
+            For Each shpObj In vsoApp.ActiveWindow.Selection
+                With shpObj
+                    If .Cells(UTC).Result("") = 0 Or .Cells(UTR).Result("") = 0 Then SelShp()
+                    Select Case arg
+                        Case 1 'Текст
+                            If IsNumeric(.Characters.Text) Or _
+                            Trim(.Characters.Text) = "" Or _
+                            IsDate(.Characters.Text) Then SelShp()
+                        Case 2 'Числа
+                            If Not IsNumeric(.Characters.Text) Then SelShp()
+                        Case 3 'Даты
+                            If Not IsDate(.Characters.Text) Or IsNumeric(.Characters.Text) Then SelShp()
+                        Case 5 'Не числа
+                            If IsNumeric(.Characters.Text) Or _
+                            Trim(.Characters.Text) = "" Then SelShp()
+                        Case 6 'Пустые
+                            If Trim(.Characters.Text) <> "" Then SelShp()
+                        Case 7 'Не пустые
+                            If Trim(.Characters.Text) = "" Then SelShp()
+                    End Select
+                End With
+            Next
+            vsoApp.ActiveWindow.Selection = vsoSel
+        Else 'Инвертировать относительно таблицы
             Call InitArrShapeID(NT)
-            Call SelectCells(1, UBound(ArrShapeID, 1), 1, UBound(ArrShapeID, 2))
-        End If
+            Call SelectCls(1, 1, UBound(ArrShapeID, 1), UBound(ArrShapeID, 2))
 
-        For Each shpObj In vsoSel
-            With shpObj
-                If .Cells(UTC).Result("") = 0 Or .Cells(UTR).Result("") = 0 Then SelShp()
-                Select Case arg
-                    Case 1 'Текст
-                        If IsNumeric(.Characters.Text) Or _
-                        Trim(.Characters.Text) = "" Or _
-                        IsDate(.Characters.Text) Then SelShp()
-                    Case 2 'Числа
-                        If Not IsNumeric(.Characters.Text) Then SelShp()
-                    Case 3 'Даты
-                        If Not IsDate(.Characters.Text) Or IsNumeric(.Characters.Text) Then SelShp()
-                        '        Case 4 'Время
-                        '            If Not IsDate(.Characters.Text) Or Not .Characters.Text Like "*:*:*" Then GoSub Sub1
-                    Case 5 'Не числа
-                        If IsNumeric(.Characters.Text) Or _
-                        Trim(.Characters.Text) = "" Then SelShp()
-                    Case 6 'Пустые
-                        If Trim(.Characters.Text) <> "" Then SelShp()
-                    Case 7 'Не пустые
-                        If Trim(.Characters.Text) = "" Then SelShp()
-                    Case 8 'Инвертировать относительно таблицы
-                        SelShp()
-                End Select
-            End With
-        Next
+            For Each shpObj In vsoSel
+                vsoApp.ActiveWindow.Select(shpObj, 1)
+            Next
+        End If
 
     End Sub
 
-#End Region
+    ' Установить текст ячейки/ячеек таблицы по номеру столбца и строки
+    Sub SetText(arg As Object, intStartCol As Integer, intStartRow As Integer, intEndCol As Integer, intEndRow As Integer, byColOrRow As Byte)
 
-#Region "Private Sub"
+        Dim bytParam As Short, iCount As Integer, jCount As Integer
 
-    Private Sub AlignOnText(ShNum As Integer, bytColumnOrRow As Byte, Optional bytNothingOrAutoOrLock As Byte = 0)
-        ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Основная процедура
+        If IsArray(arg) Then
+            Select Case arg.Rank
+                Case 1 : bytParam = 1 : iCount = LBound(arg)
+                Case 2 : bytParam = 2 : iCount = LBound(arg, 1) : jCount = LBound(arg, 2)
+                Case Else : Exit Sub
+            End Select
+        Else
+            bytParam = 0
+            If Len(arg) = 0 Then Exit Sub
+        End If
 
+        Dim intColNum As Integer, intRowNum As Integer
+        Call InitArrShapeID(NT)
+
+        If intEndCol < intStartCol Then
+            Dim x As Integer = intEndCol : intEndCol = intStartCol : intStartCol = x
+        End If
+        If intEndRow < intStartRow Then
+            Dim y As Integer = intEndRow : intEndRow = intStartRow : intStartRow = y
+        End If
+
+        If intStartCol < 1 Then intStartCol = 0
+        If intEndCol > UBound(ArrShapeID, 1) Then intEndCol = UBound(ArrShapeID, 1)
+        If intStartRow < 1 Then intStartRow = 0
+        If intEndRow > UBound(ArrShapeID, 2) Then intEndRow = UBound(ArrShapeID, 2)
+
+        On Error Resume Next
+
+        If byColOrRow = 0 Then
+
+            For intColNum = intStartCol To intEndCol
+                For intRowNum = intStartRow To intEndRow
+                    If bytParam = 0 Then shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg)
+                    If bytParam = 1 Then
+                        shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg(iCount))
+                        iCount += 1
+                    End If
+                    If bytParam = 2 Then
+                        shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg(iCount, jCount))
+                        If iCount = UBound(arg, 1) And jCount = UBound(arg, 2) Then GoTo Line1
+
+                        If jCount = UBound(arg, 2) Then
+                            jCount = 0 : iCount += 1
+                        Else
+                            jCount += 1
+                        End If
+                    End If
+                Next
+            Next
+
+        ElseIf byColOrRow = 1 Then
+
+            For intRowNum = intStartRow To intEndRow
+                For intColNum = intStartCol To intEndCol
+                    If bytParam = 0 Then shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg)
+                    If bytParam = 1 Then
+                        shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg(iCount))
+                        iCount += 1
+                    End If
+                    If bytParam = 2 Then
+                        shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Characters.Text = CStr(arg(iCount, jCount))
+                        If iCount = UBound(arg, 1) And jCount = UBound(arg, 2) Then GoTo Line1
+
+                        If jCount = UBound(arg, 2) Then
+                            jCount = 0 : iCount += 1
+                        Else
+                            jCount += 1
+                        End If
+                    End If
+                Next
+            Next
+
+        End If
+Line1:
+    End Sub
+
+    ' Установить формулу ячейки/ячеек таблицы по номеру столбца и строки
+    Sub SetFormula(cell As String, intStartCol As Integer, intStartRow As Integer, intEndCol As Integer, intEndRow As Integer, txt As Object)
+        Dim bytParam As Short, iCount As Integer, jCount As Integer
+
+        If IsArray(txt) Then
+            Select Case txt.Rank
+                Case 1 : bytParam = 1 : iCount = LBound(txt)
+                Case Else : Exit Sub
+            End Select
+        Else
+            bytParam = 0
+            If Len(txt) = 0 Then Exit Sub
+        End If
+
+        Dim intColNum As Integer, intRowNum As Integer
+        Call InitArrShapeID(NT)
+
+        On Error Resume Next
+
+        For intColNum = intStartCol To intEndCol
+            For intRowNum = intStartRow To intEndRow
+                If bytParam = 0 Then shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Cells(cell).FormulaU = CStr(txt)
+                If bytParam = 1 Then
+                    shpsObj.ItemFromID(ArrShapeID(intColNum, intRowNum)).Cells(cell).FormulaU = CStr(txt(iCount))
+                    iCount += 1
+                End If
+            Next
+        Next
+
+Line1:
+    End Sub
+
+    ' Сортировка выделенных ячеек таблицы
+    Sub SortTableData(NumColumn, a, b)
+        Dim vsoSel As Visio.Selection = winObj.Selection
+        If vsoSel.Count < 2 Then
+            MsgBox("Должно быть выделено не меньше двух ячеек! Без управляющих ячеек.", 48, "Ошибка!")
+            Exit Sub
+        End If
+        '------------------------------- START --------------------------------------------------------
+        Call RecUndo("Сортировать данные")
+
+        Dim arr, arrTMP
+        Dim cS As Integer, rS As Integer, ci As Integer, ri As Integer
+        Dim i As Integer, j As Integer, allN As Integer, TCol As Byte
+
+        SelCell(3, True) ' выделение диапазона ячеек
+
+        cS = SelColRow(1) ' количество выделенных столбцов
+        rS = SelColRow(2) ' количество выделенных строк
+        ci = vsoSel.PrimaryItem.Cells(UTC).Result("") ' индекс(столбец) первой выделенной ячейки
+        ri = vsoSel.PrimaryItem.Cells(UTR).Result("") ' индекс(строка) первой выделенной ячейки
+        Call GetCellsProperties(arr, ci, ri, ci + cS - 1, ri + rS - 1, "Text") ' считывание текста выделенных ячеек в массив
+
+        ReDim arrTMP(cS - 1, rS - 1) ' переопределение массива
+        allN = -1
+
+        On Error GoTo err
+        ' заполнение двумерного массива данными из одномерного
+        For i = 0 To UBound(arrTMP, 1)
+            For j = 0 To UBound(arrTMP, 2)
+                allN = allN + 1
+                arrTMP(i, j) = arr(allN)
+            Next
+        Next
+
+        ' получение номера целевого столбца
+        TCol = NumColumn - 1
+        If TCol < 0 Or TCol > UBound(arrTMP, 1) Then TCol = 0
+
+        On Error Resume Next
+
+        ' сортировка пузырьковым методом
+        Dim Temp, n As Integer, SortDir
+
+        Select Case a ' выбор: сортировка текста или чисел
+            Case False ' сортировка текста
+                SortDir = Switch(b = False, 1, b = True, -1)
+                For i = 0 To UBound(arrTMP, 2)
+                    For j = i + 1 To UBound(arrTMP, 2)
+                        If StrComp(arrTMP(TCol, i), arrTMP(TCol, j), 1) = SortDir Then
+                            ' подпроцедура пузырькового метода сортировки
+                            ' сортировка целевого столбца
+                            Temp = arrTMP(TCol, i)
+                            arrTMP(TCol, i) = arrTMP(TCol, j)
+                            arrTMP(TCol, j) = Temp
+
+                            ' сортировка других столбцов в соответствии с целевым столбцом
+                            For n = 0 To UBound(arrTMP, 1)
+                                If n <> TCol Then
+                                    Temp = arrTMP(n, i)
+                                    arrTMP(n, i) = arrTMP(n, j)
+                                    arrTMP(n, j) = Temp
+                                End If
+                            Next
+                        End If
+                    Next
+                Next
+            Case True ' сортировка чисел
+                SortDir = Switch(b = False, True, b = True, False)
+                For i = 0 To UBound(arrTMP, 2)
+                    For j = i + 1 To UBound(arrTMP, 2)
+                        If CDbl(arrTMP(TCol, i)) > CDbl(arrTMP(TCol, j)) = SortDir Then
+                            ' подпроцедура пузырькового метода сортировки
+                            ' сортировка целевого столбца
+                            Temp = arrTMP(TCol, i)
+                            arrTMP(TCol, i) = arrTMP(TCol, j)
+                            arrTMP(TCol, j) = Temp
+
+                            ' сортировка других столбцов в соответствии с целевым столбцом
+                            For n = 0 To UBound(arrTMP, 1)
+                                If n <> TCol Then
+                                    Temp = arrTMP(n, i)
+                                    arrTMP(n, i) = arrTMP(n, j)
+                                    arrTMP(n, j) = Temp
+                                End If
+                            Next
+                        End If
+                    Next
+                Next
+        End Select
+
+        ' вставка отсортированных данных в таблицу
+        ' .SetCellsText(arrTMP, ci, ri, ci + cS - 1, ri + rS - 1, 0)
+        Call SetText(arrTMP, ci, ri, ci + cS - 1, ri + rS - 1, 0)
+
+        Call RecUndo("0")
+        Exit Sub
+
+err:
+        MsgBox("Ошибка", 48, "Ошибка!") '111111111111111111111111111111111111111111
+    End Sub
+
+    ' Извлечение формулы/значения  заданных ячеек из активной таблицы
+    Sub GetCellsProperties(ByRef arr As Object, c As Integer, r As Integer, c1 As Integer, r1 As Integer, arg As String)
+        Call InitArrShapeID(NT)
+        Dim Coll As New Collection
+
+        For i = c To c1
+            For j = r To r1
+                Select Case StrConv(arg, vbLowerCase)
+                    Case "id", "0"
+                        If ArrShapeID(i, j) <> 0 Then Coll.Add(ArrShapeID(i, j))
+                    Case "name", "1"
+                        If ArrShapeID(i, j) <> 0 Then Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).NameU)
+                    Case "text", "2"
+                        If ArrShapeID(i, j) <> 0 Then Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Characters.Text)
+                    Case "comment", "3"
+                        If ArrShapeID(i, j) <> 0 Then Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Cells("Comment").ResultStr(""))
+                End Select
+            Next
+        Next
+
+        If c = c1 And r = r1 Then
+            arr = Coll.Item(1)
+        Else
+            ReDim arr(Coll.Count - 1)
+            For i = 1 To Coll.Count
+                arr(i - 1) = Coll.Item(i)
+            Next
+        End If
+
+    End Sub
+
+    ' Получить формулу ячейки/ячеек таблицы по номеру столбца и строки
+    Sub GetFormula(cell As String, c As Integer, r As Integer, c1 As Integer, r1 As Integer, ByRef arr As Object, res As String)
+        Call InitArrShapeID(NT)
+        Dim Coll As New Collection
+
+        On Error Resume Next
+
+        For i = c To c1
+            For j = r To r1
+                Select Case StrConv(res, vbLowerCase)
+                    Case "number", "0"
+                        Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Cells(cell).Result(""))
+                    Case "string", "1"
+                        Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Cells(cell).ResultStr(""))
+                    Case "formula", "2"
+                        Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Cells(cell).FormulaU)
+                    Case Else
+                        Coll.Add(shpsObj.ItemFromID(ArrShapeID(i, j)).Cells(cell).Result(CInt(res)))
+                End Select
+            Next
+        Next
+
+        If c = c1 And r = r1 Then
+            arr = Coll.Item(1)
+        Else
+            ReDim arr(Coll.Count - 1)
+            For i = 1 To Coll.Count
+                arr(i - 1) = Coll.Item(i)
+            Next
+        End If
+
+    End Sub
+
+    ' Выравнивание/автовыравнивание ячеек таблицы по ширине/высоте текста. Основная процедура
+    Sub AlignOnText(ShNum As Integer, bytColumnOrRow As Byte, Optional bytNothingOrAutoOrLock As Byte = 0)
         Dim cellName As String = "", txt As String = "", txt1 As String, txt2 As String, lentxt As Integer
         Dim intCount As Integer, iC As Integer, iR As Integer
 
@@ -1166,7 +1472,60 @@ err:
 
     End Sub
 
-    Private Sub ClearControlCells(arg)   ' Deselect УЯ столбцов или строк
+	' Поиск текста в ячейках
+    Sub SearchText(Operand As String, Pattern As String, Action As String)
+        Dim selObj As Visio.Selection = winObj.Selection, sh As Visio.Shape, booCheck As Boolean = False
+
+
+        If StrConv(Action, vbLowerCase) = "select" OrElse StrConv(Action, vbLowerCase) = "0" Then winObj.DeselectAll()
+
+        If StrConv(Action, vbLowerCase) = "clear text" OrElse StrConv(Action, vbLowerCase) = "2" Then Call RecUndo("Очистить текст")
+
+        For Each sh In selObj
+            With sh.Characters
+                Select Case StrConv(Operand, vbLowerCase)
+                    Case "equal", "=", "0" : If .Text = Pattern Then booCheck = True
+                    Case "not equal", "<>", "1" : If .Text <> Pattern Then booCheck = True
+                    Case "contains", "*", "2" : If .Text Like Pattern Then booCheck = True
+                    Case "not contains", "!*", "3" : If Not .Text Like Pattern Then booCheck = True
+                End Select
+                Select Case StrConv(Action, vbLowerCase)
+                    Case "select", "0" : If booCheck Then winObj.Select(sh, 2)
+                    Case "deselect", "1" : If booCheck Then winObj.Select(sh, 1)
+                    Case "clear text", "2" : If booCheck Then .Text = ""
+                End Select
+                booCheck = False
+            End With
+        Next
+
+        If StrConv(Action, vbLowerCase) = "clear text" OrElse StrConv(Action, vbLowerCase) = "2" Then Call RecUndo("0")
+
+    End Sub
+
+	' Замена текста в ячейках
+    Sub ReplaceTxt(txt As String, txt1 As String, Optional istart As Integer = 1, Optional icount As Integer = -1)
+        Dim selObj As Visio.Selection = winObj.Selection, sh As Visio.Shape
+
+        Call RecUndo("Замена текста")
+
+        On Error Resume Next
+
+        For Each sh In selObj
+            With sh.Characters
+                .Text = Strings.Replace(.Text, txt, txt1, istart, icount)
+            End With
+        Next
+
+        Call RecUndo("0")
+
+    End Sub
+
+#End Region
+
+#Region "Private Sub"
+
+    ' Снятие выделения УЯ столбцов или строк
+    Private Sub ClearControlCells(arg)
         Dim shObj As Visio.Shape
 
         With winObj
@@ -1178,8 +1537,8 @@ err:
 
     End Sub
 
-    Private Sub IntegrateCells() ' Объединение выделенных ячеек в одну с сохранением содержимого. Основная процедура
-
+    ' Объединение выделенных ячеек в одну с сохранением содержимого. Основная процедура
+    Private Sub IntegrateCells()
         Dim vsoSel As Visio.Selection = winObj.Selection
         Dim shObj As Visio.Shape, flagCheck As Boolean
         flagCheck = True
@@ -1197,7 +1556,7 @@ err:
         NText = shObj1.Characters.Text
 
         winObj.DeselectAll()
-        Call SelectCells(cMin, cMax, rMin, rMax)
+        Call SelectCls(cMin, rMin, cMax, rMax)
         vsoSel = winObj.Selection
 
         ' Start Проверка на вшивость------------------------------------------------
@@ -1269,11 +1628,10 @@ err:
         msg = msg & "Выделена уже объединенная ячейка." & vbCrLf
         msg = msg & "Что-то пошло не так." & vbCrLf
         MsgBox(msg, 48, "Ошибка!")
-
     End Sub
 
-    Private Sub DeIntegrateCells(shObj As Visio.Shape) ' Разъединение выделенной ячейки с сохранением содержимого. Основная процедура
-
+    ' Разъединение выделенной ячейки с сохранением содержимого. Основная процедура
+    Private Sub DeIntegrateCells(shObj As Visio.Shape)
         Dim flagCheck As Boolean, flagTxt As Boolean
         flagCheck = True
 
@@ -1356,7 +1714,8 @@ err:
 
     End Sub
 
-    Private Sub DeleteColumn(shObj) ' Удаление столбца. Основная процедура
+    ' Удаление столбца. Основная процедура
+    Private Sub DeleteColumn(shObj)
         If shObj.Cells(UTC).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
         Call RecUndo("Удалить столбец")
 
@@ -1451,7 +1810,8 @@ err:
         CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
     End Sub
 
-    Private Sub DeleteRow(shObj) ' Удаление строки. Основная процедура
+    ' Удаление строки. Основная процедура
+    Private Sub DeleteRow(shObj)
         If shObj.Cells(UTR).Result("") = 0 Or shObj.Cells(UTN).FormulaU = "GUARD(NAME(0))" Then Exit Sub
         Call RecUndo("Удалить строку")
 
@@ -1546,7 +1906,8 @@ err:
         CheckArrID = winObj.Page.Shapes(NT).UniqueID(0) & "1"
     End Sub
 
-    Private Sub NotDub(vsoSel, UT) ' Заполнение коллекции значениями без дубликатов
+    ' Заполнение коллекции значениями без дубликатов
+    Private Sub NotDub(vsoSel, UT)
         Dim Shp As Visio.Shape
 
         On Error Resume Next
@@ -1559,8 +1920,8 @@ err:
 
     End Sub
 
-    Private Sub PropLayers(arg As Byte) ' Включение/выключение видимости и блокировки слоев на время выполнения кода - Titles_Tables и Cells_Tables
-
+    ' Включение/выключение видимости и блокировки слоев на время выполнения кода - Titles_Tables и Cells_Tables
+    Private Sub PropLayers(arg As Byte)
         With winObj.Page.Layers
             Select Case arg
                 Case 1
@@ -1580,8 +1941,10 @@ err:
 
 #End Region
 
+
 #Region "Functions"
 
+    ' Функции форматирования данных
     Function PtoD(arg)
         Return vsoApp.FormatResult(arg, 50, 64, "####0.####")
     End Function
@@ -1598,8 +1961,29 @@ err:
         Return vsoApp.FormatResult(arg, 65, 64, "####0.####")
     End Function
 
-    Function CheckSelCells() As Boolean ' Сообщение об отсутствующем/некорректном выделении на листе
+    ' функция подсчета количества выделенных строк/столбцов
+    Function SelColRow(arg)
+        Dim col As New Collection, num As Integer
 
+        On Error Resume Next
+
+        If arg = 1 Then
+            For i = 1 To winObj.Selection.Count
+                num = winObj.Selection(i).Cells(UTC).Result("")
+                col.Add(num, CStr(num))
+            Next
+        ElseIf arg = 2 Then
+            For i = 1 To winObj.Selection.Count
+                num = winObj.Selection(i).Cells(UTR).Result("")
+                col.Add(num, CStr(num))
+            Next
+        End If
+
+        Return col.Count
+    End Function
+
+    ' Сообщение об отсутствующем/некорректном выделении на листе
+    Function CheckSelCells() As Boolean
         With winObj
             If .Selection.Count = 0 Then GoTo ErrMsg
 
@@ -1626,7 +2010,8 @@ ErrMsg:
         Return False
     End Function
 
-    Private Function fArrT(txt) ' Заполнение массива данными из ячеек таблицы
+    ' Заполнение массива данными из ячеек таблицы
+    Private Function fArrT(txt)
         Dim i As Integer, j As Integer, arrId(,) As String, Response As Boolean
         Dim cMin As Integer, rMin As Integer, cMax As Integer, rMax As Integer
 
@@ -1654,8 +2039,8 @@ ErrMsg:
         fArrT = txt
     End Function
 
-    Function fSTWH(sh As Visio.Shape, strWidthOrHeight As Byte, booInit As Boolean) ' Функция подсчета размеров активной таблицы
-
+    ' Функция подсчета размеров активной таблицы
+    Function fSTWH(sh As Visio.Shape, strWidthOrHeight As Byte, booInit As Boolean)
         If booInit Then Call InitArrShapeID(sh.Cells(UTN).ResultStr(""))
 
         With winObj.Page.Shapes
@@ -1673,8 +2058,9 @@ ErrMsg:
 
     End Function
 
-    Private Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
-        ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
+    ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
+    Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
+
         Dim i As Integer
         rMin = 1000 : cMin = 1000 : rMax = 0 : cMax = 0
 
@@ -1696,8 +2082,9 @@ err:
         GetMinMaxRange = False
     End Function
 
-    Private Function GetShapeId(ByVal intColNum As Integer, ByVal intRowNum As Integer) As Integer
-        ' Получение ID ячейки таблицы по номеру столбца и строки
+    ' Получение ID ячейки таблицы по номеру столбца и строки
+    Function GetShapeId(ByVal intColNum As Integer, ByVal intRowNum As Integer) As Integer
+
 
         On Error GoTo err
 
