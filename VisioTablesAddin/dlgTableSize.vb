@@ -16,19 +16,24 @@
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
 
+        On Error GoTo LineExit
+
         Select Case TabControl1.SelectedIndex
 
             Case 0 ' Размеры
-                If Val(txtCellL.Text) = 0 Or Val(txtTableL.Text) = 0 Or Val(txtCellH.Text) = 0 Or Val(txtTableH.Text) = 0 Then Exit Sub
+                'If Val(txtCellL.Text) = 0 Or Val(txtTableL.Text) = 0 Or Val(txtCellH.Text) = 0 Or Val(txtTableH.Text) = 0 Then Exit Sub
                 Dim TableW As Single, TableH As Single
                 TableW = txtTableL.Text : TableH = txtTableH.Text
+                Dim CellL As Single, CellH As Single
+                CellL = txtCellL.Text : CellH = txtCellH.Text
+
                 With winObj.Page.PageSheet
                     If ckbToWidthPage.Checked Then TableW = .Cells("PageWidth").Result(64) - .Cells("PageRightMargin").Result(64) - .Cells("PageLeftMargin").Result(64)
                     If ckbToHeightPage.Checked Then TableH = .Cells("PageHeight").Result(64) - .Cells("PageTopMargin").Result(64) - .Cells("PageBottomMargin").Result(64)
                 End With
                 If txtCellL.Tag <> txtCellL.Text Or txtTableL.Tag <> txtTableL.Text Or ckbToWidthPage.Checked Then m_booWidth = True
                 If txtCellH.Tag <> txtCellH.Text Or txtTableH.Tag <> txtTableH.Text Or ckbToHeightPage.Checked Then m_booHeight = True
-                Call ResizeCells(m_bytCellsOrTable, ckbWithActivateCell.Checked, txtCellL.Text, txtCellH.Text, TableW, TableH, m_booWidth, m_booHeight)
+                Call ResizeCells(m_bytCellsOrTable, ckbWithActivateCell.Checked, CellL, CellH, TableW, TableH, m_booWidth, m_booHeight)
 
             Case 1 ' Авторазмеры
                 Dim bytNothingOrAutoOrLockColumns As Byte, bytNothingOrAutoOrLockRows As Byte
@@ -44,6 +49,10 @@
         End Select
 
         Me.Close()
+        Exit Sub
+
+LineExit:
+        MsgBox("Возможно введены ошибочные данные.", MsgBoxStyle.Critical, "Ошибка!")
     End Sub
 
     Private Sub Cancel_Button_Click(sender As Object, e As EventArgs) Handles Cancel_Button.Click
@@ -116,7 +125,7 @@
         End If
         optAllHeightAuto.Enabled = ckbAllHeight.Checked
         optAllHeightLock.Enabled = ckbAllHeight.Checked
-        ckbOnlySelectH.Enabled = ckbAllWidth.Checked
+        ckbOnlySelectH.Enabled = ckbAllHeight.Checked
     End Sub
 
 #End Region
