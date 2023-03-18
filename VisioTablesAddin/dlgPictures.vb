@@ -5,7 +5,7 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-        Dim hAL As Byte = 1, Val As Byte = 2, shN As Byte = 0, lF As Boolean = False
+        Dim hAL As Byte = 1, Val As Byte = 2, shN As Boolean = False, lF As Boolean = False
 
         If optAlignCenterH.Checked Then hAL = 2 ' hAL - выравнивание по горизонтали(1-3)
         If optAlignRightH.Checked Then hAL = 3
@@ -13,10 +13,10 @@
         If optAlignTopV.Checked Then Val = 1 ' vAL - выравнивание по вертикали(1-3)
         If optAlignBottomV.Checked Then Val = 3
 
-        If ckbInsertName.Checked Then shN = 1 ' shN - помещать названия в ячейку(0,1)
+        If ckbInsertName.Checked Then shN = True ' shN - помещать названия в ячейку(0,1)
 
         If ckbLockFormulas.Checked Then lF = True ' lF - блокировать формулы(True,False)
-        Call LockPicture(hAL, Val, shN, lF)
+        Call LockPicture(hAL, Val, shN, lF, True)
 
         Me.Close()
     End Sub

@@ -61,7 +61,6 @@ Partial Class dlgFromFile
         Me.lblTxt.Name = "lblTxt"
         Me.lblTxt.Size = New System.Drawing.Size(561, 23)
         Me.lblTxt.TabIndex = 2
-        Me.lblTxt.Text = "putokaputo.livejournal.com/38699.html"
         '
         'TableLayoutPanel1
         '

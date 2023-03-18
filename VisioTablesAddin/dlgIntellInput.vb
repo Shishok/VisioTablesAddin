@@ -93,7 +93,7 @@ Public Class dlgIntellInput
             End Select
         End If
 
-        SelectCells(c, c, r, r)
+        SelectCls(c, r, c, r)
 
     End Sub
 

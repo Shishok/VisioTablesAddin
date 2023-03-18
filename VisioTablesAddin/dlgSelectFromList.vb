@@ -8,7 +8,9 @@
         Call RecUndo("Вставить из списка")
 
         For i = 1 To sh.Count ' Вставка выбранного значения в выделенные ячейки
-            If InStr(1, sh(i).NameU, "ClW", 1) <> 0 Then sh(i).Characters.Text = cmbSelectValue.Text
+            'If InStr(1, sh(i).NameU, "ClW", 1) <> 0 Then
+            sh(i).Characters.Text = cmbSelectValue.Text
+            'End If
         Next
 
         Call RecUndo("0")

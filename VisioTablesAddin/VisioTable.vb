@@ -17,7 +17,6 @@ Friend Class VisioTable
 #End Region
 
 #Region "List Of Variables"
-
     Private vsoApp As Visio.Application = Globals.ThisAddIn.Application
     Private winObj As Visio.Window = vsoApp.ActiveWindow
     Private pagObj As Visio.Page = vsoApp.ActivePage
@@ -60,11 +59,16 @@ Friend Class VisioTable
     Private Const P50 = "50%"
     Private Const GT = "GUARD(TRUE)"
     Private Const G1 = "Guard(1)"
-
 #End Region
 
-    Public Sub New(ByVal a As String, ByVal b As Byte, ByVal c As Integer, ByVal d As Integer, ByVal e As Single, _
-                   ByVal f As Single, ByVal g As Single, ByVal h As Single, ByVal i As Boolean, ByVal j As Boolean)
+    Public Sub CreatTable(ByVal a As String, ByVal b As Byte, ByVal c As Integer, ByVal d As Integer, ByVal e As Single, _
+                   ByVal f As Single, ByVal g As Single, ByVal h As Single, ByVal i As Boolean, ByVal j As Boolean) 'Implements IVisioTable.CreatTable
+        On Error GoTo errD
+        Dim frm As New dlgWait
+        Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
+        Dim TypeCell As String
+        Dim jGT As Integer = 0
+        Dim iGT As Integer = 0
 
         strNameTable = IIf(Trim(a) = "", "TbL", a)
         bytInsertType = IIf(b < 1 Or b > 4, 1, b)
@@ -76,16 +80,6 @@ Friend Class VisioTable
         sngHeightTable = IIf(h = 0 Or h < 0, PtoD(283.4646), h)
         booDeleteTargetShape = i
         booVisibleProgressBar = j
-
-    End Sub
-
-    Public Sub CreatTable()
-        On Error GoTo errD
-        Dim frm As New dlgWait
-        Dim vsoLayerTitles As Visio.Layer, vsoLayerCells As Visio.Layer, MemSHID As Integer
-        Dim TypeCell As String
-        Dim jGT As Integer = 0
-        Dim iGT As Integer = 0
 
         winObj = vsoApp.ActiveWindow
         pagObj = vsoApp.ActivePage
@@ -192,7 +186,7 @@ Friend Class VisioTable
         shpObj.Cells(UTC).FormulaU = GU & intColumnsCount & ")"
         shpObj.Cells(UTR).FormulaU = GU & intRowsCount & ")"
 
-        For iGT = 0 To intColumnsCount + intRowsCount - 1
+        For iGT = 0 To intColumnsCount + intRowsCount
             winObj.Page.Shapes.ItemFromID(arrNewID(iGT)).Cells("LockTextEdit").FormulaU = "Guard(1)"
         Next
 
@@ -322,7 +316,7 @@ errD:
             .Cells("UpdateAlignBox").FormulaForceU = GT
             .Cells("LockDelete").FormulaU = G1
             .Cells("LockRotate").FormulaU = G1
-            .CellsSRC(1, 16, 1).FormulaU = "char(169)&char(32)&char(82)&char(79)&char(77)&char(65)&char(78)&char(79)&char(86)&char(32)&char(86)&char(55)&char(46)&char(48)"
+            .CellsSRC(1, 16, 1).FormulaU = "char(169)&char(32)&char(82)&char(79)&char(77)&char(65)&char(78)&char(79)&char(86)&char(32)&char(86)&char(56)&char(46)&char(48)"
 
             Select Case TypeCell
                 Case strNameTable, "ThC", "TvR"

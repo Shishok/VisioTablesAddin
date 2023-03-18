@@ -15,4 +15,14 @@
         '_addin.Shutdown()
     End Sub
 
+
+    Private accessVBA As ClassVBA
+
+    Protected Overrides Function RequestComAddInAutomationService() As Object
+        If accessVBA Is Nothing Then
+            accessVBA = New ClassVBA()
+        End If
+        Return accessVBA
+    End Function
+
 End Class

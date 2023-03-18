@@ -7,21 +7,18 @@
         Dim vsoObj As Visio.Selection = winObj.Selection
         If ListBox2.Items.Count = 0 Then Exit Sub
 
-        Dim iC As Integer, iR As Integer
-
-        iC = vsoObj(1).Cells(UTC).Result("") : iR = vsoObj(1).Cells(UTR).Result("")
-
-        iR = intlistStart
+        Dim iC As Integer = vsoObj(1).Cells(UTC).Result("")
+        Dim iR As Integer = intlistStart
 
         Call RecUndo("Вставить из файла")
 
+        On Error Resume Next
+
         For iC = 1 To vsoObj.Count
-            If InStr(1, vsoObj(iC).Name, "Clw", 1) <> 0 Then
-                vsoObj(iC).Characters.Text = ListBox2.Items(iR)
-                If iR = ListBox2.Items.Count - 1 Then
-                    iR = 0
-                Else : iR = iR + 1
-                End If
+            vsoObj(iC).Characters.Text = ListBox2.Items(iR)
+            If iR = ListBox2.Items.Count - 1 Then
+                iR = 0
+            Else : iR = iR + 1
             End If
         Next
 
