@@ -800,6 +800,8 @@ err:
 
         Call RecUndo("Связать данные с фигурами")
 
+        On Error GoTo ExitLine
+
         ' Вставить название таблицы         ' (Проверить 1 строку на объединеность!!!!!)
         If booInsertTableName Then
             With winObj
@@ -820,7 +822,6 @@ err:
 
         ' Вставить заголовки столбцов
         If booTitleColumns Then
-
             For i = 1 To UBound(ArrShapeID, 1)
                 With shpsObj.ItemFromID(GetShapeId(i, 1 + intRowStart))
                     .DeleteSection(243)
@@ -834,43 +835,39 @@ err:
             intRowStart = intRowStart + 1
         End If
 
-        'vsoApp.ShowChanges = False
-        'Dim www1 As Double
-        'www1 = (300 / vsoSel.Count)
-
         ' Связать ячейки таблицы с внешними данными
         For c = 1 To intEndCol
             Application.DoEvents()
             For r = intRowStart + 1 To intEndRow
-                'frm.lblProgressBar.Width = www1 * i : frm.lblProgressBar.Refresh() : 
 
                 With shpsObj.ItemFromID(ArrShapeID(c, r))
                     .DeleteSection(243)
                     intCountCur = .Cells(UTR).Result("") - intRowStart '+ intRowStartSourse - 1
                     .LinkToData(vsoDataRecordset.ID, intCountCur, False)
 
-                    'For j = 0 To .RowCount(243)
-                    'If .Cells(UTC).Result("") = c And .Cells(UTC).Result("") <= intCountColSourse Then
                     .Characters.AddCustomFieldU("=" & .CellsSRC(243, c - 1, 0).Name, 0)
+                    'MsgBox("Номер ошибки: 6", 48, "Ошибка!")
                     If booInvisibleZero Then
                         .Cells("Fields.Format").FormulaU = "=IF(" & .CellsSRC(243, c - 1, 0).Name & ".Type=2,IF(" & .CellsSRC(243, c - 1, 0).Name & "=0," & """#""" & ",FIELDPICTURE(0)),FIELDPICTURE(0))"
                     Else
                         .Cells("Fields.Format").FormulaU = "=" & "FIELDPICTURE(0)"
                     End If
-                    '    Exit For
-                    'End If
-                    'Next
                 End With
             Next
         Next
 
         Call RecUndo("0")
-        'vsoApp.ShowChanges = True
         winObj.Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
         frm.Close()
+        Exit Sub
+
+ExitLine:
+        Call RecUndo("0")
+        frm.Close()
+        winObj.Select(shpsObj.ItemFromID(GetShapeId(1, 1)), 2)
+        MsgBox("Связь с внешними данными не удалась.", 48, "Ошибка!")
 
         'lngRowIDs = vsoDataRecordset.GetDataRowIDs("") ' Массив всех строк
-        'varrow = vsoDataRecordset.GetRowData(i) ' Массив строки i
     End Sub
 
     ' Закрепление изображений в ячейках таблицы
@@ -1541,7 +1538,7 @@ err:
         flagCheck = True
 
         If vsoSel.Count < 2 Then
-            MsgBox("Должно быть выделено не меньше двух ячеек! Без управляющих ячеек.", 48, "Ошибка!")
+            MsgBox("Объединение ячеек:" & vbNewLine & "Должно быть выделено не меньше двух ячеек! Без управляющих ячеек.", 48, "Ошибка!")
             Exit Sub
         End If
         '------------------------------- START --------------------------------------------------------
