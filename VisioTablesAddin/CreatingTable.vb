@@ -1,4 +1,4 @@
-﻿Imports System.Drawing
+Imports System.Drawing
 Imports System.Windows.Forms
 
 Module CreatingTable
@@ -39,7 +39,6 @@ Module CreatingTable
 #End Region
 
 #Region "Load Sub"
-
     Sub CreatTable(a, b, c, d, e, f, g, h, i, j)
         'Dim NewTable As VisioTable = New VisioTable(a, b, c, d, e, f, g, h, i, j)
         'NewTable.CreatTable()
@@ -769,21 +768,19 @@ err:
     End Sub
 
     ' Связывание таблиц с внешними источниками данных
-    Sub LinkToDataInShapes(intDataIndex, booInsertTableName, TblName, booTitleColumns, _
+    Sub LinkToDataInShapes(ID, booInsertTableName, TblName, booTitleColumns, _
          booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
         ' Нужна проверка объединенных ячеек
 
         Dim vsoDataRecordset As Visio.DataRecordset
-        Dim vsoSel As Visio.Selection
         Dim shpObj As Visio.Shape
         Dim intEndCol As Integer, intEndRow As Integer
         Dim intRowStart As Integer, intCountCur As Integer, intRS As Integer
 
         shpsObj = winObj.Page.Shapes
-        vsoSel = winObj.Selection
-        vsoDataRecordset = vsoApp.ActiveDocument.DataRecordsets.Item(intDataIndex + 1)
+        vsoDataRecordset = vsoApp.ActiveDocument.DataRecordsets.ItemFromID(ID)
 
-        Call InitArrShapeID(NT)
+        'Call InitArrShapeID(NT)
         intRowStart = 0
 
         ' Определение диапазона ячеек для связи
@@ -816,7 +813,7 @@ err:
                 If booFontBold Then shpObj.CellsSRC(3, 0, 2).FormulaU = 1
             End With
             intRowStart = intRowStart + 1
-            Call InitArrShapeID(NT)
+            'Call InitArrShapeID(NT)
             winObj.Select(winObj.Page.Shapes.item(1), 256)
         End If
 
@@ -846,7 +843,6 @@ err:
                     .LinkToData(vsoDataRecordset.ID, intCountCur, False)
 
                     .Characters.AddCustomFieldU("=" & .CellsSRC(243, c - 1, 0).Name, 0)
-                    'MsgBox("Номер ошибки: 6", 48, "Ошибка!")
                     If booInvisibleZero Then
                         .Cells("Fields.Format").FormulaU = "=IF(" & .CellsSRC(243, c - 1, 0).Name & ".Type=2,IF(" & .CellsSRC(243, c - 1, 0).Name & "=0," & """#""" & ",FIELDPICTURE(0)),FIELDPICTURE(0))"
                     Else
@@ -1158,7 +1154,6 @@ err:
 
     ' Установить текст ячейки/ячеек таблицы по номеру столбца и строки
     Sub SetText(arg As Object, intStartCol As Integer, intStartRow As Integer, intEndCol As Integer, intEndRow As Integer, byColOrRow As Byte)
-
         Dim bytParam As Short, iCount As Integer, jCount As Integer
 
         If IsArray(arg) Then
@@ -1365,6 +1360,7 @@ Line1:
 
 err:
         MsgBox("Номер ошибки: " & Err.Number & vbNewLine & "Описание ошибки: " & Err.Description, 48, "Ошибка!")
+		Call RecUndo("0")
     End Sub
 
     ' Извлечение формулы/значения  заданных ячеек из активной таблицы
@@ -2054,7 +2050,6 @@ ErrMsg:
 
     ' Функция определения минимального и максимального номера столбцов/строк среди выделенного диапазона ячеек
     Function GetMinMaxRange(ByVal vsoSel As Visio.Selection, ByRef cMin As Integer, ByRef cMax As Integer, ByRef rMin As Integer, ByRef rMax As Integer) As Boolean
-
         Dim i As Integer
         rMin = 1000 : cMin = 1000 : rMax = 0 : cMax = 0
 
@@ -2078,8 +2073,6 @@ err:
 
     ' Получение ID ячейки таблицы по номеру столбца и строки
     Function GetShapeId(ByVal intColNum As Integer, ByVal intRowNum As Integer) As Integer
-
-
         On Error GoTo err
 
         If ArrShapeID(intColNum, intRowNum) <> 0 Then

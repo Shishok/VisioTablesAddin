@@ -34,6 +34,7 @@ Partial Class dlgLinkData
         Me.OK_Button = New System.Windows.Forms.Button()
         Me.Cancel_Button = New System.Windows.Forms.Button()
         Me.cmdRefreshAll = New System.Windows.Forms.Button()
+        Me.cmb_DataID = New System.Windows.Forms.ComboBox()
         Me.TableLayoutPanel1.SuspendLayout()
         Me.SuspendLayout()
         '
@@ -168,11 +169,24 @@ Partial Class dlgLinkData
         Me.cmdRefreshAll.Text = "Обновить все источники данных"
         Me.cmdRefreshAll.UseVisualStyleBackColor = True
         '
+        'cmb_DataID
+        '
+        Me.cmb_DataID.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.cmb_DataID.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
+        Me.cmb_DataID.FormattingEnabled = True
+        Me.cmb_DataID.Location = New System.Drawing.Point(278, 183)
+        Me.cmb_DataID.Name = "cmb_DataID"
+        Me.cmb_DataID.Size = New System.Drawing.Size(83, 21)
+        Me.cmb_DataID.TabIndex = 20
+        Me.cmb_DataID.Visible = False
+        '
         'dlgLinkData
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(535, 214)
+        Me.ClientSize = New System.Drawing.Size(535, 213)
+        Me.Controls.Add(Me.cmb_DataID)
         Me.Controls.Add(Me.cmdRefreshAll)
         Me.Controls.Add(Me.TableLayoutPanel1)
         Me.Controls.Add(Me.ckbInvisibleZero)
@@ -210,4 +224,5 @@ Partial Class dlgLinkData
     Friend WithEvents OK_Button As System.Windows.Forms.Button
     Friend WithEvents Cancel_Button As System.Windows.Forms.Button
     Friend WithEvents cmdRefreshAll As System.Windows.Forms.Button
+    Friend WithEvents cmb_DataID As System.Windows.Forms.ComboBox
 End Class

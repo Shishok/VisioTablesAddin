@@ -1,4 +1,4 @@
-﻿Public Class dlgLinkData
+Public Class dlgLinkData
 
     Dim lngRowIDs() As Integer
 
@@ -10,6 +10,7 @@
             vsoDataRecordset = vsoApp.ActiveDocument.DataRecordsets.Item(i)
             arrDataRecordset = Split(vsoDataRecordset.DataConnection.ConnectionString, ";")
             cmbSourseData.Items.Add(Strings.Right(arrDataRecordset(2), Len(arrDataRecordset(2)) - 12) & " - " & vsoDataRecordset.Name)
+            cmb_DataID.Items.Add(vsoDataRecordset.ID)
         Next
 
         cmbSourseData.SelectedIndex = 0
@@ -18,10 +19,9 @@
     End Sub
 
     Private Sub OK_Button_Click(sender As Object, e As EventArgs) Handles OK_Button.Click
-
-        Call LinkToDataInShapes(cmbSourseData.SelectedIndex, ckbInsertName.Checked, txtNameTable.Text, _
+        Call LinkToDataInShapes(Val(cmb_DataID.Text), ckbInsertName.Checked, txtNameTable.Text, _
         ckbTitleColumns.Checked, ckbInvisibleZero.Checked, _
-        UBound(lngRowIDs), vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).DataColumns.Count, ckbFontBold.Checked)
+        UBound(lngRowIDs), vsoApp.ActiveDocument.DataRecordsets.ItemFromID(Val(cmb_DataID.Text)).DataColumns.Count, ckbFontBold.Checked)
 
         Me.Close()
 
@@ -36,6 +36,7 @@
     End Sub
 
     Private Sub cmbSourseData_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cmbSourseData.SelectedIndexChanged
+        cmb_DataID.SelectedIndex = cmbSourseData.SelectedIndex
         txtNameTable.Text = vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).Name
         lngRowIDs = vsoApp.ActiveDocument.DataRecordsets.Item(cmbSourseData.SelectedIndex + 1).GetDataRowIDs("")
         lblCountRow.Text = "Источник содержит " & _

@@ -569,7 +569,7 @@ Line1:
         Dim lngRowIDs() As Integer = vsoApp.ActiveDocument.DataRecordsets.Item(a).GetDataRowIDs("")
         Dim f As Integer = UBound(lngRowIDs)
         Dim g As Integer = vsoApp.ActiveDocument.DataRecordsets.Item(a).DataColumns.Count
-        Call LinkToDataInShapes(a - 1, b, c, d, e, f, g, h)
+        Call LinkToDataInShapes(a, b, c, d, e, f, g, h)
     End Sub
 
 	' Вставка пользовательских данных в выделенные ячейки таблицы
