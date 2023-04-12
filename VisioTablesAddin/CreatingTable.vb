@@ -772,10 +772,13 @@ err:
          booInvisibleZero, intCountRowSourse, intCountColSourse, booFontBold)
         ' Нужна проверка объединенных ячеек
 
+
         Dim vsoDataRecordset As Visio.DataRecordset
         Dim shpObj As Visio.Shape
         Dim intEndCol As Integer, intEndRow As Integer
         Dim intRowStart As Integer, intCountCur As Integer, intRS As Integer
+
+        Call InitArrShapeID(NT)
 
         shpsObj = winObj.Page.Shapes
         vsoDataRecordset = vsoApp.ActiveDocument.DataRecordsets.ItemFromID(ID)
