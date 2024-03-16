@@ -23,7 +23,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ru</TargetCulture>
-    <ApplicationVersion>2.0.2.3</ApplicationVersion>
+    <ApplicationVersion>2.0.2.4</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -207,6 +207,7 @@
     </Compile>
     <None Include="VisioTablesAddin_1_TemporaryKey.pfx" />
     <None Include="VisioTablesAddin_2_TemporaryKey.pfx" />
+    <None Include="VisioTablesAddin_3_TemporaryKey.pfx" />
     <None Include="VisioTablesAddin_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -270,11 +271,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>
-    </ManifestKeyFile>
+    <ManifestKeyFile>VisioTablesAddin_3_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>A153FC67F59BEA63B19CAA087C079911EC78BA8A</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>DD0AFD8D4CF340924E18F359D59B90CD93168110</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
